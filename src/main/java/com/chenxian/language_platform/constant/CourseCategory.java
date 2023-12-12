@@ -1,6 +1,6 @@
 package com.chenxian.language_platform.constant;
 
-public enum ClassCategory {
+public enum CourseCategory {
     EN,
     JP,
     KR,

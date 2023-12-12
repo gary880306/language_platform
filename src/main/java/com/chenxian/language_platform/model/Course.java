@@ -1,40 +1,40 @@
 package com.chenxian.language_platform.model;
 
-import com.chenxian.language_platform.constant.ClassCategory;
+import com.chenxian.language_platform.constant.CourseCategory;
 
 import java.util.Date;
 
-public class Class {
-    private Integer classId;
-    private String className;
-    private ClassCategory category;
+public class Course {
+    private Integer courseId;
+    private String courseName;
+    private CourseCategory category;
     private String imageUrl;
     private Integer price;
     private String description;
     private Date creatDate;
     private Date lastModifiedDate;
 
-    public Integer getClassId() {
-        return classId;
+    public Integer getCourseId() {
+        return courseId;
     }
 
-    public void setClassId(Integer classId) {
-        this.classId = classId;
+    public void setCourseId(Integer courseId) {
+        this.courseId = courseId;
     }
 
-    public String getClassName() {
-        return className;
+    public String getCourseName() {
+        return courseName;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
     }
 
-    public ClassCategory getCategory() {
+    public CourseCategory getCategory() {
         return category;
     }
 
-    public void setCategory(ClassCategory category) {
+    public void setCategory(CourseCategory category) {
         this.category = category;
     }
 

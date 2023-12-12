@@ -1,33 +1,33 @@
 package com.chenxian.language_platform.dto;
 
-import com.chenxian.language_platform.constant.ClassCategory;
+import com.chenxian.language_platform.constant.CourseCategory;
 import jakarta.validation.constraints.NotNull;
 
-public class ClassRequest {
+public class CourseRequest {
     @NotNull
     // 需要前端傳過來的參數
-    private String className;
+    private String courseName;
     @NotNull
-    private ClassCategory category;
+    private CourseCategory category;
     @NotNull
     private String imageUrl;
     @NotNull
     private Integer price;
     private String description;
 
-    public String getClassName() {
-        return className;
+    public String getCourseName() {
+        return courseName;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
     }
 
-    public ClassCategory getCategory() {
+    public CourseCategory getCategory() {
         return category;
     }
 
-    public void setCategory(ClassCategory category) {
+    public void setCategory(CourseCategory category) {
         this.category = category;
     }
 
