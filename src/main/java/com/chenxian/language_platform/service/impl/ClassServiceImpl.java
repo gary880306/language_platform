@@ -20,4 +20,9 @@ public class ClassServiceImpl implements ClassService {
     public Integer creatClass(ClassRequest classRequest) {
         return classDao.creatClass(classRequest);
     }
+
+    @Override
+    public void updateClass(Integer classId, ClassRequest classRequest) {
+        classDao.updateClass(classId,classRequest);
+    }
 }

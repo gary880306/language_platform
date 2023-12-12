@@ -29,4 +29,17 @@ public class ClassController {
             Class newClass = classService.getClassById(classId);
             return ResponseEntity.status(HttpStatus.CREATED).body(newClass);
     }
+
+    @PutMapping("/classes/{classId}")
+    public ResponseEntity<Class> updateClass(@PathVariable Integer classId,
+                                             @RequestBody @Valid ClassRequest classRequest){
+       Class getClass =  classService.getClassById(classId);
+       if(getClass == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+       }
+
+       classService.updateClass(classId,classRequest);
+       Class result = classService.getClassById(classId);
+       return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
 }

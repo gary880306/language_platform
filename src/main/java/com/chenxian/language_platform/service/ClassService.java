@@ -7,4 +7,5 @@ public interface ClassService {
     Class getClassById(Integer classId);
 
     Integer creatClass(ClassRequest classRequest);
+    void updateClass(Integer classId,ClassRequest classRequest);
 }

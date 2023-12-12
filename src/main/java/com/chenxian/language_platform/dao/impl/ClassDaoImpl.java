@@ -57,4 +57,19 @@ public class ClassDaoImpl implements ClassDao {
 
         return classId;
     }
+
+    @Override
+    public void updateClass(Integer classId, ClassRequest classRequest) {
+        String sql = "UPDATE class SET class_id =:classId,class_name =:className,category =:category,image_url =:imageUrl,price=:price,description=:description,last_modified_date=:lasModifiedDate WHERE class_id =:classId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("classId",classId);
+        map.put("className",classRequest.getClassName());
+        map.put("category",classRequest.getCategory().toString());
+        map.put("imageUrl",classRequest.getImageUrl());
+        map.put("price",classRequest.getPrice());
+        map.put("description",classRequest.getDescription());
+
+        map.put("lasModifiedDate",new Date());
+        namedParameterJdbcTemplate.update(sql,map);
+    }
 }

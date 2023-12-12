@@ -6,4 +6,5 @@ import com.chenxian.language_platform.model.Class;
 public interface ClassDao {
     Class getClassById(Integer classId);
     Integer creatClass(ClassRequest classRequest);
+    void updateClass(Integer classId,ClassRequest classRequest);
 }
