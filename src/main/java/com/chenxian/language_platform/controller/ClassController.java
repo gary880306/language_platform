@@ -1,13 +1,13 @@
 package com.chenxian.language_platform.controller;
 
+import com.chenxian.language_platform.dto.ClassRequest;
 import com.chenxian.language_platform.model.Class;
 import com.chenxian.language_platform.service.ClassService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ClassController {
@@ -21,5 +21,12 @@ public class ClassController {
         }else{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @PostMapping("/classes")
+    public ResponseEntity<Class> createClass(@RequestBody @Valid ClassRequest classRequest){
+            Integer classId  = classService.creatClass(classRequest);
+            Class newClass = classService.getClassById(classId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newClass);
     }
 }
