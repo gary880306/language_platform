@@ -1,5 +1,6 @@
 package com.chenxian.language_platform.rowmapper;
 
+import com.chenxian.language_platform.constant.ClassCategory;
 import com.chenxian.language_platform.model.Class;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -12,7 +13,9 @@ public class ClassRowMapper implements RowMapper<Class> {
         Class newClass = new Class();
         newClass.setClassId(rs.getInt("class_id"));
         newClass.setClassName(rs.getString("class_name"));
-        newClass.setCategory(rs.getString("category"));
+        String categoryStr = rs.getString("category");
+        ClassCategory category = ClassCategory.valueOf(categoryStr);
+        newClass.setCategory(category);
         newClass.setImageUrl(rs.getString("image_url"));
         newClass.setPrice(rs.getInt("price"));
         newClass.setDescription(rs.getString("description"));

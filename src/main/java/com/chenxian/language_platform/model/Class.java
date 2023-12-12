@@ -1,11 +1,13 @@
 package com.chenxian.language_platform.model;
 
+import com.chenxian.language_platform.constant.ClassCategory;
+
 import java.util.Date;
 
 public class Class {
     private Integer classId;
     private String className;
-    private String category;
+    private ClassCategory category;
     private String imageUrl;
     private Integer price;
     private String description;
@@ -28,11 +30,11 @@ public class Class {
         this.className = className;
     }
 
-    public String getCategory() {
+    public ClassCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(ClassCategory category) {
         this.category = category;
     }
 
