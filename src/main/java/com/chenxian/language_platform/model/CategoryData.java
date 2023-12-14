@@ -1,6 +1,6 @@
 package com.chenxian.language_platform.model;
 
-public class Category {
+public class CategoryData {
     private Integer id;
     private String name;
 

@@ -1,6 +1,5 @@
 package com.chenxian.language_platform.dto;
 
-import com.chenxian.language_platform.constant.CourseCategory;
 import jakarta.validation.constraints.NotNull;
 
 public class CourseRequest {
@@ -8,11 +7,15 @@ public class CourseRequest {
     // 需要前端傳過來的參數
     private String courseName;
     @NotNull
-    private CourseCategory category;
+    private Integer categoryId;
     @NotNull
     private String imageUrl;
     @NotNull
+    private Double time;
+    @NotNull
     private Integer price;
+    @NotNull
+    private String teacher;
     private String description;
 
     public String getCourseName() {
@@ -23,12 +26,12 @@ public class CourseRequest {
         this.courseName = courseName;
     }
 
-    public CourseCategory getCategory() {
-        return category;
+    public Integer getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(CourseCategory category) {
-        this.category = category;
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getImageUrl() {
@@ -39,12 +42,28 @@ public class CourseRequest {
         this.imageUrl = imageUrl;
     }
 
+    public Double getTime() {
+        return time;
+    }
+
+    public void setTime(Double time) {
+        this.time = time;
+    }
+
     public Integer getPrice() {
         return price;
     }
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public String getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(String teacher) {
+        this.teacher = teacher;
     }
 
     public String getDescription() {

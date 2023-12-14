@@ -1,15 +1,16 @@
 package com.chenxian.language_platform.model;
 
-import com.chenxian.language_platform.constant.CourseCategory;
-
 import java.util.Date;
 
 public class Course {
     private Integer courseId;
+
     private String courseName;
-    private CourseCategory category;
+    private String categoryName;
     private String imageUrl;
+    private Double time;
     private Integer price;
+    private String teacher;
     private String description;
     private Date creatDate;
     private Date lastModifiedDate;
@@ -22,6 +23,7 @@ public class Course {
         this.courseId = courseId;
     }
 
+
     public String getCourseName() {
         return courseName;
     }
@@ -30,12 +32,12 @@ public class Course {
         this.courseName = courseName;
     }
 
-    public CourseCategory getCategory() {
-        return category;
+    public String getCategoryName() {
+        return categoryName;
     }
 
-    public void setCategory(CourseCategory category) {
-        this.category = category;
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public String getImageUrl() {
@@ -46,12 +48,28 @@ public class Course {
         this.imageUrl = imageUrl;
     }
 
+    public Double getTime() {
+        return time;
+    }
+
+    public void setTime(Double time) {
+        this.time = time;
+    }
+
     public Integer getPrice() {
         return price;
     }
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public String getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(String teacher) {
+        this.teacher = teacher;
     }
 
     public String getDescription() {

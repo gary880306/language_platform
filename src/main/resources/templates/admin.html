@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ch" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,20 +21,23 @@
 
         #container {
             display: flex;
+            width: 100%;
             margin: 0;
             padding: 0;
         }
 
         #menu {
-            flex: 0.2;
+            flex: 0 0 160px;
+            /* 固定寬度為160px */
             padding: 20px;
             background-color: rgb(241, 239, 237);
             color: #000;
-            height: 100vh;
+            min-height: 100vh;
             box-sizing: border-box;
         }
 
         #menu a {
+            width: 100%;
             display: block;
             text-decoration: none;
             padding: 10px;
@@ -51,8 +53,10 @@
         }
 
         #productTable {
-            flex: 0.8;
+            flex-grow: 1;
+            /* 自動擴展以填滿剩餘空間 */
             padding: 20px;
+            box-sizing: border-box;
         }
 
         table {
@@ -83,8 +87,10 @@
             display: none;
         }
     </style>
-</head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+
+</head>
 <body>
 <div id="navbar">
     <h4>後台管理系統</h4>
@@ -97,49 +103,48 @@
     </div>
     <div id="productTable">
         <h2 class="mb-4">商品狀態管理</h2>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">新增課程
-        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">新增課程</button>
         <table class="table table-bordered table-striped">
             <thead>
             <tr>
-                <th>課程名稱</th>
-                <th>銷售次數</th>
-                <th>課程價格</th>
-                <th>課程狀態</th>
+                <th>編號</th>
+                <th>名稱</th>
+                <th>語言</th>
+                <th>圖片</th>
+                <th>時數</th>
+                <th>價格</th>
+                <th>老師名稱</th>
+                <th>課程介紹</th>
+                <th>創建時間</th>
+                <th>最後修改時間</th>
                 <th>修改</th>
                 <th>刪除</th>
             </tr>
             </thead>
-            <tbody>
-            <!-- 在這裡插入商品數據 -->
+            <tbody th:each="course : ${courses}">
             <tr>
-                <td>課程A</td>
-                <td>50</td>
-                <td>$100</td>
-                <td>上架</td>
+                <td th:text="${course.getCourseId}"></td>
+                <td th:text="${course.getCourseName}"></td>
+                <td th:text="${course.getCategoryName}"></td>
+                <td th:text="${course.getImageUrl}"></td>
+                <td th:text="${course.getTime}"></td>
+                <td th:text="${course.getPrice}"></td>
+                <td th:text="${course.getTeacher}"></td>
+                <td th:text="${course.getDescription}"></td>
+                <td th:text="${course.getCreatDate}"></td>
+                <td th:text="${course.getLastModifiedDate}"></td>
                 <td>
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editProductModal">修改
-                    </button>
-                </td>
+
+                        <button class="btn btn-warning edit-button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editProductModal"
+                                th:attr="data-course-id=${course.getCourseId}">修改
+                        </button>
+
+
                 <td>
-                    <button class="btn btn-danger" data-bs-toggle="modal"
-                            data-bs-target="#deleteConfirmationModal">刪除
-                    </button>
-                </td>
-            </tr>
-            <!-- 更多商品行 -->
-            <tr>
-                <td>課程B</td>
-                <td>30</td>
-                <td>$80</td>
-                <td>下架</td>
-                <td>
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editProductModal">修改
-                    </button>
-                </td>
-                <td>
-                    <button class="btn btn-danger" data-bs-toggle="modal"
-                            data-bs-target="#deleteConfirmationModal">刪除
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+                        刪除
                     </button>
                 </td>
             </tr>
@@ -148,9 +153,10 @@
     </div>
 </div>
 
+
+
 <!-- 新增課程 Modal -->
-<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel"
-     aria-hidden="true">
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -159,27 +165,26 @@
             </div>
             <div class="modal-body">
                 <!-- 表單內容可以根據需要調整 -->
-                <form>
-                    <label for="courseName">課程名稱:</label> <input type="text" id="courseName" name="courseName"
-                                                                     class="form-control" required><br>
+                <form method="post" action="/courses" enctype="multipart/form-data">
+                    <label for="courseName">課程名稱:</label>
+                    <input type="text" id="courseName" name="courseName" class="form-control" required><br>
 
-                    <label for="language">語言:</label> <select id="language" name="language" class="form-select"
-                                                                default="english">
-                    <option value="english" selected>英文</option>
-                    <!-- 其他語言選項 -->
-                </select><br> <label for="courseImage">上傳課程封面圖片:</label> <input type="file" id="courseImage"
-                                                                                        name="courseImage"
-                                                                                        class="form-control"
-                                                                                        accept="image/*"><br> <label
-                        for="price">價格:</label>
-                    <input type="number" id="price" name="price" class="form-control" required><br> <label
-                        for="duration">時數:</label> <input type="number" id="duration" name="duration"
-                                                            class="form-control" required><br> <label for="teacherName">老師名:</label>
-                    <input type="text"
-                           id="teacherName" name="teacherName" class="form-control" required><br>
-
-                    <button type="button" class="btn btn-success" onclick="addProduct()">確認新增
-                    </button>
+                    <label for="categoryId">語言:</label>
+                    <select id="categoryId" name="categoryId" class="form-select">
+                        <option th:each="category : ${categories}" th:value="${category.id}"
+                                th:text="${category.name}"></option>
+                    </select><br>
+                    <label for="imageUrl">上傳課程封面圖片:</label>
+                    <input type="file" id="imageUrl" name="imageUrl" class="form-control" accept="image/*"><br>
+                    <label for="time">時數:</label>
+                    <input type="number" id="time" name="time" class="form-control" required><br>
+                    <label for="price">價格:</label>
+                    <input type="number" id="price" name="price" class="form-control" required><br>
+                    <label for="teacher">老師名:</label>
+                    <input type="text" id="teacher" name="teacher" class="form-control" required><br>
+                    課程介紹:
+                    <textarea class="form-control" placeholder="隨意填寫" id="description" name="description" style="height: 100px"></textarea>
+                    <button type="submit" class="btn btn-success mt-2" name="submitForm">確認新增</button>
                 </form>
             </div>
         </div>
@@ -187,8 +192,7 @@
 </div>
 
 <!-- 修改課程 Modal -->
-<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel"
-     aria-hidden="true">
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -198,29 +202,25 @@
             <div class="modal-body">
                 <!-- 表單內容可以根據需要調整 -->
                 <form>
-                    <label for="editCourseName">課程名稱:</label> <input type="text" id="editCourseName"
-                                                                         name="editCourseName" class="form-control"
-                                                                         required><br> <label
-                        for="editLanguage">語言:</label>
-                    <select id="editLanguage" name="editLanguage" class="form-select" default="english">
-                        <option value="english" selected>英文</option>
-                        <!-- 其他語言選項 -->
-                    </select><br> <label for="editCourseImage">上傳課程封面圖片:</label> <input type="file"
-                                                                                                id="editCourseImage"
-                                                                                                name="editCourseImage"
-                                                                                                class="form-control"
-                                                                                                accept="image/*"><br>
-                    <label for="editPrice">價格:</label> <input type="number" id="editPrice" name="editPrice"
-                                                                class="form-control" required><br>
+                    <label for="courseName">課程名稱:</label>
+                    <input type="text" id="editCourseName" name="editCourseName" class="form-control" required><br>
 
-                    <label for="editDuration">時數:</label> <input type="number" id="editDuration" name="editDuration"
-                                                                   class="form-control" required><br> <label
-                        for="editTeacherName">老師名:</label>
-                    <input type="text" id="editTeacherName" name="editTeacherName" class="form-control"
-                           required><br>
-
-                    <button type="button" class="btn btn-success" onclick="editProduct()">確認修改
-                    </button>
+                    <label for="editCategoryId">語言:</label>
+                    <select id="editCategoryId" name="editCategoryId" class="form-select">
+                        <option th:each="category : ${categories}" th:value="${category.id}"
+                                th:text="${category.name}"></option>
+                    </select><br>
+                    <label for="editImageUrl">上傳課程封面圖片:</label>
+                    <input type="file" id="editImageUrl" name="editImageUrl" class="form-control" accept="image/*"><br>
+                    <label for="editTime">時數:</label>
+                    <input type="number" id="editTime" name="editTime" class="form-control" required><br>
+                    <label for="editPrice">價格:</label>
+                    <input type="number" id="editPrice" name="editPrice" class="form-control" required><br>
+                    <label for="editTeacher">老師名:</label>
+                    <input type="text" id="editTeacher" name="editTeacher" class="form-control" required><br>
+                    課程介紹:
+                    <textarea class="form-control" placeholder="隨意填寫" id="editDescription" name="editDescription" style="height: 100px"></textarea>
+                    <button type="submit" class="btn btn-success mt-2" name="submitForm">修改課程</button>
                 </form>
             </div>
         </div>
@@ -237,16 +237,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <button type="button" class="btn btn-danger" onclick="deleteProduct()">確認刪除
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消
-                </button>
+                <button type="button" class="btn btn-danger" onclick="deleteProduct()">確認刪除</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
             </div>
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js">
-</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const menuLinks = document.querySelectorAll('#menu a');
     menuLinks.forEach(link => {
@@ -256,6 +254,47 @@
         });
     });
 </script>
+
+<script>
+    // 選擇所有的「修改」按鈕並為它們添加點擊事件監聽器
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function () {
+            // 從點擊的按鈕上獲取 data-course-id 屬性的值
+            const courseId = this.getAttribute('data-course-id');
+            // 創建一個新的 URL，包含課程 ID 的查詢參數
+            const newUrl = '/admin/course?courseId=' + courseId;
+            // 使用 pushState 方法更新瀏覽器的歷史記錄和地址欄，但不重新加載頁面
+            window.history.pushState({ path: newUrl }, '', newUrl);
+
+            // 當模態框隱藏時的事件處理
+            $('#editProductModal').on('hidden.bs.modal', function () {
+                // 模態框關閉後，將 URL 替換為 '/admin'，同樣不會重新加載頁面
+                window.history.replaceState({}, '', '/admin');
+            });
+
+            // 使用 fetch API 向伺服器發送請求，獲取指定課程的數據
+            fetch(`/admin/course?courseId=${courseId}`)
+                .then(response => response.json()) // 將響應轉換為 JSON
+                .then(courseData => {
+                    // 使用從伺服器獲取的課程數據來更新表單欄位
+                    document.getElementById('editCourseName').value = courseData.courseName;
+                    document.getElementById('editCategoryId').value = courseData.categoryId;
+                    document.getElementById('editTime').value = courseData.time;
+                    document.getElementById('editPrice').value = courseData.price;
+                    document.getElementById('editTeacher').value = courseData.teacher;
+                    document.getElementById('editDescription').value = courseData.description;
+
+                    // 這裡可以加入打開模態框或其他更新頁面元素的邏輯
+                })
+                .catch(error => {
+                    // 處理任何在請求過程中發生的錯誤
+                    console.error('Error:', error);
+                });
+        });
+    });
+</script>
+
+
 </body>
 
 </html>
