@@ -13,7 +13,6 @@ public class CourseRequestRowMapper implements RowMapper<CourseRequest> {
         CourseRequest course = new CourseRequest();
         course.setCourseName(rs.getString("course_name"));
         course.setCategoryId(rs.getInt("category_id")); // 添加映射逻辑
-        course.setImageUrl(rs.getString("image_url"));
         course.setTime(rs.getDouble("time"));
         course.setPrice(rs.getInt("price"));
         course.setTeacher(rs.getString("teacher"));

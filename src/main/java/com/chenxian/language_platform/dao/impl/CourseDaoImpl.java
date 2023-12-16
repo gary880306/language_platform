@@ -53,11 +53,13 @@ public class CourseDaoImpl implements CourseDao {
         Map<String,Object> map = new HashMap<>();
         map.put("courseName",courseRequest.getCourseName());
         map.put("categoryId",courseRequest.getCategoryId());
-        map.put("imageUrl",courseRequest.getImageUrl());
+        map.put("imageUrl",courseRequest.getImageUrl().getOriginalFilename());
         map.put("time",courseRequest.getTime());
         map.put("price",courseRequest.getPrice());
         map.put("teacher",courseRequest.getTeacher());
         map.put("description",courseRequest.getDescription());
+
+
 
         Date now = new Date();
         map.put("createdDate",now);
@@ -85,10 +87,11 @@ public class CourseDaoImpl implements CourseDao {
     }
 
     @Override
-    public void deleteCourseById(Integer courseId) {
+    public boolean deleteCourseById(Integer courseId) {
         String sql = "DELETE FROM course WHERE course_id=:courseId";
         Map<String,Object> map = new HashMap<>();
         map.put("courseId",courseId);
         namedParameterJdbcTemplate.update(sql,map);
+        return true;
     }
 }

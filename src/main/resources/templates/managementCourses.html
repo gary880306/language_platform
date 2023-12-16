@@ -86,6 +86,10 @@
         #deleteConfirmationModal {
             display: none;
         }
+
+        .error-message {
+            color: red;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -98,11 +102,11 @@
 <div id="container">
     <div id="menu">
         <a href="#" id="userInfoLink">用戶資訊</a>
-        <a href="#" id="productInfoLink">商品狀態管理</a>
+        <a href="#" id="productInfoLink" class="active">課程管理</a>
         <a href="#" id="salesReportLink">銷售報表</a>
     </div>
     <div id="productTable">
-        <h2 class="mb-4">商品狀態管理</h2>
+        <h2 class="mb-4">課程管理</h2>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">新增課程</button>
         <table class="table table-bordered table-striped">
             <thead>
@@ -126,7 +130,9 @@
                 <td th:text="${course.getCourseId}"></td>
                 <td th:text="${course.getCourseName}"></td>
                 <td th:text="${course.getCategoryName}"></td>
-                <td th:text="${course.getImageUrl}"></td>
+                <td>
+                    <a th:href="@{${course.getImageUrl}}" th:text="${course.getImageUrl}" target="_blank"></a>
+                </td>
                 <td th:text="${course.getTime}"></td>
                 <td th:text="${course.getPrice}"></td>
                 <td th:text="${course.getTeacher}"></td>
@@ -143,7 +149,7 @@
 
 
                 <td>
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
+                    <button class="btn btn-danger delete-button" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" th:attr="data-course-id=${course.getCourseId}">
                         刪除
                     </button>
                 </td>
@@ -165,10 +171,10 @@
             </div>
             <div class="modal-body">
                 <!-- 表單內容可以根據需要調整 -->
-                <form method="post" action="/courses" enctype="multipart/form-data">
+                <form id="courseForm" method="post" enctype="multipart/form-data">
                     <label for="courseName">課程名稱:</label>
                     <input type="text" id="courseName" name="courseName" class="form-control" required><br>
-
+                    <div id="courseNameError" class="error-message"></div>
                     <label for="categoryId">語言:</label>
                     <select id="categoryId" name="categoryId" class="form-select">
                         <option th:each="category : ${categories}" th:value="${category.id}"
@@ -177,9 +183,13 @@
                     <label for="imageUrl">上傳課程封面圖片:</label>
                     <input type="file" id="imageUrl" name="imageUrl" class="form-control" accept="image/*"><br>
                     <label for="time">時數:</label>
-                    <input type="number" id="time" name="time" class="form-control" required><br>
+                    <input type="number" id="time" name="time" class="form-control" required step="any"><br>
+                    <div id="courseTimeError" class="error-message"></div>
+
                     <label for="price">價格:</label>
                     <input type="number" id="price" name="price" class="form-control" required><br>
+                    <div id="coursePriceError" class="error-message"></div>
+
                     <label for="teacher">老師名:</label>
                     <input type="text" id="teacher" name="teacher" class="form-control" required><br>
                     課程介紹:
@@ -227,23 +237,8 @@
     </div>
 </div>
 
-<!-- 刪除確認 Modal -->
-<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteConfirmationModalLabel">確定要刪除嗎？</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <button type="button" class="btn btn-danger" onclick="deleteProduct()">確認刪除</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-            </div>
-        </div>
-    </div>
-</div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const menuLinks = document.querySelectorAll('#menu a');
@@ -256,42 +251,123 @@
 </script>
 
 <script>
-    // 選擇所有的「修改」按鈕並為它們添加點擊事件監聽器
-    document.querySelectorAll('.edit-button').forEach(button => {
-        button.addEventListener('click', function () {
-            // 從點擊的按鈕上獲取 data-course-id 屬性的值
-            const courseId = this.getAttribute('data-course-id');
-            // 創建一個新的 URL，包含課程 ID 的查詢參數
-            const newUrl = '/admin/course?courseId=' + courseId;
-            // 使用 pushState 方法更新瀏覽器的歷史記錄和地址欄，但不重新加載頁面
+    // 將更新表單的邏輯封裝到一個函數中
+    function updateEditForm(courseData) {
+        document.getElementById('editCourseName').value = courseData.courseName;
+        document.getElementById('editCategoryId').value = courseData.categoryId;
+        document.getElementById('editTime').value = courseData.time;
+        document.getElementById('editPrice').value = courseData.price;
+        document.getElementById('editTeacher').value = courseData.teacher;
+        document.getElementById('editDescription').value = courseData.description;
+        // 其他相關邏輯
+    }
+
+    // 使用事件委派來監聽按鈕點擊
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('edit-button')) {
+            const courseId = e.target.getAttribute('data-course-id');
+            const newUrl = '/admin/managementCourses?courseId=' + courseId;
             window.history.pushState({ path: newUrl }, '', newUrl);
 
-            // 當模態框隱藏時的事件處理
-            $('#editProductModal').on('hidden.bs.modal', function () {
-                // 模態框關閉後，將 URL 替換為 '/admin'，同樣不會重新加載頁面
-                window.history.replaceState({}, '', '/admin');
-            });
-
-            // 使用 fetch API 向伺服器發送請求，獲取指定課程的數據
-            fetch(`/admin/course?courseId=${courseId}`)
-                .then(response => response.json()) // 將響應轉換為 JSON
+            fetch(`/admin/managementCourses/info?courseId=${courseId}`)
+                .then(response => response.json())
                 .then(courseData => {
-                    // 使用從伺服器獲取的課程數據來更新表單欄位
-                    document.getElementById('editCourseName').value = courseData.courseName;
-                    document.getElementById('editCategoryId').value = courseData.categoryId;
-                    document.getElementById('editTime').value = courseData.time;
-                    document.getElementById('editPrice').value = courseData.price;
-                    document.getElementById('editTeacher').value = courseData.teacher;
-                    document.getElementById('editDescription').value = courseData.description;
-
+                    updateEditForm(courseData);
                     // 這裡可以加入打開模態框或其他更新頁面元素的邏輯
                 })
                 .catch(error => {
-                    // 處理任何在請求過程中發生的錯誤
                     console.error('Error:', error);
                 });
+        }
+    });
+
+    $('#editProductModal').on('hidden.bs.modal', function () {
+        window.history.replaceState({}, '', '/admin/managementCourses');
+    });
+
+
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function () {
+            // 從點擊的按鈕上獲取 data-course-id 屬性的值
+            const courseId = this.getAttribute('data-course-id');
+
+            // 確認刪除操作
+            if (confirm('確定要刪除這門課程嗎？')) {
+                // 發送 AJAX 請求進行刪除
+                fetch(`/admin/managementCourses/delete?courseId=${courseId}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('課程已刪除');
+                            // 可以在這裡重新加載頁面或更新 DOM
+                            location.reload(); // 例如，重新加載頁面
+                        } else {
+                            alert('刪除失敗');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('刪除過程中出現錯誤:', error);
+                    });
+            } else {
+                // 用戶選擇了「取消」
+                window.history.replaceState({}, '', '/admin/managementCourses');
+            }
         });
     });
+
+
+
+</script>
+
+<script>
+    $('#courseForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+        for (var pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]);
+        }
+
+        $.ajax({
+            url: '/admin/validateCourseData',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                // 驗證通過，發送第二個 AJAX 請求來創建課程
+                $.ajax({
+                    url: '/admin/creatCourse', // 調用創建課程的 URL
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        window.location.href = 'http://localhost:8080/admin/managementCourses';
+                    },
+                    error: function(response) {
+                        // 处理创建课程请求的错误情况
+                    }
+                });
+            },
+            error: function(response) {
+                // 清除现有错误信息
+                $('.error-message').text('').hide();
+
+                var errors = response.responseJSON;
+
+                for (var key in errors) {
+                    var errorMessage = errors[key];
+                    var errorElementId = 'course' + key.charAt(0).toUpperCase() + key.slice(1) + 'Error';
+
+                    // 只有当错误消息非空时才显示
+                    if (errorMessage) {
+                        $('#' + errorElementId).text(errorMessage).show();
+                    }
+                }
+            }
+        });
+    });
+
 </script>
 
 

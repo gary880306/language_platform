@@ -1,20 +1,24 @@
 package com.chenxian.language_platform.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
+import org.springframework.web.multipart.MultipartFile;
 
 public class CourseRequest {
-    @NotNull
+    @NotEmpty(message = "course.name.nonempty")
+    @Size(min = 1, message = "course.name.size")
     // 需要前端傳過來的參數
     private String courseName;
-    @NotNull
+    @NotNull(message = "course.categoryId.notnull")
     private Integer categoryId;
-    @NotNull
-    private String imageUrl;
-    @NotNull
+    private MultipartFile imageUrl;
+    @NotNull(message = "course.time.notnull")
+    @DecimalMin(value = "0.5", message = "時數必須大於0.5小時")
     private Double time;
-    @NotNull
+    @NotNull(message = "course.price.notnull")
+    @Min(value = 1, message = "價格需大於0")
     private Integer price;
-    @NotNull
+    @NotEmpty(message = "course.teacher.nonempty")
+    @Size(min = 1, message = "course.teacher.size")
     private String teacher;
     private String description;
 
@@ -34,11 +38,11 @@ public class CourseRequest {
         this.categoryId = categoryId;
     }
 
-    public String getImageUrl() {
+    public MultipartFile getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public void setImageUrl(MultipartFile imageUrl) {
         this.imageUrl = imageUrl;
     }
 
