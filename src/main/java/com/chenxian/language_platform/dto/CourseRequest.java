@@ -11,6 +11,7 @@ public class CourseRequest {
     @NotNull(message = "course.categoryId.notnull")
     private Integer categoryId;
     private MultipartFile imageUrl;
+    private String imageUrlString;
     @NotNull(message = "course.time.notnull")
     @DecimalMin(value = "0.5", message = "時數必須大於0.5小時")
     private Double time;
@@ -76,5 +77,13 @@ public class CourseRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImageUrlString() {
+        return imageUrlString;
+    }
+
+    public void setImageUrlString(String imageUrlString) {
+        this.imageUrlString = imageUrlString;
     }
 }

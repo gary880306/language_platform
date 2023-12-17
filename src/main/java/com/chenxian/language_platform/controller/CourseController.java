@@ -63,9 +63,7 @@ public class    CourseController {
 //
 //        // 檢查 class 是否存在
 //        Course course = courseService.getCourseById(courseId);
-//        if (course == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
+//
 //
 //        // 修改課程資訊
 //        courseService.updateCourse(courseId, courseRequest);
@@ -173,6 +171,18 @@ public class    CourseController {
 
         // 驗證通過的處理邏輯
        return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
+    }
+
+    @PostMapping("/validateRevisedCourseData")
+    public ResponseEntity<?> validateRevisedCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = bindingResult.getFieldErrors().stream()
+                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        // 驗證通過的處理邏輯
+        return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
     }
 
 }

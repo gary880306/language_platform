@@ -2,12 +2,10 @@ package com.chenxian.language_platform.controller;
 
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.service.CourseService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class EditCourseController {
@@ -36,5 +34,13 @@ public class EditCourseController {
         } else {
             return ResponseEntity.notFound().build(); // 回應 404 Not Found
         }
+    }
+
+    @PutMapping("/managementCourses/put/{courseId}")
+    public String putCourse(@PathVariable("courseId") Integer courseId,
+                            @ModelAttribute CourseRequest courseRequest) {
+        courseService.updateCourse(courseId,courseRequest);
+
+        return "redirect:/admin/managementCourses";
     }
 }

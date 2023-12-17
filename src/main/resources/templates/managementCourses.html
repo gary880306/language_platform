@@ -130,9 +130,7 @@
                 <td th:text="${course.getCourseId}"></td>
                 <td th:text="${course.getCourseName}"></td>
                 <td th:text="${course.getCategoryName}"></td>
-                <td>
-                    <a th:href="@{${course.getImageUrl}}" th:text="${course.getImageUrl}" target="_blank"></a>
-                </td>
+                <td th:text="${course.getImageUrl}"></td>
                 <td th:text="${course.getTime}"></td>
                 <td th:text="${course.getPrice}"></td>
                 <td th:text="${course.getTeacher}"></td>
@@ -171,7 +169,7 @@
             </div>
             <div class="modal-body">
                 <!-- 表單內容可以根據需要調整 -->
-                <form id="courseForm" method="post" enctype="multipart/form-data">
+                <form id="courseFormAdd" method="post" enctype="multipart/form-data">
                     <label for="courseName">課程名稱:</label>
                     <input type="text" id="courseName" name="courseName" class="form-control" required><br>
                     <div id="courseNameError" class="error-message"></div>
@@ -181,7 +179,7 @@
                                 th:text="${category.name}"></option>
                     </select><br>
                     <label for="imageUrl">上傳課程封面圖片:</label>
-                    <input type="file" id="imageUrl" name="imageUrl" class="form-control" accept="image/*"><br>
+                    <input type="file" id="imageUrl" name="imageUrl" class="form-control" accept="image/*" required ><br>
                     <label for="time">時數:</label>
                     <input type="number" id="time" name="time" class="form-control" required step="any"><br>
                     <div id="courseTimeError" class="error-message"></div>
@@ -211,25 +209,27 @@
             </div>
             <div class="modal-body">
                 <!-- 表單內容可以根據需要調整 -->
-                <form>
+                <form id="courseFormRevise" enctype="multipart/form-data">
                     <label for="courseName">課程名稱:</label>
-                    <input type="text" id="editCourseName" name="editCourseName" class="form-control" required><br>
+                    <input type="text" id="editCourseName" name="courseName" class="form-control" required><br>
 
                     <label for="editCategoryId">語言:</label>
-                    <select id="editCategoryId" name="editCategoryId" class="form-select">
+                    <select id="editCategoryId" name="categoryId" class="form-select">
                         <option th:each="category : ${categories}" th:value="${category.id}"
                                 th:text="${category.name}"></option>
                     </select><br>
                     <label for="editImageUrl">上傳課程封面圖片:</label>
-                    <input type="file" id="editImageUrl" name="editImageUrl" class="form-control" accept="image/*"><br>
+                    <input type="file" id="editImageUrl" name="imageUrl" class="form-control" accept="image/*"><br>
+                    <div id="currentImageDisplay"></div>
+
                     <label for="editTime">時數:</label>
-                    <input type="number" id="editTime" name="editTime" class="form-control" required><br>
+                    <input type="number" id="editTime" name="time" class="form-control" required><br>
                     <label for="editPrice">價格:</label>
-                    <input type="number" id="editPrice" name="editPrice" class="form-control" required><br>
+                    <input type="number" id="editPrice" name="price" class="form-control" required><br>
                     <label for="editTeacher">老師名:</label>
-                    <input type="text" id="editTeacher" name="editTeacher" class="form-control" required><br>
+                    <input type="text" id="editTeacher" name="teacher" class="form-control" required><br>
                     課程介紹:
-                    <textarea class="form-control" placeholder="隨意填寫" id="editDescription" name="editDescription" style="height: 100px"></textarea>
+                    <textarea class="form-control" placeholder="隨意填寫" id="editDescription" name="description" style="height: 100px"></textarea>
                     <button type="submit" class="btn btn-success mt-2" name="submitForm">修改課程</button>
                 </form>
             </div>
@@ -255,6 +255,9 @@
     function updateEditForm(courseData) {
         document.getElementById('editCourseName').value = courseData.courseName;
         document.getElementById('editCategoryId').value = courseData.categoryId;
+        // console.log(courseData.imageUrlString);
+        let imageUrl = encodeURIComponent(courseData.imageUrlString);
+        document.getElementById('currentImageDisplay').innerHTML = `<img src="http://192.168.1.102/uploadImages/${imageUrl}" alt="Current Image" style="max-width: 100px; max-height: 100px;">`;
         document.getElementById('editTime').value = courseData.time;
         document.getElementById('editPrice').value = courseData.price;
         document.getElementById('editTeacher').value = courseData.teacher;
@@ -278,6 +281,58 @@
                 .catch(error => {
                     console.error('Error:', error);
                 });
+
+            $('#courseFormRevise').on('submit', function(e) {
+                e.preventDefault();
+
+                var formData = new FormData(this);
+                for (var pair of formData.entries()) {
+                    console.log(pair[0]+ ', ' + pair[1]);
+                }
+
+                console.log(formData);
+
+                // 第一次 AJAX 請求用於驗證數據
+                $.ajax({
+                    url: '/admin/validateRevisedCourseData',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // 驗證通過，發送第二個 AJAX 請求來更新課程
+                        $.ajax({
+                            url: `/managementCourses/put/${courseId}`,
+                            type: 'PUT',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                window.location.href = 'http://localhost:8080/admin/managementCourses';
+                            },
+                            error: function(response) {
+                                // 處理創建或更新課程請求的錯誤情況
+                            }
+                        });
+                    },
+                    error: function(response) {
+                        // 清除現有錯誤信息
+                        $('.error-message').text('').hide();
+
+                        var errors = response.responseJSON;
+
+                        for (var key in errors) {
+                            var errorMessage = errors[key];
+                            var errorElementId = 'course' + key.charAt(0).toUpperCase() + key.slice(1) + 'Error';
+
+                            // 只有當錯誤消息非空時才顯示
+                            if (errorMessage) {
+                                $('#' + errorElementId).text(errorMessage).show();
+                            }
+                        }
+                    }
+                });
+            });
         }
     });
 
@@ -319,13 +374,14 @@
 </script>
 
 <script>
-    $('#courseForm').on('submit', function(e) {
+    $('#courseFormAdd').on('submit', function(e) {
         e.preventDefault();
 
         var formData = new FormData(this);
         for (var pair of formData.entries()) {
             console.log(pair[0]+ ', ' + pair[1]);
         }
+        console.log(formData);
 
         $.ajax({
             url: '/admin/validateCourseData',
@@ -369,7 +425,6 @@
     });
 
 </script>
-
 
 </body>
 

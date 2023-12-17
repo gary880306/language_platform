@@ -59,29 +59,29 @@ public class CourseDaoImpl implements CourseDao {
         map.put("teacher",courseRequest.getTeacher());
         map.put("description",courseRequest.getDescription());
 
-
-
         Date now = new Date();
         map.put("createdDate",now);
         map.put("lastModifiedDate",now);
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
+
         namedParameterJdbcTemplate.update(sql,new MapSqlParameterSource(map),keyHolder);
         int courseId = keyHolder.getKey().intValue();
-
         return courseId;
     }
 
     @Override
     public void updateCourse(Integer courseId, CourseRequest courseRequest) {
-        String sql = "UPDATE course SET course_id =:courseId,course_name =:courseName,category =:category,image_url =:imageUrl,price=:price,description=:description,last_modified_date=:lasModifiedDate WHERE course_id =:courseId";
+        String sql = "UPDATE course SET course_name =:courseName,category_id =:categoryId,image_url =:imageUrl,time=:time,price=:price,teacher=:teacher,description=:description,last_modified_date=:lasModifiedDate WHERE course_id =:courseId";
         Map<String,Object> map = new HashMap<>();
         map.put("courseId",courseId);
         map.put("courseName",courseRequest.getCourseName());
-        map.put("imageUrl",courseRequest.getImageUrl());
+        map.put("categoryId",courseRequest.getCategoryId());
+        map.put("imageUrl",courseRequest.getImageUrl().getOriginalFilename());
+        map.put("time",courseRequest.getTime());
         map.put("price",courseRequest.getPrice());
+        map.put("teacher",courseRequest.getTeacher());
         map.put("description",courseRequest.getDescription());
-
         map.put("lasModifiedDate",new Date());
         namedParameterJdbcTemplate.update(sql,map);
     }

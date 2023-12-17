@@ -3,6 +3,8 @@ package com.chenxian.language_platform.rowmapper;
 import com.chenxian.language_platform.model.Course;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -18,8 +20,12 @@ public class CourseRowMapper implements RowMapper<Course> {
         course.setTime(rs.getDouble("time"));
         course.setPrice(rs.getInt("price"));
         course.setDescription(rs.getString("description"));
-        course.setCreatDate(rs.getTimestamp("created_date"));
-        course.setLastModifiedDate(rs.getTimestamp("last_modified_date"));
+        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String creatDate = sd.format(rs.getTimestamp("created_date"));
+        course.setCreatDate(creatDate);
+        String lastModifiedDate =  sd.format(rs.getTimestamp("last_modified_date"));
+        course.setLastModifiedDate(lastModifiedDate);
+//      course.setLastModifiedDate(rs.getTimestamp("last_modified_date"));
         return course;
     }
 }

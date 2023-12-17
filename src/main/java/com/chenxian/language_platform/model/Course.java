@@ -1,5 +1,7 @@
 package com.chenxian.language_platform.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 public class Course {
@@ -12,8 +14,11 @@ public class Course {
     private Integer price;
     private String teacher;
     private String description;
-    private Date creatDate;
-    private Date lastModifiedDate;
+
+
+    private String creatDate;
+
+    private String lastModifiedDate;
 
     public Integer getCourseId() {
         return courseId;
@@ -80,19 +85,19 @@ public class Course {
         this.description = description;
     }
 
-    public Date getCreatDate() {
+    public String getCreatDate() {
         return creatDate;
     }
 
-    public void setCreatDate(Date creatDate) {
+    public void setCreatDate(String creatDate) {
         this.creatDate = creatDate;
     }
 
-    public Date getLastModifiedDate() {
+    public String getLastModifiedDate() {
         return lastModifiedDate;
     }
 
-    public void setLastModifiedDate(Date lastModifiedDate) {
+    public void setLastModifiedDate(String lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
 }
