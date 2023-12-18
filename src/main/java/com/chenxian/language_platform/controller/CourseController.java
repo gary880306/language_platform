@@ -42,7 +42,7 @@ public class    CourseController {
         List<CategoryData> categories = dataService.findAllCategoryData();
         model.addAttribute("courses", courses);
         model.addAttribute("categories",categories);
-        return "managementCourses"; // 返回您的 Thymeleaf 模板名稱
+        return "admin/managementCourses"; // 返回您的 Thymeleaf 模板名稱
     }
 
 //    @GetMapping("/courses/{courseId}")

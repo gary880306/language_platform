@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>响學後台系統</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
     <style>
         body {
@@ -127,32 +127,33 @@
             </thead>
             <tbody th:each="course : ${courses}">
             <tr>
-                <td th:text="${course.getCourseId}"></td>
-                <td th:text="${course.getCourseName}"></td>
-                <td th:text="${course.getCategoryName}"></td>
-                <td th:text="${course.getImageUrl}"></td>
-                <td th:text="${course.getTime}"></td>
-                <td th:text="${course.getPrice}"></td>
-                <td th:text="${course.getTeacher}"></td>
-                <td th:text="${course.getDescription}"></td>
-                <td th:text="${course.getCreatDate}"></td>
-                <td th:text="${course.getLastModifiedDate}"></td>
-                <td>
-
-                        <button class="btn btn-warning edit-button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#editProductModal"
-                                th:attr="data-course-id=${course.getCourseId}">修改
-                        </button>
-
-
-                <td>
+                <td class="align-middle text-center" th:text="${course.getCourseId}"></td>
+                <td class="align-middle text-center" th:text="${course.getCourseName}"></td>
+                <td class="align-middle text-center" th:text="${course.getCategoryName}"></td>
+                <td class="align-middle text-center">
+                    <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrl}}" alt="課程圖片" style="max-width: 100px; max-height: 65px;"/>
+                </td>
+                <td class="align-middle text-center" th:text="${course.getTime}"></td>
+                <td class="align-middle text-center" th:text="${course.getPrice}"></td>
+                <td class="align-middle text-center" th:text="${course.getTeacher}"></td>
+                <td class="align-middle text-center" th:text="${course.getDescription}"></td>
+                <td class="align-middle text-center" th:text="${course.getCreatDate}"></td>
+                <td class="align-middle text-center" th:text="${course.getLastModifiedDate}"></td>
+                <td class="align-middle text-center">
+                    <button class="btn btn-warning edit-button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editProductModal"
+                            th:attr="data-course-id=${course.getCourseId}">修改
+                    </button>
+                </td>
+                <td class="align-middle text-center">
                     <button class="btn btn-danger delete-button" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" th:attr="data-course-id=${course.getCourseId}">
                         刪除
                     </button>
                 </td>
             </tr>
             </tbody>
+
         </table>
     </div>
 </div>
@@ -219,7 +220,7 @@
                                 th:text="${category.name}"></option>
                     </select><br>
                     <label for="editImageUrl">上傳課程封面圖片:</label>
-                    <input type="file" id="editImageUrl" name="imageUrl" class="form-control" accept="image/*"><br>
+                    <input type="file" id="editImageUrl" name="imageUrl" class="form-control" accept="image/*" required><br>
                     <div id="currentImageDisplay"></div>
 
                     <label for="editTime">時數:</label>
@@ -257,7 +258,7 @@
         document.getElementById('editCategoryId').value = courseData.categoryId;
         // console.log(courseData.imageUrlString);
         let imageUrl = encodeURIComponent(courseData.imageUrlString);
-        document.getElementById('currentImageDisplay').innerHTML = `<img src="http://192.168.1.102/uploadImages/${imageUrl}" alt="Current Image" style="max-width: 100px; max-height: 100px;">`;
+        document.getElementById('currentImageDisplay').innerHTML = `<img src="http://192.168.1.107/uploadImages/${imageUrl}" alt="Current Image" style="max-width: 100px; max-height: 100px;">`;
         document.getElementById('editTime').value = courseData.time;
         document.getElementById('editPrice').value = courseData.price;
         document.getElementById('editTeacher').value = courseData.teacher;
@@ -282,7 +283,7 @@
                     console.error('Error:', error);
                 });
 
-            $('#courseFormRevise').on('submit', function(e) {
+            $('#courseFormRevise').off('submit').on('submit', function(e) {
                 e.preventDefault();
 
                 var formData = new FormData(this);
