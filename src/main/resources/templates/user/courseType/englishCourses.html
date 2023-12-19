@@ -15,7 +15,8 @@
 
     <script
             src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <style type="text/css">
+    <style>
+        /* 導航欄樣式 */
         .navbar {
             background-color: #d1fdff;
         }
@@ -24,9 +25,8 @@
             position: relative;
             text-decoration: none;
             color: #000000; /* 超連結文字顏色 */
-            transition: color 0.2s; /* 超連結文字顏色過渡效果 */
+            transition: color 0.2s; /* 文字顏色過渡效果 */
         }
-
 
         .navbar-nav a::after {
             content: "";
@@ -35,7 +35,7 @@
             height: 1.5px;
             bottom: 8px;
             left: 10px;
-            background-color: rgb(40, 195, 192); /* 底線的顏色 */
+            background-color: rgb(40, 195, 192); /* 底線顏色 */
             visibility: hidden;
             transform: scaleX(0);
             transition: all 0.3s ease-in-out;
@@ -46,30 +46,43 @@
             transform: scaleX(1);
         }
 
+        /* 主體樣式 */
         body {
             overflow-x: hidden;
         }
 
-        .imagesize {
+        /* 圖片樣式 */
+        .imagesize, .card img {
             height: 150px;
             width: 250px;
+            border-radius: 10px; /* 圓角設定，適用於常態和 hover 狀態 */
+            transition: transform 0.3s ease-in-out; /* 平滑過渡效果 */
         }
 
+        /* 卡片樣式 */
         .card {
             overflow: hidden;
-            /* 確保卡片內容不溢出邊框 */
+            border: 1px solid transparent; /* 透明邊框 */
+            margin: 30px; /* 卡片間距 */
         }
 
         .card img {
             transition: transform 0.3s ease-in-out;
         }
 
+        /* 保持 hover 狀態時的圓角 */
+        .card img:hover {
+            transform: scale(1.1);
+            transform-origin: center center;
+        }
+
         .card:hover img {
             transform: scale(1.1);
             transform-origin: center center;
-            /* 設定變換原點為圖片的中心 */
+            border-radius: 10px; /* 圓角設定 */
         }
 
+        /* 標籤樣式 */
         .tag {
             background-color: aquamarine;
             border: 2px;
@@ -78,29 +91,24 @@
             color: #00A9B0;
         }
 
+        /* 卡片容器樣式 */
         .card-container {
             display: flex;
-            justify-content: center; /* 確保卡片在容器中居中 */
+            justify-content: center; /* 卡片居中 */
             flex-wrap: wrap;
-            margin: auto; /* 如果需要，可調整外邊距以居中容器 */
+            margin: auto;
         }
 
-        .card {
-            margin: 30px; /* 控制卡片之間的間距 */
-            /* 維持原有的寬度和高度設置 */
-        }
-
-
-
+        /* 文字樣式 */
         .cardword {
             font-size: 18px;
         }
 
+        /* 頁腳樣式 */
         footer {
             background-color: #333;
             color: #fff;
             text-align: center;
-            position: fixed;
             bottom: 0;
             padding: 10px;
             width: 100%;
@@ -145,7 +153,7 @@
 </div>
 <section class="card-container d-flex flex-wrap">
     <div class="card rounded-2" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://172.20.10.5/uploadImages/' + ${course.imageUrl}}"
+        <img th:src="@{'http://192.168.1.109/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
         <div class="card-body">
             <p class="cardword mb-1">
@@ -161,6 +169,17 @@
         <a href="../classInfo.jsp" class="stretched-link"></a>
     </div>
 </section>
+<div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="#">上一頁</a></li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">下一頁</a></li>
+        </ul>
+    </nav>
+</div>
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>

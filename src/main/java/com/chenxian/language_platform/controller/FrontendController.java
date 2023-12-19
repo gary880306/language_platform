@@ -24,9 +24,13 @@ public class FrontendController {
     private DataService dataService;
     @GetMapping("/englishCourses")
     public String showCourses(Model model,
+                              // 查詢條件
                               @RequestParam(required = false) String search,
-                                    @RequestParam(defaultValue = "created_date") String orderBy,
-                                          @RequestParam(defaultValue = "desc") String sort) {
+                              // 排序
+                              @RequestParam(defaultValue = "created_date") String orderBy,
+                              @RequestParam(defaultValue = "desc") String sort
+                              // 分頁
+                                ) {
         CourseQueryParams courseQueryParams = new CourseQueryParams();
         courseQueryParams.setSearch(search);
         courseQueryParams.setOrderBy(orderBy);
