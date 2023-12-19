@@ -1,28 +1,37 @@
 package com.chenxian.language_platform.controller;
 
+import com.chenxian.language_platform.dto.CourseQueryParams;
 import com.chenxian.language_platform.model.CategoryData;
 import com.chenxian.language_platform.model.Course;
-import com.chenxian.language_platform.service.CourseService;
 import com.chenxian.language_platform.service.DataService;
+import com.chenxian.language_platform.service.FrontendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @Controller
 @RequestMapping("/courseType")
-public class UserController {
+public class FrontendController {
     @Autowired
-    private CourseService courseService;
+    private FrontendService frontendService;
 
     @Autowired
     private DataService dataService;
     @GetMapping("/englishCourses")
-    public String showCourses(Model model) {
-        List<Course> courses = courseService.getAllCourses();
+    public String showCourses(Model model,
+                              @RequestParam(required = false) String search,
+                                    @RequestParam(defaultValue = "created_date") String orderBy,
+                                          @RequestParam(defaultValue = "desc") String sort) {
+        CourseQueryParams courseQueryParams = new CourseQueryParams();
+        courseQueryParams.setSearch(search);
+        courseQueryParams.setOrderBy(orderBy);
+        courseQueryParams.setSort(sort);
+        List<Course> courses = frontendService.getAllCourses(courseQueryParams);
         List<CategoryData> categories = dataService.findAllCategoryData();
         model.addAttribute("courses", courses);
         model.addAttribute("categories",categories);
