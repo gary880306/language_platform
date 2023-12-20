@@ -136,13 +136,14 @@
                 <a href=".././cart.jsp" class="text-dark"><i
                         class="bi bi-cart"></i></a> <a href=".././userInfo.jsp"
                                                        class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
+                <a href="/user/logout" class="pure-menu-link">🔞 登出</a>
             </div>
         </div>
     </div>
 </nav>
 
 <div class="d-flex justify-content-center align-items-top">
-    <form method="get" action="/courseType/englishCourses" class="m-5">
+    <form method="get" action="/enjoyLearning/courses" class="m-5">
         <h4 class="text-center">請輸入關鍵字</h4>
         <input id="search" name="search" class="form-control me-2"
                type="search" placeholder="英文" aria-label="Search">
@@ -153,7 +154,7 @@
 </div>
 <section class="card-container d-flex flex-wrap">
     <div class="card rounded-2" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.109/uploadImages/' + ${course.imageUrl}}"
+        <img th:src="@{'http://192.168.1.105/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
         <div class="card-body">
             <p class="cardword mb-1">

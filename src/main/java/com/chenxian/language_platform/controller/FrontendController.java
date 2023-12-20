@@ -15,14 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @Controller
-@RequestMapping("/courseType")
 public class FrontendController {
     @Autowired
     private FrontendService frontendService;
 
     @Autowired
     private DataService dataService;
-    @GetMapping("/englishCourses")
+    @GetMapping("/enjoyLearning/courses")
     public String showCourses(Model model,
                               // 查詢條件
                               @RequestParam(required = false) String search,
@@ -39,7 +38,7 @@ public class FrontendController {
         List<CategoryData> categories = dataService.findAllCategoryData();
         model.addAttribute("courses", courses);
         model.addAttribute("categories",categories);
-        return "/user/courseType/englishCourses";
+        return "user/courses/main";
     }
 
 

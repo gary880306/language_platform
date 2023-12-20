@@ -131,7 +131,7 @@
                 <td class="align-middle text-center" th:text="${course.getCourseName}"></td>
                 <td class="align-middle text-center" th:text="${course.getCategoryName}"></td>
                 <td class="align-middle text-center">
-                    <img th:src="@{'http://192.168.1.109/uploadImages/' + ${course.imageUrl}}" alt="課程圖片" style="max-width: 100px; max-height: 65px;"/>
+                    <img th:src="@{'http://192.168.1.105/uploadImages/' + ${course.imageUrl}}" alt="課程圖片" style="max-width: 100px; max-height: 65px;"/>
                 </td>
                 <td class="align-middle text-center" th:text="${course.getTime}"></td>
                 <td class="align-middle text-center" th:text="${course.getPrice}"></td>
@@ -258,7 +258,7 @@
         document.getElementById('editCategoryId').value = courseData.categoryId;
         // console.login&register(courseData.imageUrlString);
         let imageUrl = encodeURIComponent(courseData.imageUrlString);
-        document.getElementById('currentImageDisplay').innerHTML = `<img src="http://192.168.1.109/uploadImages/${imageUrl}" alt="Current Image" style="max-width: 100px; max-height: 100px;">`;
+        document.getElementById('currentImageDisplay').innerHTML = `<img src="http://192.168.1.105/uploadImages/${imageUrl}" alt="Current Image" style="max-width: 100px; max-height: 100px;">`;
         document.getElementById('editTime').value = courseData.time;
         document.getElementById('editPrice').value = courseData.price;
         document.getElementById('editTeacher').value = courseData.teacher;

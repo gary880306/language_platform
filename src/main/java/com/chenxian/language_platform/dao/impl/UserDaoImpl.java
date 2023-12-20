@@ -1,6 +1,7 @@
 package com.chenxian.language_platform.dao.impl;
 
 import com.chenxian.language_platform.dao.UserDao;
+import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.User;
 import com.chenxian.language_platform.rowmapper.UserRowMapper;
@@ -56,4 +57,18 @@ public class UserDaoImpl implements UserDao {
             return null;
         }
     }
+
+    @Override
+    public User getUserByEmail(String email) {
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date FROM user WHERE email=:email";
+        Map<String,Object> map = new HashMap<>();
+        map.put("email",email);
+        List<User> userList = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());
+        if(userList.size() > 0){
+            return userList.get(0);
+        }else{
+            return null;
+        }
+    }
+
 }

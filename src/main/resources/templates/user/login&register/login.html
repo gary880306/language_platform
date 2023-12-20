@@ -14,17 +14,18 @@
                 <div class="card">
                     <div class="card-body">
                         <h3 class="card-title text-center">登入</h3>
-                        <form>
+                        <form method="post" action="/user/login">
                             <div class="mb-3">
-                                <label for="emailInput" class="form-label">電子郵件</label>
-                                <input type="email" class="form-control" id="emailInput" placeholder="輸入電子郵件">
+                                <label for="email" class="form-label">電子郵件</label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="輸入電子郵件">
                             </div>
                             <div class="mb-3">
-                                <label for="passwordInput" class="form-label">密碼</label>
-                                <input type="password" class="form-control" id="passwordInput" placeholder="輸入密碼">
+                                <label for="password" class="form-label">密碼</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="輸入密碼">
                             </div>
                             <button type="submit" class="btn btn-primary w-100">登入</button>
                         </form>
+                        <div style="color: red" th:text="${loginMessage}">Default Login Message</div>
                         <div class="text-center mt-3">
                             <small>尚未加入會員？<a href="/user/register">註冊</a></small>
                         </div>
