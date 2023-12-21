@@ -12,7 +12,7 @@ public class CourseRequestRowMapper implements RowMapper<CourseRequest> {
     public CourseRequest mapRow(ResultSet rs, int rowNum) throws SQLException {
         CourseRequest course = new CourseRequest();
         course.setCourseName(rs.getString("course_name"));
-        course.setCategoryId(rs.getInt("category_id")); // 添加映射逻辑
+        course.setCategoryId(rs.getInt("category_id"));
         course.setImageUrlString(rs.getString("image_url"));
         course.setTime(rs.getDouble("time"));
         course.setPrice(rs.getInt("price"));

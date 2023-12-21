@@ -154,9 +154,9 @@
 </div>
 <section class="card-container d-flex flex-wrap">
     <div class="card rounded-2" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.105/uploadImages/' + ${course.imageUrl}}"
+        <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
-        <div class="card-body">
+        <div class="card-body" th:attr="data-course-id=${course.courseId}">
             <p class="cardword mb-1">
                 <span class="tag rounded-2 me-1"><strong th:text="${course.getCategoryName}"></strong></span>
                 <span th:text="${course.getCourseName}"></span>
@@ -167,7 +167,7 @@
             </p>
             <h4 th:text="'NT$' + ${course.getPrice}"></h4>
         </div>
-        <a href="../classInfo.jsp" class="stretched-link"></a>
+        <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
     </div>
 </section>
 <div class="d-flex justify-content-center mt-4">

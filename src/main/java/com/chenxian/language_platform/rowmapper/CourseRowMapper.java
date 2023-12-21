@@ -14,8 +14,8 @@ public class CourseRowMapper implements RowMapper<Course> {
         Course course = new Course();
         course.setCourseId(rs.getInt("course_id"));
         course.setCourseName(rs.getString("course_name"));
-        course.setCategoryName(rs.getString("category_name")); // 添加映射逻辑
-        course.setTeacher(rs.getString("teacher")); // 添加映射逻辑
+        course.setCategoryName(rs.getString("category_name"));
+        course.setTeacher(rs.getString("teacher"));
         course.setImageUrl(rs.getString("image_url"));
         course.setTime(rs.getDouble("time"));
         course.setPrice(rs.getInt("price"));

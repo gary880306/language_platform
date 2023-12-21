@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
+    // 注入 HandlerInterceptor 實作
     @Autowired
     private LoginInterceptor loginInterceptor;
 
