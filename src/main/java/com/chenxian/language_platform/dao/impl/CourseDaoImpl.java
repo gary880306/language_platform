@@ -12,10 +12,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class CourseDaoImpl implements CourseDao {
@@ -36,6 +33,17 @@ public class CourseDaoImpl implements CourseDao {
             return null;
         }
 
+    }
+
+    @Override
+    public Course getCoursesByIdForCart(Integer courseId) {
+        String sql = "SELECT course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date " +
+                "FROM course LEFT JOIN category on course.category_id = category.category_id " +
+                "WHERE course.course_id = :courseId";
+        Map<String, Object> map = new HashMap<>();
+        map.put("courseId", courseId);
+        List<Course> courseList = namedParameterJdbcTemplate.query(sql, map, new CourseRowMapper());
+        return courseList.get(0);
     }
 
     @Override

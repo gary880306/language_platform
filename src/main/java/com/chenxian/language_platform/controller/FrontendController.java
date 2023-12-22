@@ -99,4 +99,23 @@ public class FrontendController {
         return "/user/courses/addCart";
     }
 
+    // 購物車頁面
+    @GetMapping("/enjoyLearning/cart")
+    public String cartPage(HttpSession session, Model model) {
+        // 1. 先找到 user 登入者
+        User user = (User)session.getAttribute("user");
+        // 2. 找到 user 的尚未結帳的購物車
+        Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+        System.out.println(cart);
+
+        if(cart != null){
+            int total =  cart.getCartItems().stream().
+                    mapToInt(item ->  item.getCourse().getPrice()).sum();
+            model.addAttribute("cart", cart);
+            model.addAttribute("total", total);
+        }
+
+        return "/user/courses/cart";
+    }
+
 }

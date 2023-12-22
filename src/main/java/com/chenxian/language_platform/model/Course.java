@@ -100,4 +100,20 @@ public class Course {
     public void setLastModifiedDate(String lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
+
+    @Override
+    public String toString() {
+        return "Course{" +
+                "courseId=" + courseId +
+                ", courseName='" + courseName + '\'' +
+                ", categoryName='" + categoryName + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", time=" + time +
+                ", price=" + price +
+                ", teacher='" + teacher + '\'' +
+                ", description='" + description + '\'' +
+                ", creatDate='" + creatDate + '\'' +
+                ", lastModifiedDate='" + lastModifiedDate + '\'' +
+                '}';
+    }
 }

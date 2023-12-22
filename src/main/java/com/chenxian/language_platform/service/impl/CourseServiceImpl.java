@@ -19,6 +19,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Course getCoursesByIdForCart(Integer courseId) {
+        return courseDao.getCoursesByIdForCart(courseId);
+    }
+
+    @Override
     public List<Course> getAllCourses() {
         return courseDao.getAllCourses();
     }

@@ -1,11 +1,15 @@
 package com.chenxian.language_platform.dao.impl;
 
+import com.chenxian.language_platform.dao.CourseDao;
 import com.chenxian.language_platform.dao.UserDao;
+import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.Cart;
 import com.chenxian.language_platform.model.CartItem;
+import com.chenxian.language_platform.model.Course;
 import com.chenxian.language_platform.model.User;
+import com.chenxian.language_platform.rowmapper.CartItemRowMapper;
 import com.chenxian.language_platform.rowmapper.CartRowMapper;
 import com.chenxian.language_platform.rowmapper.UserRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,8 @@ public class UserDaoImpl implements UserDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    @Autowired
+    private CourseDao courseDao;
     @Override
     public Integer createUser(UserRegisterRequest userRegisterRequest) {
         String sql = "INSERT INTO user(email,password,user_name,birth,phone_number,address,created_date,last_modified_date) " +
@@ -82,6 +88,7 @@ public class UserDaoImpl implements UserDao {
         map.put("userId", userId);
         List<Cart> cartList = namedParameterJdbcTemplate.query(sql, map, new CartRowMapper());
         if(cartList.size() > 0){
+            enrichCartWithDetails(cartList.get(0));
             return cartList.get(0);
         }else{
             return null;
@@ -126,4 +133,32 @@ public class UserDaoImpl implements UserDao {
         }
     }
 
+    // 為 cart 注入 cartItem
+    // details: 使用者物件(user) 與 購物車明細(cartItems), 以及購物車明細的商品資料
+    private void enrichCartWithDetails(Cart cart) {
+        // 注入 user
+        //findUserById(cart.getUserId()).ifPresent(user -> cart.setUser(user));
+        User user =  getUserById(cart.getUserId());
+        if(user != null){
+            cart.setUser(user);
+        }
+        // 查詢 cartItems 並注入
+        String sqlItems = "SELECT item_id, cart_id, course_id, created_date, last_modified_date FROM cart_item WHERE cart_id = :cartId";
+        Map<String, Object> map = new HashMap<>();
+        map.put("cartId", cart.getCartId());
+        List<CartItem> cartItems = namedParameterJdbcTemplate.query(sqlItems, map, new CartItemRowMapper());
+        System.out.println("-----------------------------------");
+        System.out.println(cartItems);
+        // 根據 courseId 找到 course 並注入
+        cartItems.forEach(cartItem -> {
+            Course course = courseDao.getCoursesByIdForCart(cartItem.getCourseId()); // 假設這個方法返回相應的 Course 對象
+            System.out.println("-----------------------------------");
+            System.out.println(course);
+            cartItem.setCourse(course);
+        });
+
+        // 將注入了 course 的 cartItems 設置到 cart 中
+        cart.setCartItems(cartItems);
+
+    }
 }

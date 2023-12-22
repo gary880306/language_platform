@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
-public class    CourseController {
+public class   CourseController {
     @Autowired
     private CourseService courseService;
 
