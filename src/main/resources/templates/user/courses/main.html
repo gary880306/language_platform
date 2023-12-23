@@ -3,31 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>响學</title>
-    <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css"
-            rel="stylesheet">
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script
-            src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <style>
         /* 導航欄樣式 */
         .navbar {
             background-color: #d1fdff;
         }
-
         .navbar-nav a {
             position: relative;
             text-decoration: none;
             color: #000000; /* 超連結文字顏色 */
             transition: color 0.2s; /* 文字顏色過渡效果 */
         }
-
         .navbar-nav a::after {
             content: "";
             position: absolute;
@@ -40,10 +30,24 @@
             transform: scaleX(0);
             transition: all 0.3s ease-in-out;
         }
-
         .navbar-nav a:hover::after {
             visibility: visible;
             transform: scaleX(1);
+        }
+
+        /* 搜索欄位樣式 */
+        .search-form {
+            display: flex;
+            align-items: center;
+        }
+        .search-input {
+            height: 32px;
+            margin-right: 5px;
+        }
+        .search-button {
+            height: 32px;
+            padding: 0 10px;
+            white-space: nowrap;
         }
 
         /* 主體樣式 */
@@ -51,37 +55,42 @@
             overflow-x: hidden;
         }
 
-        /* 圖片樣式 */
-        .imagesize, .card img {
-            height: 150px;
-            width: 250px;
-            border-radius: 10px; /* 圓角設定，適用於常態和 hover 狀態 */
-            transition: transform 0.3s ease-in-out; /* 平滑過渡效果 */
+        /* 卡片容器樣式 */
+        .card-container {
+            display: flex;
+            justify-content: center; /* 卡片居中 */
+            flex-wrap: wrap; /* 允許元素換行 */
+            margin: auto;
+            padding: 50px 150px; /* 增加左右邊距 */
         }
 
         /* 卡片樣式 */
         .card {
             overflow: hidden;
-            border: 1px solid transparent; /* 透明邊框 */
-            margin: 30px; /* 卡片間距 */
-        }
-
-        .card img {
+            border: 1px solid transparent;
+            margin: 15px;
+            width: 250px; /* 固定卡片寬度 */
+            height: 320px; /* 固定卡片高度 */
+            border-radius: 10px; /* 設置卡片邊框圓角 */
             transition: transform 0.3s ease-in-out;
         }
 
-        /* 保持 hover 狀態時的圓角 */
+
+        .card img {
+            height: 150px;
+            width: auto;
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+
         .card img:hover {
             transform: scale(1.1);
             transform-origin: center center;
         }
-
         .card:hover img {
             transform: scale(1.1);
             transform-origin: center center;
-            border-radius: 10px; /* 圓角設定 */
         }
-
         /* 標籤樣式 */
         .tag {
             background-color: aquamarine;
@@ -91,25 +100,15 @@
             color: #00A9B0;
         }
 
-        /* 卡片容器樣式 */
-        .card-container {
-            display: flex;
-            justify-content: center; /* 卡片居中 */
-            flex-wrap: wrap;
-            margin: auto;
-        }
 
-        /* 文字樣式 */
-        .cardword {
-            font-size: 18px;
-        }
+        /* 其他樣式 */
+        /* ... */
 
         /* 頁腳樣式 */
         footer {
             background-color: #333;
             color: #fff;
             text-align: center;
-            bottom: 0;
             padding: 10px;
             width: 100%;
         }
@@ -118,43 +117,37 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/ProjectDemo/project/student/main.jsp">响學</a>
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+        <a class="navbar-brand" href="/enjoyLearning/courses">响學</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="/ProjectDemo/project/student/main.jsp">首頁</a></li>
+                <li class="nav-item"><a class="nav-link" href="/enjoyLearning/courses">首頁</a></li>
                 <li class="nav-item"><a class="nav-link" href=".././class.jsp">課程列表</a></li>
                 <li class="nav-item"><a class="nav-link" href=".././exchange.jsp">語言交換</a></li>
+                <li class="nav-item">
+                    <form class="search-form" method="get" action="/enjoyLearning/courses">
+                        <input class="form-control search-input" type="search" placeholder="英文" aria-label="Search" name="search">
+                        <button class="btn btn-outline-success search-button" type="submit">搜索</button>
+                    </form>
+                </li>
             </ul>
             <div class="ms-auto">
-                <!-- 使用 ms-auto 將元素向右推送，從而實現左右元素向中間靠攏 -->
-                <a href="/enjoyLearning/cart" class="text-dark"><i
-                        class="bi bi-cart"></i></a> <a href=".././userInfo.jsp"
-                                                       class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
+                <a href="/enjoyLearning/cart" class="text-dark"><i class="bi bi-cart"></i></a>
+                <a href=".././userInfo.jsp" class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
                 <a href="/user/logout" class="pure-menu-link">🔞 登出</a>
             </div>
         </div>
     </div>
 </nav>
 
-<div class="d-flex justify-content-center align-items-top">
-    <form method="get" action="/enjoyLearning/courses" class="m-5">
-        <h4 class="text-center">請輸入關鍵字</h4>
-        <input id="search" name="search" class="form-control me-2"
-               type="search" placeholder="英文" aria-label="Search">
-        <div class="d-flex justify-content-center mt-3">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-        </div>
-    </form>
-</div>
+<!-- 卡片容器區塊 -->
 <section class="card-container d-flex flex-wrap">
-    <div class="card rounded-2" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrl}}"
+    <!-- 卡片內容 -->
+    <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
+        <img th:src="@{'http://192.168.1.102/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
         <div class="card-body" th:attr="data-course-id=${course.courseId}">
             <p class="cardword mb-1">
@@ -170,6 +163,8 @@
         <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
     </div>
 </section>
+
+<!-- 分頁導航 -->
 <div class="d-flex justify-content-center mt-4">
     <nav aria-label="Page navigation">
         <ul class="pagination">

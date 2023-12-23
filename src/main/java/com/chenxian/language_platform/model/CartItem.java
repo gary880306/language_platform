@@ -13,4 +13,11 @@ public class CartItem {
     private Timestamp lastModifiedDate;
     private Cart cart;
     private Course course;
+
+    public Integer getAmount() {
+        if (course != null) {
+            return course.getPrice();
+        }
+        return 0;
+    }
 }

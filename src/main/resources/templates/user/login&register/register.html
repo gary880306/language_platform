@@ -24,7 +24,7 @@
                             <div class="mb-3">
                                 <label for="email" class="form-label">電子郵件</label>
                                 <input type="email" class="form-control" id="email" name="email" placeholder="輸入電子郵件">
-                                <div th:if="${emailError}" th:text="${emailError}" class="error"></div>
+                                <div th:if="${emailRegistered}" th:text="${emailRegistered}" class="error"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">密碼</label>

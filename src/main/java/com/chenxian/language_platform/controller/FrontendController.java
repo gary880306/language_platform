@@ -54,7 +54,6 @@ public class FrontendController {
     @GetMapping("/enjoyLearning/courses/courseInfo/{courseId}")
     public String getCourseInfo(@PathVariable("courseId") Integer courseId,Model model){
         CourseRequest course = courseService.getCourseById(courseId);
-        System.out.println(course.getImageUrl());
         model.addAttribute("courseId", courseId);
         model.addAttribute("course", course);
         return "/user/courses/courseInfo";
@@ -106,7 +105,6 @@ public class FrontendController {
         User user = (User)session.getAttribute("user");
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
-        System.out.println(cart);
 
         if(cart != null){
             int total =  cart.getCartItems().stream().
@@ -116,6 +114,42 @@ public class FrontendController {
         }
 
         return "/user/courses/cart";
+    }
+
+    // 刪除購物車項目
+    @GetMapping("/enjoyLearning/cart/delete")
+    public String deleteCartItem(@RequestParam("itemId") Integer itemId,
+                                 HttpSession session, Model model) {
+        User user = (User)session.getAttribute("user");
+        // 如何得知 itemId 是屬於該使用者的 ?
+
+        CartItem cartItem = userService.findCartItemById(itemId);
+        if(cartItem.getCart().getUserId().equals(user.getUserId())){
+            userService.removeCartItemById(itemId);
+        }
+
+        return "redirect:/enjoyLearning/cart";
+
+    }
+
+    // 購物車結帳
+    @GetMapping("/enjoyLearning/checkout")
+    public String checkout(HttpSession session, Model model) {
+        // 1. 先找到 user 登入者
+        User user = (User)session.getAttribute("user");
+        // 2. 找到 user 的尚未結帳的購物車
+        Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+
+        if(cart != null){
+            int total =  cart.getCartItems().stream().
+                    mapToInt(item ->  item.getCourse().getPrice()).sum();
+            userService.checkoutCartByUserId(cart.getUserId(),cart.getCartId()); // 結帳
+            model.addAttribute("cart", cart);
+            model.addAttribute("total", total);
+
+        }
+
+        return "/user/courses/purchasedResult";
     }
 
 }

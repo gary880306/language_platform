@@ -66,14 +66,14 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="./main.jsp">响學</a>
+        <a class="navbar-brand" href="/enjoyLearning/courses">响學</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="./main.jsp">首頁</a></li>
+                <li class="nav-item"><a class="nav-link" href="/enjoyLearning/courses">首頁</a></li>
                 <li class="nav-item"><a class="nav-link" href="./class.jsp">課程列表</a></li>
                 <li class="nav-item"><a class="nav-link" href="./exchange.jsp">語言交換</a></li>
             </ul>
@@ -87,40 +87,48 @@
 
 <div class="container">
     <h1 class="text-center mb-4">購物車</h1>
-    <div class="row">
-        <div class="col-md-12">
-            <table class="table table-bordered cart-table">
-                <thead>
-                <tr>
-                    <th>課程名稱</th>
-                    <th>價格</th>
-                    <th>操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="item : ${cart.cartItems}">
-                    <td th:text="${item.course.courseName}">課程名稱</td>
-                    <td th:text="${item.course.price}">價格</td>
-                    <td><button class="btn btn-danger">刪除</button></td>
-                </tr>
-                </tbody>
-            </table>
+    <div th:if="${cart != null and not #lists.isEmpty(cart.cartItems)}">
+        <table class="table table-bordered cart-table">
+            <thead>
+            <tr>
+                <th>課程名稱</th>
+                <th>價格</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${cart.cartItems}">
+                <td th:text="${item.course.courseName}"></td>
+                <td th:text="${item.course.price}"></td>
+                <td><a href="#" th:onclick="'deleteItem(' + ${item.itemId} + ');'">刪除</a></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="row justify-content-end">
+            <div class="col-md-4 text-end">
+                <h5 th:text="'總金額: NT$' + ${total}"></h5>
+                <form method="get" action="/enjoyLearning/checkout">
+                    <button class="btn btn-success checkout-btn">結帳</button>
+                </form>
+            </div>
         </div>
     </div>
-    <div class="row justify-content-end">
-        <div class="col-md-4 text-end">
-            <h5 th:text="'總金額: NT$' + ${total}">總金額顯示處</h5>
-            <form method="post" action="./purchase.jsp">
-                <button class="btn btn-success checkout-btn">結帳</button>
-            </form>
-        </div>
+
+    <div class="text-center" th:unless="${cart != null and not #lists.isEmpty(cart.cartItems)}">
+        <h1>您的購物車是空的</h1>
+        <h3><a href="/enjoyLearning/courses">快去看看有什麼課程吧!</a></h3>
     </div>
 </div>
-
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>
 </footer>
+
+<script type="text/javascript">
+    function deleteItem(itemId) {
+        window.location.href='/enjoyLearning/cart/delete?itemId=' + itemId;
+    }
+</script>
 </body>
 </html>
-

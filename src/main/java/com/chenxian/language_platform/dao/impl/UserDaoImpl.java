@@ -3,12 +3,8 @@ package com.chenxian.language_platform.dao.impl;
 import com.chenxian.language_platform.dao.CourseDao;
 import com.chenxian.language_platform.dao.UserDao;
 import com.chenxian.language_platform.dto.CourseRequest;
-import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
-import com.chenxian.language_platform.model.Cart;
-import com.chenxian.language_platform.model.CartItem;
-import com.chenxian.language_platform.model.Course;
-import com.chenxian.language_platform.model.User;
+import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.rowmapper.CartItemRowMapper;
 import com.chenxian.language_platform.rowmapper.CartRowMapper;
 import com.chenxian.language_platform.rowmapper.UserRowMapper;
@@ -97,6 +93,104 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
+    public CartItem findCartItemById(Integer itemId) {
+        String sql = "SELECT item_id, cart_id, course_id,created_date,last_modified_date FROM cart_item WHERE item_id = :itemId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("itemId",itemId);
+        List<CartItem> cartItemsList = namedParameterJdbcTemplate.query(sql,map,new CartItemRowMapper());
+        if(cartItemsList.size() == 0){
+            return null ;
+        }
+        CartItem cartItem =  cartItemsList.get(0);
+        cartItem.setCart(findCartById(cartItem.getCartId()));
+        return cartItem;
+
+    }
+
+    @Override
+    public List<CartItem> findCartItemsById(Integer cartId) {
+        String sql = "SELECT item_id,cart_id,course_id,created_date,last_modified_date  FROM cart_item WHERE cart_id = :cartId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("cartId",cartId);
+        List<CartItem> cartItems = namedParameterJdbcTemplate.query(sql,map,new CartItemRowMapper());
+        return cartItems;
+    }
+
+    @Override
+    public Boolean removeCartItemById(Integer itemId) {
+        String sql = "DELETE FROM cart_item WHERE item_id = :itemId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("itemId",itemId);
+        return namedParameterJdbcTemplate.update(sql,map) == 1;
+
+    }
+
+    @Override
+    public Cart findCartById(Integer cartId) {
+        String sql = "SELECT cart_id, user_id, isCheckout, created_date ,checkout_date FROM cart WHERE cart_id = :cartId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("cartId",cartId);
+        List<Cart> cartList = namedParameterJdbcTemplate.query(sql,map,new CartRowMapper());
+        if(cartList.size() > 0){
+            return cartList.get(0);
+        }
+        return null;
+    }
+
+    // 結帳
+    @Override
+    public Boolean checkoutCartByUserId(Integer userId,Integer cartId) {
+        // 1. 檢索購物車項目
+        List<CartItem> cartItems = findCartItemsById(cartId);
+
+        if (cartItems.isEmpty()) {
+            return false;
+        }
+        // 2. 創建新訂單
+        Order order = createOrder(userId, cartItems);
+
+
+
+        String sql = "UPDATE cart SET isCheckout = true WHERE user_id = :userId AND (isCheckout = false or isCheckout is null)";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+
+        return namedParameterJdbcTemplate.update(sql,map) == 1;
+
+    }
+
+    @Override
+    public Order createOrder(Integer userId, List<CartItem> cartItems) {
+        int totalAmount = 0;
+        System.out.println(cartItems);
+        for (CartItem cartItem : cartItems){
+            int amount =  courseDao.getCourseById(cartItem.getCourseId()).getPrice();
+            totalAmount += amount;
+        }
+        System.out.println(totalAmount);
+//        for (CartItem item : cartItems) {
+//            System.out.println(item);
+//            int amount = item.getAmount(); // 假設每個CartItem有一個獲取金額的方法
+//            totalAmount += amount;
+//        }
+        // 創建新訂單
+        Order order = new Order();
+        order.setUserId(userId);
+        order.setTotalAmount(totalAmount);
+
+        String sql = "INSERT INTO `order` (user_id, total_amount) VALUES (:userId, :totalAmount)";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        map.put("totalAmount",totalAmount);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(sql,new MapSqlParameterSource(map),keyHolder);
+        Integer newOrderId = keyHolder.getKey().intValue();
+        order.setOrderId(newOrderId);
+        return order;
+    }
+
+
+    @Override
     public void addCart(Cart cart) {
         String sql = "INSERT INTO cart(user_id, isCheckout) VALUES(:userId, :isCheckout)";
         Map<String, Object> map = new HashMap<>();
@@ -147,13 +241,11 @@ public class UserDaoImpl implements UserDao {
         Map<String, Object> map = new HashMap<>();
         map.put("cartId", cart.getCartId());
         List<CartItem> cartItems = namedParameterJdbcTemplate.query(sqlItems, map, new CartItemRowMapper());
-        System.out.println("-----------------------------------");
-        System.out.println(cartItems);
+
         // 根據 courseId 找到 course 並注入
         cartItems.forEach(cartItem -> {
             Course course = courseDao.getCoursesByIdForCart(cartItem.getCourseId()); // 假設這個方法返回相應的 Course 對象
-            System.out.println("-----------------------------------");
-            System.out.println(course);
+
             cartItem.setCourse(course);
         });
 

@@ -2,6 +2,7 @@ package com.chenxian.language_platform.rowmapper;
 
 import com.chenxian.language_platform.model.Cart;
 import com.chenxian.language_platform.model.CartItem;
+import com.chenxian.language_platform.model.Course;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
@@ -16,6 +17,12 @@ public class CartItemRowMapper implements RowMapper<CartItem> {
         cartItem.setCourseId(rs.getInt("course_id"));
         cartItem.setCreatedDate(rs.getTimestamp("created_date"));
         cartItem.setLastModifiedDate(rs.getTimestamp("last_modified_date"));
+
+        Cart cart = new Cart();
+        cart.setCartId(rs.getInt("cart_id"));
+
+        Course course = new Course();
+        course.setCourseId(rs.getInt("course_id"));
         return cartItem;
     }
 }

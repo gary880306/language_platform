@@ -59,7 +59,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light  sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="./main.jsp">响學</a>
+        <a class="navbar-brand" href="/enjoyLearning/courses">响學</a>
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -68,13 +68,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="./main.jsp">首頁</a></li>
+                <li class="nav-item"><a class="nav-link" href="/enjoyLearning/courses">首頁</a></li>
                 <li class="nav-item"><a class="nav-link" href="./class.jsp">課程列表</a></li>
                 <li class="nav-item"><a class="nav-link" href="./exchange.jsp">語言交換</a></li>
             </ul>
             <div class="ms-auto">
                 <!-- 使用 ms-auto 將元素向右推送，從而實現左右元素向中間靠攏 -->
-                <a href="../student/cart.jsp" class="text-dark"><i
+                <a href="/enjoyLearning/cart" class="text-dark"><i
                         class="bi bi-cart"></i></a> <a href="../student/userInfo.jsp"
                                                        class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
             </div>
@@ -87,7 +87,7 @@
         <input type="hidden" name="courseId" th:value="${courseId}" />
         <div class="row m-5 p-5">
             <div class="col-6">
-                <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrlString}}"
+                <img th:src="@{'http://192.168.1.102/uploadImages/' + ${course.imageUrlString}}"
                      class="imagesize card-img-top" alt="...">
             </div>
             <div class="col-6">

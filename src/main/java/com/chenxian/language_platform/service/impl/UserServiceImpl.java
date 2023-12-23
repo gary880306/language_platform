@@ -5,11 +5,14 @@ import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.Cart;
 import com.chenxian.language_platform.model.CartItem;
+import com.chenxian.language_platform.model.Order;
 import com.chenxian.language_platform.model.User;
 import com.chenxian.language_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+
+import java.util.List;
 
 @Component
 public class UserServiceImpl implements UserService {
@@ -34,6 +37,36 @@ public class UserServiceImpl implements UserService {
     @Override
     public Cart findNoneCheckoutCartByUserId(Integer userId) {
         return userDao.findNoneCheckoutCartByUserId(userId);
+    }
+
+    @Override
+    public CartItem findCartItemById(Integer itemId) {
+        return userDao.findCartItemById(itemId);
+    }
+
+    @Override
+    public List<CartItem> findCartItemsById(Integer cartId) {
+        return userDao.findCartItemsById(cartId);
+    }
+
+    @Override
+    public Boolean removeCartItemById(Integer itemId) {
+        return userDao.removeCartItemById(itemId);
+    }
+
+    @Override
+    public Cart findCartById(Integer cartId) {
+        return userDao.findCartById(cartId);
+    }
+
+    @Override
+    public Boolean checkoutCartByUserId(Integer userId,Integer cartId) {
+        return userDao.checkoutCartByUserId(userId,cartId);
+    }
+
+    @Override
+    public Order createOrder(Integer userId, List<CartItem> cartItems) {
+        return userDao.createOrder(userId,cartItems);
     }
 
     @Override

@@ -27,26 +27,32 @@ public class UserController {
     // 登入功能實作
     @PostMapping("/user/login")
     public String  login(@RequestParam @Valid String email,
-                          @RequestParam @Valid String password,
-                          HttpSession session, Model model){
+                         @RequestParam @Valid String password,
+                         HttpSession session, Model model){
+        // 接收輸入的帳號密碼
         UserLoginRequest userLoginRequest = new UserLoginRequest();
         userLoginRequest.setEmail(email);
         userLoginRequest.setPassword(password);
+        // 使用接收到的密碼查找資料庫是否有此用戶資訊
         User user  = userService.getUserByEmail(userLoginRequest.getEmail());
 
+        // 有此用戶邏輯
         if(user != null) {
+            // 比對密碼成功邏輯
             if (user.getPassword().equals(password)) {
-                session.setAttribute("user", user);
-                return "redirect:/enjoyLearning/courses";
+                session.setAttribute("user", user); // 設置 session
+                return "redirect:/enjoyLearning/courses"; // 重導到主頁面
+            // 比對密碼失敗邏輯
             }else{
                 session.invalidate(); // session 過期失效
                 model.addAttribute("loginMessage", "帳號或密碼錯誤");
-                return "user/login&register/login";
+                return "user/login&register/login"; // 將失敗訊息渲染到登入頁面
             }
+        // 資料庫無此用戶邏輯
         }else {
             session.invalidate(); // session 過期失效
             model.addAttribute("loginMessage", "帳號或密碼錯誤");
-            return "user/login&register/login";
+            return "user/login&register/login"; // 將失敗訊息渲染到登入頁面
         }
 
     }
@@ -54,8 +60,8 @@ public class UserController {
     // 登出功能實作
     @GetMapping("/user/logout")
     public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/user/loginPage";
+        session.invalidate(); // session 過期失效
+        return "redirect:/user/loginPage"; // 重導到登入頁面
     }
 
     // 註冊頁面
@@ -76,8 +82,8 @@ public class UserController {
         // 驗證 Email 是否已被註冊
         User user = userService.getUserByEmail(email);
         if(user != null){
-            model.addAttribute("emailError", "Email已被註冊");
-            return "/user/login&register/register"; // 返回註冊頁面
+            model.addAttribute("emailRegistered", "Email已被註冊");
+            return "/user/login&register/register"; // 將失敗訊息渲染到註冊頁面
         }
 
         // 成功則創建新的用戶資料
@@ -88,6 +94,7 @@ public class UserController {
         userRegisterRequest.setBirth(birth);
         userRegisterRequest.setPhoneNumber(phoneNumber);
         userRegisterRequest.setAddress(address);
+        // 使用 register 方法將會員資料存到資料庫
         userService.register(userRegisterRequest);
         // 導向登入成功頁面
         return "user/login&register/result";
