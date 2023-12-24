@@ -15,7 +15,7 @@
 
     <script
             src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <style>
+    <style type="text/css">
         .navbar {
             background-color: #d1fdff;
         }
@@ -50,6 +50,7 @@
             background-color: #333;
             color: #fff;
             text-align: center;
+            position: fixed;
             bottom: 0;
             padding: 10px;
             width: 100%;
@@ -59,7 +60,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light  sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/enjoyLearning/courses">响學</a>
+        <a class="navbar-brand" href="./main.jsp">响學</a>
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -68,13 +69,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="/enjoyLearning/courses">首頁</a></li>
+                <li class="nav-item"><a class="nav-link" href="./main.jsp">首頁</a></li>
                 <li class="nav-item"><a class="nav-link" href="./class.jsp">課程列表</a></li>
                 <li class="nav-item"><a class="nav-link" href="./exchange.jsp">語言交換</a></li>
             </ul>
             <div class="ms-auto">
                 <!-- 使用 ms-auto 將元素向右推送，從而實現左右元素向中間靠攏 -->
-                <a href="/enjoyLearning/cart" class="text-dark"><i
+                <a href="../student/cart.jsp" class="text-dark"><i
                         class="bi bi-cart"></i></a> <a href="../student/userInfo.jsp"
                                                        class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
             </div>
@@ -82,68 +83,13 @@
     </div>
 </nav>
 
-<section class="container-fluid " id="sec01">
-    <form method="post" action="/enjoyLearning/courses/addToCart">
-        <input type="hidden" name="courseId" th:value="${courseId}" />
-        <div class="row m-5 p-5">
-            <div class="col-6">
-                <img th:src="@{'http://192.168.1.109/uploadImages/' + ${course.imageUrlString}}"
-                     class="imagesize card-img-top" alt="...">
-            </div>
-            <div class="col-6">
-                <h2 th:text="${course.courseName}">課程名稱</h2>
-                <p th:text="${course.description}">課程描述</p>
+<h1>歡迎回來，<span th:text="${user.userName}">使用者名稱</span>!</h1>
 
-                <p>課程售價: <span th:text="${course.price}"></span>元</p>
-                <button type="submit" class="btn btn-primary mt-5 me-2">加入購物車</button>
-            </div>
-        </div>
-    </form>
 
-    <!-- 課程評論區 -->
-    <div class="comment-section">
-        <h3 class="mb-3">課程評論</h3>
-        <div class="col">
-            <div class="comment">
-                <div class="comment-header">
-                    阿賢 <span class="datefs text-muted">2023-11-10</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 260px;">課程很棒！</p>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <div class="comment">
-                <div class="comment-header">
-                    小美 <span class="datefs text-muted">2023-11-25</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9734;&#9734;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 700px;">希望能多出一點課程！</p>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <div class="comment">
-                <div class="comment-header">
-                    阿偉<span class="datefs text-muted">2023-11-30</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 260px;">學到不少東西！</p>
-                </div>
-            </div>
-            <div class="separator"></div>
-        </div>
-    </div>
-</section>
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>
 </footer>
 </body>
 </html>
+

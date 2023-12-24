@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ch" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1>上課囉老鐵!</h1>
+    <h2>課程名稱:<span th:text="${course.getCourseName()}"></span> </h2>
+    <iframe width="560" height="315" th:src="${course.getEmbedVideoUrl}" title="YouTube video player" style="border: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
+</body>
+</html>

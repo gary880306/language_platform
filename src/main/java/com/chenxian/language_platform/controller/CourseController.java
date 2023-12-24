@@ -85,6 +85,7 @@ public class   CourseController {
                                @RequestParam("price") Integer price,
                                @RequestParam("teacher") String teacher,
                                @RequestParam("description") String description,
+                               @RequestParam("videoUrl") String videoUrl,
                                RedirectAttributes redirectAttributes) {
         if (!file.isEmpty()) {
             // 繼續您的文件處理邏輯...
@@ -99,6 +100,7 @@ public class   CourseController {
             course.setPrice(price);
             course.setTeacher(teacher);
             course.setDescription(description);
+            course.setVideoUrl(videoUrl);
 
             // 保存到資料庫
             courseService.creatCourse(course);

@@ -18,6 +18,7 @@ public class CourseRequestRowMapper implements RowMapper<CourseRequest> {
         course.setPrice(rs.getInt("price"));
         course.setTeacher(rs.getString("teacher"));
         course.setDescription(rs.getString("description"));
+        course.setVideoUrl(rs.getString("video_url"));
         return course;
     }
 }

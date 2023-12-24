@@ -7,18 +7,18 @@ import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.rowmapper.CartItemRowMapper;
 import com.chenxian.language_platform.rowmapper.CartRowMapper;
+import com.chenxian.language_platform.rowmapper.UserCourseRowMapper;
 import com.chenxian.language_platform.rowmapper.UserRowMapper;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class UserDaoImpl implements UserDao {
@@ -138,6 +138,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     // 結帳
+    @Transactional
     @Override
     public Boolean checkoutCartByUserId(Integer userId,Integer cartId) {
         // 1. 檢索購物車項目
@@ -149,7 +150,11 @@ public class UserDaoImpl implements UserDao {
         // 2. 創建新訂單
         Order order = createOrder(userId, cartItems);
 
+        // 3. 創建新訂單明細
+        createOrderItems(userId,order.getOrderId(),cartItems);
 
+        // 4. 將訂單中的課程加入成員擁有的課程清單
+        createUserCourse(userId,cartItems);
 
         String sql = "UPDATE cart SET isCheckout = true WHERE user_id = :userId AND (isCheckout = false or isCheckout is null)";
         Map<String,Object> map = new HashMap<>();
@@ -159,20 +164,14 @@ public class UserDaoImpl implements UserDao {
 
     }
 
+    // 創建訂單方法
     @Override
     public Order createOrder(Integer userId, List<CartItem> cartItems) {
         int totalAmount = 0;
-        System.out.println(cartItems);
         for (CartItem cartItem : cartItems){
             int amount =  courseDao.getCourseById(cartItem.getCourseId()).getPrice();
             totalAmount += amount;
         }
-        System.out.println(totalAmount);
-//        for (CartItem item : cartItems) {
-//            System.out.println(item);
-//            int amount = item.getAmount(); // 假設每個CartItem有一個獲取金額的方法
-//            totalAmount += amount;
-//        }
         // 創建新訂單
         Order order = new Order();
         order.setUserId(userId);
@@ -189,7 +188,62 @@ public class UserDaoImpl implements UserDao {
         return order;
     }
 
+    // 創建訂單明細方法
+    @Override
+    public void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        int amount = 0;
+        int courseId;
+        for (CartItem cartItem : cartItems){
+            amount =  courseDao.getCourseById(cartItem.getCourseId()).getPrice();
+            courseId = cartItem.getCourseId();
 
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrderId(orderId);
+            orderItem.setCourseId(courseId);
+            orderItem.setAmount(amount);
+
+            orderItems.add(orderItem);
+        }
+
+        for(OrderItem orderItem : orderItems){
+            String sql = "INSERT INTO order_item(order_id,course_id,amount) VALUES (:orderId,:courseId,:amount)";
+            Map<String,Object> map = new HashMap<>();
+            map.put("orderId",orderId);
+            map.put("courseId",orderItem.getCourseId());
+            map.put("amount",orderItem.getAmount());
+
+
+            namedParameterJdbcTemplate.update(sql,map);
+        }
+
+
+
+
+    }
+
+    // 紀錄用戶擁有的課程清單
+    @Override
+    public void createUserCourse(Integer userId, List<CartItem> cartItems) {
+        List<UserCourse> userCourses = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            int courseId = cartItem.getCourseId();
+            UserCourse userCourse = new UserCourse();
+            userCourse.setCourseId(courseId);
+            userCourse.setUserId(userId);
+            userCourses.add(userCourse);
+        }
+
+        for (UserCourse userCourse : userCourses) {
+            String sql = "INSERT INTO user_course(user_id,course_id) VALUES (:userId,:courseId)";
+            Map<String, Object> map = new HashMap<>();
+            map.put("userId",userId);
+            map.put("courseId",userCourse.getCourseId());
+            namedParameterJdbcTemplate.update(sql,map);
+        }
+    }
+
+    // 購物車新增
     @Override
     public void addCart(Cart cart) {
         String sql = "INSERT INTO cart(user_id, isCheckout) VALUES(:userId, :isCheckout)";
@@ -200,6 +254,7 @@ public class UserDaoImpl implements UserDao {
         namedParameterJdbcTemplate.update(sql, map);
     }
 
+    // 購物車明細新增
     @Override
     public void addCartItem(CartItem cartItem) {
         String sql1 = "SELECT COUNT(*) AS COUNT FROM cart_item WHERE cart_id = :cartId AND course_id = :courseId";
@@ -253,4 +308,5 @@ public class UserDaoImpl implements UserDao {
         cart.setCartItems(cartItems);
 
     }
+
 }

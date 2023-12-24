@@ -52,7 +52,19 @@ public class FrontendController {
 
     // 顯示商品資訊 courseInfo 頁面
     @GetMapping("/enjoyLearning/courses/courseInfo/{courseId}")
-    public String getCourseInfo(@PathVariable("courseId") Integer courseId,Model model){
+    public String getCourseInfo(@PathVariable("courseId") Integer courseId,HttpSession session,Model model){
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+        boolean hasPurchased = courseService.hasUserPurchasedCourse(user.getUserId(), courseId);
+        if (hasPurchased) {
+                // 如果用戶已購買該課程，則導向課程主頁面
+                CourseRequest course = courseService.getCourseById(courseId);
+                model.addAttribute("courseId", courseId);
+                model.addAttribute("course", course);
+                return "/user/courses/courseMain";
+            }
+        }
+
         CourseRequest course = courseService.getCourseById(courseId);
         model.addAttribute("courseId", courseId);
         model.addAttribute("course", course);
@@ -140,6 +152,7 @@ public class FrontendController {
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
 
+
         if(cart != null){
             int total =  cart.getCartItems().stream().
                     mapToInt(item ->  item.getCourse().getPrice()).sum();
@@ -150,6 +163,15 @@ public class FrontendController {
         }
 
         return "/user/courses/purchasedResult";
+    }
+
+    // 我的課程頁面
+    @GetMapping("/enjoyLearning/myCourse")
+    public String myCourse(HttpSession session, Model model){
+        // 1. 先找到 user 登入者
+        User user = (User)session.getAttribute("user");
+        model.addAttribute("user", user);
+        return  "/user/courses/myCourse";
     }
 
 }

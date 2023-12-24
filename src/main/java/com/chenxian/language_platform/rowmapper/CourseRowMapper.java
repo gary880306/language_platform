@@ -24,8 +24,8 @@ public class CourseRowMapper implements RowMapper<Course> {
         String creatDate = sd.format(rs.getTimestamp("created_date"));
         course.setCreatDate(creatDate);
         String lastModifiedDate =  sd.format(rs.getTimestamp("last_modified_date"));
+        course.setVideoUrl(rs.getString("video_url"));
         course.setLastModifiedDate(lastModifiedDate);
-//      course.setLastModifiedDate(rs.getTimestamp("last_modified_date"));
         return course;
     }
 }

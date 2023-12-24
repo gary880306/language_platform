@@ -3,10 +3,7 @@ package com.chenxian.language_platform.service.impl;
 import com.chenxian.language_platform.dao.UserDao;
 import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
-import com.chenxian.language_platform.model.Cart;
-import com.chenxian.language_platform.model.CartItem;
-import com.chenxian.language_platform.model.Order;
-import com.chenxian.language_platform.model.User;
+import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,6 +64,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Order createOrder(Integer userId, List<CartItem> cartItems) {
         return userDao.createOrder(userId,cartItems);
+    }
+
+    @Override
+    public void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems) {
+        userDao.createOrderItems(userId,orderId,cartItems);
     }
 
     @Override

@@ -1,10 +1,7 @@
 package com.chenxian.language_platform.dao;
 
 import com.chenxian.language_platform.dto.UserRegisterRequest;
-import com.chenxian.language_platform.model.Cart;
-import com.chenxian.language_platform.model.CartItem;
-import com.chenxian.language_platform.model.Order;
-import com.chenxian.language_platform.model.User;
+import com.chenxian.language_platform.model.*;
 
 import java.util.List;
 
@@ -23,6 +20,9 @@ public interface UserDao {
     Cart findCartById(Integer cartId);
     Boolean checkoutCartByUserId(Integer userId,Integer cartId);
     Order createOrder(Integer userId,List<CartItem> cartItems);
+    void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems);
+    void createUserCourse(Integer userId,List<CartItem> cartItems );
+
     // 新增購物車資料
     void addCart(Cart cart);
 

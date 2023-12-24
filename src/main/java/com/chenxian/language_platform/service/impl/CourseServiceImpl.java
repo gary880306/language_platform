@@ -42,4 +42,9 @@ public class CourseServiceImpl implements CourseService {
     public boolean deleteCourseById(Integer courseId) {
         return courseDao.deleteCourseById(courseId);
     }
+
+    @Override
+    public boolean hasUserPurchasedCourse(Integer userId, Integer courseId) {
+        return courseDao.hasUserPurchasedCourse(userId,courseId);
+    }
 }

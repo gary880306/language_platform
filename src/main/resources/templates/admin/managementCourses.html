@@ -118,7 +118,7 @@
                 <th>時數</th>
                 <th>價格</th>
                 <th>老師名稱</th>
-                <th>課程介紹</th>
+                <th>課程影片</th>
                 <th>創建時間</th>
                 <th>最後修改時間</th>
                 <th>修改</th>
@@ -131,12 +131,12 @@
                 <td class="align-middle text-center" th:text="${course.getCourseName}"></td>
                 <td class="align-middle text-center" th:text="${course.getCategoryName}"></td>
                 <td class="align-middle text-center">
-                    <img th:src="@{'http://192.168.1.102/uploadImages/' + ${course.imageUrl}}" alt="課程圖片" style="max-width: 100px; max-height: 65px;"/>
+                    <img th:src="@{'http://192.168.1.109/uploadImages/' + ${course.imageUrl}}" alt="課程圖片" style="max-width: 100px; max-height: 65px;"/>
                 </td>
                 <td class="align-middle text-center" th:text="${course.getTime}"></td>
                 <td class="align-middle text-center" th:text="${course.getPrice}"></td>
                 <td class="align-middle text-center" th:text="${course.getTeacher}"></td>
-                <td class="align-middle text-center" th:text="${course.getDescription}"></td>
+                <td class="align-middle text-center" th:text="${course.getVideoUrl}"></td>
                 <td class="align-middle text-center" th:text="${course.getCreatDate}"></td>
                 <td class="align-middle text-center" th:text="${course.getLastModifiedDate}"></td>
                 <td class="align-middle text-center">
@@ -181,6 +181,8 @@
                     </select><br>
                     <label for="imageUrl">上傳課程封面圖片:</label>
                     <input type="file" id="imageUrl" name="imageUrl" class="form-control" accept="image/*" required ><br>
+                    <label for="video">課程影片:</label>
+                    <input type="text" id="video" name="videoUrl" class="form-control" required><br>
                     <label for="time">時數:</label>
                     <input type="number" id="time" name="time" class="form-control" required step="any"><br>
                     <div id="courseTimeError" class="error-message"></div>
@@ -222,6 +224,8 @@
                     <label for="editImageUrl">上傳課程封面圖片:</label>
                     <input type="file" id="editImageUrl" name="imageUrl" class="form-control" accept="image/*" required><br>
                     <div id="currentImageDisplay"></div>
+                    <label for="editVideo">課程影片:</label>
+                    <input type="text" id="editVideo" name="videoUrl" class="form-control" required><br>
 
                     <label for="editTime">時數:</label>
                     <input type="number" id="editTime" name="time" class="form-control" required><br>
@@ -258,7 +262,8 @@
         document.getElementById('editCategoryId').value = courseData.categoryId;
         // console.login&register(courseData.imageUrlString);
         let imageUrl = encodeURIComponent(courseData.imageUrlString);
-        document.getElementById('currentImageDisplay').innerHTML = `<img src="http://192.168.1.102/uploadImages/${imageUrl}" alt="Current Image" style="max-width: 100px; max-height: 100px;">`;
+        document.getElementById('currentImageDisplay').innerHTML = `<img src="http://192.168.1.109/uploadImages/${imageUrl}" alt="Current Image" style="max-width: 100px; max-height: 100px;">`;
+        document.getElementById('editVideo').value = courseData.videoUrl;
         document.getElementById('editTime').value = courseData.time;
         document.getElementById('editPrice').value = courseData.price;
         document.getElementById('editTeacher').value = courseData.teacher;

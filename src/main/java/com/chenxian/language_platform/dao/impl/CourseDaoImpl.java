@@ -3,8 +3,10 @@ package com.chenxian.language_platform.dao.impl;
 import com.chenxian.language_platform.dao.CourseDao;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.Course;
+import com.chenxian.language_platform.model.UserCourse;
 import com.chenxian.language_platform.rowmapper.CourseRequestRowMapper;
 import com.chenxian.language_platform.rowmapper.CourseRowMapper;
+import com.chenxian.language_platform.rowmapper.UserCourseRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -21,7 +23,7 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public CourseRequest getCourseById(Integer courseId) {
-        String sql = "SELECT course_id , course_name, category_id, image_url,`time`,price, teacher, description, created_date, last_modified_date FROM course WHERE course_id=:courseId";
+        String sql = "SELECT course_id , course_name, category_id, image_url,`time`,price, teacher, description, created_date, last_modified_date,video_url FROM course WHERE course_id=:courseId";
         Map<String, Object> map = new HashMap<>();
         map.put("courseId", courseId);
 
@@ -37,7 +39,7 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public Course getCoursesByIdForCart(Integer courseId) {
-        String sql = "SELECT course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date " +
+        String sql = "SELECT course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url " +
                 "FROM course LEFT JOIN category on course.category_id = category.category_id " +
                 "WHERE course.course_id = :courseId";
         Map<String, Object> map = new HashMap<>();
@@ -48,7 +50,7 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public List<Course> getAllCourses() {
-        String sql = "SELECT course_id , course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date FROM course LEFT JOIN category  on course.category_id = category.category_id";
+        String sql = "SELECT course_id , course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url FROM course LEFT JOIN category  on course.category_id = category.category_id";
         Map<String, Object> map = new HashMap<>();
         List<Course> courseList = namedParameterJdbcTemplate.query(sql, map, new CourseRowMapper());
         return courseList;
@@ -56,7 +58,7 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public Integer creatCourse(CourseRequest courseRequest) {
-        String sql = "INSERT INTO course (course_name, category_id, image_url, time, price, teacher, description, created_date, last_modified_date) VALUES (:courseName, :categoryId, :imageUrl, :time, :price, :teacher, :description, :createdDate, :lastModifiedDate)";
+        String sql = "INSERT INTO course (course_name, category_id, image_url, time, price, teacher, description, created_date, last_modified_date, video_url) VALUES (:courseName, :categoryId, :imageUrl, :time, :price, :teacher, :description, :createdDate, :lastModifiedDate, :videoUrl)";
 
         Map<String,Object> map = new HashMap<>();
         map.put("courseName",courseRequest.getCourseName());
@@ -66,7 +68,7 @@ public class CourseDaoImpl implements CourseDao {
         map.put("price",courseRequest.getPrice());
         map.put("teacher",courseRequest.getTeacher());
         map.put("description",courseRequest.getDescription());
-
+        map.put("videoUrl",courseRequest.getVideoUrl());
         Date now = new Date();
         map.put("createdDate",now);
         map.put("lastModifiedDate",now);
@@ -80,7 +82,7 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public void updateCourse(Integer courseId, CourseRequest courseRequest) {
-        String sql = "UPDATE course SET course_name =:courseName,category_id =:categoryId,image_url =:imageUrl,time=:time,price=:price,teacher=:teacher,description=:description,last_modified_date=:lasModifiedDate WHERE course_id =:courseId";
+        String sql = "UPDATE course SET course_name =:courseName,category_id =:categoryId,image_url =:imageUrl,time=:time,price=:price,teacher=:teacher,description=:description,last_modified_date=:lasModifiedDate,video_url=:videoUrl WHERE course_id =:courseId";
         Map<String,Object> map = new HashMap<>();
         map.put("courseId",courseId);
         map.put("courseName",courseRequest.getCourseName());
@@ -90,6 +92,7 @@ public class CourseDaoImpl implements CourseDao {
         map.put("price",courseRequest.getPrice());
         map.put("teacher",courseRequest.getTeacher());
         map.put("description",courseRequest.getDescription());
+        map.put("videoUrl",courseRequest.getVideoUrl());
         map.put("lasModifiedDate",new Date());
         namedParameterJdbcTemplate.update(sql,map);
     }
@@ -101,5 +104,19 @@ public class CourseDaoImpl implements CourseDao {
         map.put("courseId",courseId);
         namedParameterJdbcTemplate.update(sql,map);
         return true;
+    }
+
+    @Override
+    public boolean hasUserPurchasedCourse(Integer userId, Integer courseId) {
+        String sql = "SELECT user_id,course_id,purchase_date FROM user_course WHERE user_id =:userId AND course_id =:courseId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        map.put("courseId",courseId);
+        List<UserCourse> userCourseList = namedParameterJdbcTemplate.query(sql,map,new UserCourseRowMapper());
+        if(userCourseList.size() > 0){
+            userCourseList.get(0);
+            return true;
+        }
+        return false;
     }
 }

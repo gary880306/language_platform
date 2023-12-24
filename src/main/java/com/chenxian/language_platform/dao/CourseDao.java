@@ -12,4 +12,5 @@ public interface CourseDao {
     Integer creatCourse(CourseRequest courseRequest);
     void updateCourse(Integer courseId,CourseRequest courseRequest);
     boolean deleteCourseById(Integer courseId);
+    boolean hasUserPurchasedCourse(Integer userId,Integer courseId);
 }

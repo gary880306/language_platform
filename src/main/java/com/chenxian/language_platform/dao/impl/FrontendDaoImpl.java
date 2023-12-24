@@ -18,7 +18,7 @@ public class FrontendDaoImpl implements FrontendDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Override
     public List<Course> getAllCourses(CourseQueryParams courseQueryParams) {
-        String sql = "SELECT course_id , course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date " +
+        String sql = "SELECT course_id , course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url " +
                 "FROM course LEFT JOIN category  on course.category_id = category.category_id " +
                 "WHERE 1=1";
         Map<String, Object> map = new HashMap<>();
