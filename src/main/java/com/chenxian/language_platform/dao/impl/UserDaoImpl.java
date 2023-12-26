@@ -5,10 +5,7 @@ import com.chenxian.language_platform.dao.UserDao;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
-import com.chenxian.language_platform.rowmapper.CartItemRowMapper;
-import com.chenxian.language_platform.rowmapper.CartRowMapper;
-import com.chenxian.language_platform.rowmapper.UserCourseRowMapper;
-import com.chenxian.language_platform.rowmapper.UserRowMapper;
+import com.chenxian.language_platform.rowmapper.*;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -51,11 +48,20 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserById(Integer userId) {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date " +
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId " +
                 "FROM user WHERE user_id=:userId";
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
         List<User> userList = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());
+
+        String sql2 = "select s.serviceId, s.serviceLocation, s.serviceName, s.serviceUrl " +
+                "from level_ref_service r " +
+                "left join service s on s.serviceId = r.serviceId "+
+                "where r.levelId =:levelId";
+        Map<String,Object> map2 = new HashMap<>();
+        map2.put("levelId",userList.get(0).getLevelId());
+        List<Service> services = namedParameterJdbcTemplate.query(sql2,map2,new ServiceRowMapper());
+        userList.get(0).setServices(services);
         if(userList.size() > 0){
             return userList.get(0);
         }else{
@@ -65,10 +71,19 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserByEmail(String email) {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date FROM user WHERE email=:email";
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId FROM user WHERE email=:email";
         Map<String,Object> map = new HashMap<>();
         map.put("email",email);
         List<User> userList = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());
+
+        String sql2 = "select s.serviceId, s.serviceLocation, s.serviceName, s.serviceUrl " +
+                "from level_ref_service r " +
+                "left join service s on s.serviceId = r.serviceId "+
+                "where r.levelId =:levelId";
+        Map<String,Object> map2 = new HashMap<>();
+        map2.put("levelId",userList.get(0).getLevelId());
+        List<Service> services = namedParameterJdbcTemplate.query(sql2,map2,new ServiceRowMapper());
+        userList.get(0).setServices(services);
         if(userList.size() > 0){
             return userList.get(0);
         }else{

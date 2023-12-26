@@ -3,6 +3,7 @@ package com.chenxian.language_platform.model;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class User {
@@ -15,4 +16,6 @@ public class User {
     private String address;
     private Date createdDate;
     private Date lastModifiedDate;
+    private Integer levelId;
+    private List<Service> services;
 }

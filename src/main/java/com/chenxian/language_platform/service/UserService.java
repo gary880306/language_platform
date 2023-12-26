@@ -9,7 +9,6 @@ import java.util.List;
 public interface UserService {
     Integer register(UserRegisterRequest userRegisterRequest);
     User getUserById(Integer userId);
-
     User getUserByEmail(String email);
     Cart findNoneCheckoutCartByUserId(Integer userId);
     CartItem findCartItemById(Integer itemId);

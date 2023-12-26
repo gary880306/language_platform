@@ -17,6 +17,6 @@ public class WebConfig implements WebMvcConfigurer {
         // 註冊攔截器並設定攔截路徑
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**") // 指定攔截的路徑
-                .excludePathPatterns("/user/loginPage", "/user/login", "/user/logout", "/user/register", "/user/registerResult"); // 排除特定路徑
+                .excludePathPatterns("/user/loginPage", "/user/login", "/user/logout", "/user/register", "/user/registerResult","/admin/login"); // 排除特定路徑
     }
 }

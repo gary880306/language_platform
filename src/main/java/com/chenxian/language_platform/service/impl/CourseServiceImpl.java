@@ -3,6 +3,7 @@ package com.chenxian.language_platform.service.impl;
 import com.chenxian.language_platform.dao.CourseDao;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.Course;
+import com.chenxian.language_platform.model.UserCourse;
 import com.chenxian.language_platform.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Course> getAllCourses() {
         return courseDao.getAllCourses();
+    }
+
+    @Override
+    public List<UserCourse> getPurchasedCourses(Integer userId) {
+        return courseDao.getPurchasedCourses(userId);
     }
 
     @Override

@@ -19,7 +19,7 @@ public class UserRowMapper implements RowMapper<User> {
         user.setAddress(rs.getString("address"));
         user.setCreatedDate(rs.getTimestamp("created_date"));
         user.setLastModifiedDate(rs.getTimestamp("last_modified_date"));
-
+        user.setLevelId(rs.getInt("levelId"));
         return user;
     }
 }

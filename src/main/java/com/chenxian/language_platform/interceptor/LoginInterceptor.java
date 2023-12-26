@@ -17,12 +17,26 @@ public class LoginInterceptor implements HandlerInterceptor {
         response.setDateHeader("Expires", 0);
 
         HttpSession session = request.getSession();
-        // 檢查 session 中是否有 user 的物件資料(意味著用戶已經登入)
-        if(session.getAttribute("user") != null) {
+        // 檢查 session 中是否有 user 物件（用戶已經登入）
+        if (session.getAttribute("user") != null) {
             return true; // 放行
         }
-        // 未登入, 導入到登入頁面
-        response.sendRedirect(request.getServletContext().getContextPath() + "/user/loginPage");
+
+        // 獲取請求的 URL
+        String requestURI = request.getRequestURI();
+
+        // 檢查是否已經在登入頁面，防止無限重定向
+        if (requestURI.endsWith("/loginPage") || requestURI.endsWith("/loginBackend")) {
+            return true; // 放行，防止無限重定向
+        }
+
+        if (requestURI.startsWith("/admin")) {
+            // 重定向到後台登入表單頁面
+            response.sendRedirect(request.getServletContext().getContextPath() + "/admin/loginPage");
+        } else {
+            // 重定向到前台登入頁面
+            response.sendRedirect(request.getServletContext().getContextPath() + "/user/loginPage");
+        }
         return false; // 不放行
     }
 }

@@ -57,6 +57,15 @@ public class CourseDaoImpl implements CourseDao {
     }
 
     @Override
+    public List<UserCourse> getPurchasedCourses(Integer userId) {
+        String sql = "SELECT user_id,course_id,purchase_date FROM user_course WHERE user_id =:userId;";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        List<UserCourse> userCourses = namedParameterJdbcTemplate.query(sql,map,new UserCourseRowMapper());
+        return userCourses;
+    }
+
+    @Override
     public Integer creatCourse(CourseRequest courseRequest) {
         String sql = "INSERT INTO course (course_name, category_id, image_url, time, price, teacher, description, created_date, last_modified_date, video_url) VALUES (:courseName, :categoryId, :imageUrl, :time, :price, :teacher, :description, :createdDate, :lastModifiedDate, :videoUrl)";
 
