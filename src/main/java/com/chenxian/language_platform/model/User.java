@@ -18,4 +18,5 @@ public class User {
     private Date lastModifiedDate;
     private Integer levelId;
     private List<Service> services;
+    private boolean isActive;
 }

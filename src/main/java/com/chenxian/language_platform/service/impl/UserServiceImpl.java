@@ -17,6 +17,11 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
 
     @Override
+    public List<User> findALlUsers() {
+        return userDao.findALlUsers();
+    }
+
+    @Override
     public Integer register(UserRegisterRequest userRegisterRequest) {
         return userDao.createUser(userRegisterRequest);
     }
@@ -27,8 +32,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserIncludeActiveById(Integer userId) {
+        return userDao.getUserIncludeActiveById(userId);
+    }
+
+    @Override
     public User getUserByEmail(String email) {
         return userDao.getUserByEmail(email);
+    }
+
+    @Override
+    public void updateUserInfo(User user) {
+        userDao.updateUserInfo(user);
     }
 
     @Override
@@ -79,6 +94,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public void addCartItem(CartItem cartItem) {
         userDao.addCartItem(cartItem);
+    }
+
+    @Override
+    public boolean updateUserActiveStatus(Integer userId, boolean isActive) {
+        User user = userDao.getUserIncludeActiveById(userId);
+        user.setActive(isActive);
+        userDao.updateUserInfo(user);
+        return false;
     }
 
 

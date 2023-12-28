@@ -7,9 +7,12 @@ import com.chenxian.language_platform.model.*;
 import java.util.List;
 
 public interface UserService {
+    List<User> findALlUsers();
     Integer register(UserRegisterRequest userRegisterRequest);
     User getUserById(Integer userId);
+    User getUserIncludeActiveById(Integer userId);
     User getUserByEmail(String email);
+    void updateUserInfo(User user);
     Cart findNoneCheckoutCartByUserId(Integer userId);
     CartItem findCartItemById(Integer itemId);
     List<CartItem> findCartItemsById(Integer cartId);
@@ -20,4 +23,5 @@ public interface UserService {
     void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems);
     void addCart(Cart cart);
     void addCartItem(CartItem cartItem);
+    boolean updateUserActiveStatus(Integer userId, boolean isActive);
 }

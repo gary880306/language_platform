@@ -24,6 +24,19 @@ public class UserDaoImpl implements UserDao {
 
     @Autowired
     private CourseDao courseDao;
+
+    @Override
+    public List<User> findALlUsers() {
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active FROM user";
+        Map<String,Object> map = new HashMap<>();
+        List<User> users = namedParameterJdbcTemplate.query(sql,map,new UserInfoRowMapper());
+        if(!users.isEmpty()){
+
+            return users;
+        }
+        return null;
+    }
+
     @Override
     public Integer createUser(UserRegisterRequest userRegisterRequest) {
         String sql = "INSERT INTO user(email,password,user_name,birth,phone_number,address,created_date,last_modified_date) " +
@@ -70,25 +83,46 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
+    public User getUserIncludeActiveById(Integer userId) {
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active " +
+                "FROM user WHERE user_id=:userId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        List<User> users = namedParameterJdbcTemplate.query(sql,map,new UserInfoRowMapper());
+        if(!users.isEmpty()){
+           return  users.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public User getUserByEmail(String email) {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId FROM user WHERE email=:email";
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active FROM user WHERE email=:email";
         Map<String,Object> map = new HashMap<>();
         map.put("email",email);
-        List<User> userList = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());
+        List<User> users = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());
 
-        String sql2 = "select s.serviceId, s.serviceLocation, s.serviceName, s.serviceUrl " +
-                "from level_ref_service r " +
-                "left join service s on s.serviceId = r.serviceId "+
-                "where r.levelId =:levelId";
-        Map<String,Object> map2 = new HashMap<>();
-        map2.put("levelId",userList.get(0).getLevelId());
-        List<Service> services = namedParameterJdbcTemplate.query(sql2,map2,new ServiceRowMapper());
-        userList.get(0).setServices(services);
-        if(userList.size() > 0){
-            return userList.get(0);
-        }else{
-            return null;
+//        String sql2 = "select s.serviceId, s.serviceLocation, s.serviceName, s.serviceUrl " +
+//                "from level_ref_service r " +
+//                "left join service s on s.serviceId = r.serviceId "+
+//                "where r.levelId =:levelId";
+//        Map<String,Object> map2 = new HashMap<>();
+//        map2.put("levelId",userList.get(0).getLevelId());
+//        List<Service> services = namedParameterJdbcTemplate.query(sql2,map2,new ServiceRowMapper());
+//        userList.get(0).setServices(services);
+        if(!users.isEmpty()){
+            return users.get(0);
         }
+            return null;
+    }
+
+    @Override
+    public void updateUserInfo(User user) {
+        String sql = "UPDATE user SET is_active = :isActive WHERE user_id = :userId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",user.getUserId());
+        map.put("isActive",user.isActive());
+        namedParameterJdbcTemplate.update(sql,map);
     }
 
     @Override
@@ -116,7 +150,7 @@ public class UserDaoImpl implements UserDao {
         if(cartItemsList.size() == 0){
             return null ;
         }
-        CartItem cartItem =  cartItemsList.get(0);
+        CartItem cartItem = cartItemsList.get(0);
         cartItem.setCart(findCartById(cartItem.getCartId()));
         return cartItem;
 

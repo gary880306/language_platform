@@ -17,7 +17,6 @@ public class Course {
     private String teacher;
     private String description;
     private String creatDate;
-
     private String lastModifiedDate;
     private String videoUrl;
 

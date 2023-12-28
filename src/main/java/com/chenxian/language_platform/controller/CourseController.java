@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
-public class   CourseController {
+public class CourseController {
     @Autowired
     private CourseService courseService;
 
@@ -44,32 +44,6 @@ public class   CourseController {
         model.addAttribute("categories",categories);
         return "admin/managementCourses"; // 返回您的 Thymeleaf 模板名稱
     }
-
-//    @GetMapping("/courses/{courseId}")
-//    public ResponseEntity<Course> getCourse(@PathVariable Integer courseId) {
-//        Course course = courseService.getCourseById(courseId);
-//        if (course != null) {
-//            return ResponseEntity.status(HttpStatus.OK).body(course);
-//        } else {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
-//    }
-
-
-
-//    @PutMapping("/courses/{courseId}")
-//    public ResponseEntity<Course> updateCourse(@PathVariable Integer courseId,
-//                                               @RequestBody @Valid CourseRequest courseRequest) {
-//
-//        // 檢查 class 是否存在
-//        Course course = courseService.getCourseById(courseId);
-//
-//
-//        // 修改課程資訊
-//        courseService.updateCourse(courseId, courseRequest);
-//        Course updatedCourse = courseService.getCourseById(courseId);
-//        return ResponseEntity.status(HttpStatus.OK).body(updatedCourse);
-//    }
 
     @DeleteMapping("/courses/{courseId}")
     public ResponseEntity<?> deleteCourseById(@PathVariable Integer courseId){
@@ -114,15 +88,6 @@ public class   CourseController {
         return "redirect:/admin/managementCourses"; // 如果文件为空，直接重定向，不创建课程
     }
 
-
-
-    @GetMapping("/admin/{id}")
-    public String editCourse(@PathVariable("id") Long id, Model model) {
-        // 根据id获取课程信息
-        // 添加到model
-        return "editCourse"; // 返回编辑课程的视图
-    }
-
     // 下載到本地端 C槽的 uploadImages 資料夾
     private String uploadFile(MultipartFile file) {
         if (!file.isEmpty()) {
@@ -160,8 +125,6 @@ public class   CourseController {
         }
         return null; // 如果沒有文件，返回null或者預設值
     }
-
-
 
     @PostMapping("/validateCourseData")
     public ResponseEntity<?> validateCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {

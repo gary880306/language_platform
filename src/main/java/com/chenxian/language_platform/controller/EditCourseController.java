@@ -1,14 +1,20 @@
 package com.chenxian.language_platform.controller;
 
 import com.chenxian.language_platform.dto.CourseRequest;
+import com.chenxian.language_platform.model.OrderItem;
 import com.chenxian.language_platform.service.CourseService;
+import com.chenxian.language_platform.service.OrderedInfoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class EditCourseController {
+    @Autowired
+    private OrderedInfoService orderedInfoService;
 
     @Autowired
     private CourseService courseService;
@@ -43,4 +49,6 @@ public class EditCourseController {
 
         return "redirect:/admin/managementCourses";
     }
+
+
 }

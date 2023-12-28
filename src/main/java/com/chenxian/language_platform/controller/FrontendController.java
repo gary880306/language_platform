@@ -172,14 +172,12 @@ public class FrontendController {
         // 1. 先找到 user 登入者
         User user = (User)session.getAttribute("user");
         List<UserCourse> userCourse = courseService.getPurchasedCourses(user.getUserId());
-        System.out.println(userCourse);
         List<Course> courses = new ArrayList<>();
         for (UserCourse uc : userCourse) {
             Course course = courseService.getCoursesByIdForCart(uc.getCourseId());
             courses.add(course);
         }
 
-        System.out.println("!!!!" + courses);
         model.addAttribute("user", user);
         model.addAttribute("courses",courses);
         return  "/user/courses/myCourse";

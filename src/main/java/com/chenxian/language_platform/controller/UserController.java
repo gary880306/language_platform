@@ -26,36 +26,42 @@ public class UserController {
 
     // 用戶登入功能實作
     @PostMapping("/user/login")
-    public String  login(@RequestParam @Valid String email,
-                         @RequestParam @Valid String password,
-                         HttpSession session, Model model){
+    public String login(@RequestParam @Valid String email,
+                        @RequestParam @Valid String password,
+                        HttpSession session, Model model){
         // 接收輸入的帳號密碼
         UserLoginRequest userLoginRequest = new UserLoginRequest();
         userLoginRequest.setEmail(email);
         userLoginRequest.setPassword(password);
         // 使用接收到的密碼查找資料庫是否有此用戶資訊
-        User user  = userService.getUserByEmail(userLoginRequest.getEmail());
+        User user = userService.getUserByEmail(userLoginRequest.getEmail());
+        // 若有此用戶的邏輯
+        if (user != null) {
+            // 檢查用戶是否被停權
+            if (!user.isActive()) {
+                session.invalidate(); // 使 session 過期失效
+                model.addAttribute("loginMessage", "該帳號已被停權");
+                return "user/login&register/login"; // 將失敗消息渲染到登入頁面
+            }
 
-        // 有此用戶邏輯
-        if(user != null) {
-            // 比對密碼成功邏輯
+            // 比對密碼成功的邏輯
             if (user.getPassword().equals(password)) {
                 session.setAttribute("user", user); // 設置 session
-                return "redirect:/enjoyLearning/courses"; // 重導到主頁面
-            // 比對密碼失敗邏輯
-            }else{
-                session.invalidate(); // session 過期失效
+                return "redirect:/enjoyLearning/courses"; // 重定向到主頁面
+                // 比對密碼失敗的邏輯
+            } else {
+                session.invalidate(); // 使 session 過期失效
                 model.addAttribute("loginMessage", "帳號或密碼錯誤");
-                return "user/login&register/login"; // 將失敗訊息渲染到登入頁面
+                return "user/login&register/login"; // 將失敗消息渲染到登入頁面
             }
-        // 資料庫無此用戶邏輯
-        }else {
-            session.invalidate(); // session 過期失效
-            model.addAttribute("loginMessage", "無此使用者");
-            return "user/login&register/login"; // 將失敗訊息渲染到登入頁面
+            // 資料庫無此用戶的邏輯
+        } else {
+            session.invalidate(); // 使 session 過期失效
+            model.addAttribute("loginMessage", "無此用戶");
+            return "user/login&register/login"; // 將失敗消息渲染到登入頁面
         }
-
     }
+
 
     // 管理員登入頁面
     @GetMapping("/admin/login")
@@ -149,4 +155,6 @@ public class UserController {
         // 導向登入成功頁面
         return "user/login&register/result";
     }
+
+
 }
