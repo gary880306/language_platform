@@ -61,7 +61,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserById(Integer userId) {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId " +
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active " +
                 "FROM user WHERE user_id=:userId";
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);

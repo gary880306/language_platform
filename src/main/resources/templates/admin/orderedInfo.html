@@ -67,11 +67,13 @@
             width: 100%;
             margin-top: 20px;
             text-align: center;
+            border-collapse: collapse; /* 添加以獲得更緊湊的邊框效果 */
         }
 
         th, td {
             text-align: center;
-            padding: 8px;
+            padding: 4px; /* 減小內邊距 */
+            border: 1px solid #ddd;
         }
 
         .table th, .table td {
@@ -106,7 +108,8 @@
     <div id="menu">
         <a href="/admin/userInfo" id="userInfoLink">用戶資訊</a>
         <a href="/admin/orderedInfo" id="orderedInfoLink" class="active">訂單資訊</a>
-        <a href="/admin/managementCourses" id="productInfoLink">課程管理</a>
+        <a href="/admin/managementCourses" id="courseInfoLink">課程管理</a>
+        <a href="/admin/coupons" id="couponInfoLink">優惠券管理</a>
         <a href="/admin/reportInfo" id="salesReportLink">銷售報表</a>
     </div>
     <div id="content">
