@@ -3,10 +3,7 @@ package com.chenxian.language_platform.controller;
 import com.chenxian.language_platform.dto.CourseQueryParams;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.*;
-import com.chenxian.language_platform.service.CourseService;
-import com.chenxian.language_platform.service.DataService;
-import com.chenxian.language_platform.service.FrontendService;
-import com.chenxian.language_platform.service.UserService;
+import com.chenxian.language_platform.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +26,8 @@ public class FrontendController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private CouponService couponService;
 
     // 顯示主頁 main 資訊頁面
     @GetMapping("/enjoyLearning/courses")
@@ -181,6 +180,17 @@ public class FrontendController {
         model.addAttribute("user", user);
         model.addAttribute("courses",courses);
         return  "/user/courses/myCourse";
+    }
+
+    // 優惠券  -------------------------------------------------------------------------------------
+    // 獲取所有優惠劵頁面
+    @GetMapping("/enjoyLearning/coupons")
+    public String showCoupons(Model model) {
+        List<Coupon> coupons = couponService.getAllCoupons();
+        System.out.println(coupons.get(1).getDiscountType());
+
+        model.addAttribute("coupons", coupons);
+        return "user/courses/couponInfo";
     }
 
 }

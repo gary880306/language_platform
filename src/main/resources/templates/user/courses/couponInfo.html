@@ -46,10 +46,55 @@
             transform: scaleX(1);
         }
 
+        .coupon-container {
+            display: flex;
+            flex-wrap: wrap; /* 當卡片多於一行時換行 */
+            justify-content: space-around; /* 卡片之間平均分佈 */
+            padding: 10px;
+        }
+
+        .coupon-card {
+            width: 18rem;
+            border-radius: 15px;
+            background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);;
+            box-shadow: 0 8px 5px 0 rgba(0,0,0,0.3);
+            color: white;
+            margin: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .coupon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+        }
+
+        .coupon-card .card-body {
+            text-align: center;
+        }
+
+        .coupon-card .card-title {
+            font-weight: bold;
+        }
+
+        .coupon-value {
+            font-size: 1.5em;
+            color: yellow;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .btn-coupon {
+            border-radius: 8px;
+            color: #2193b0;
+            background-color: white;
+            font-weight: bold;
+        }
+
         footer {
             background-color: #333;
             color: #fff;
             text-align: center;
+            position: fixed;
             bottom: 0;
             padding: 10px;
             width: 100%;
@@ -83,65 +128,29 @@
     </div>
 </nav>
 
-<section class="container-fluid " id="sec01">
-    <form method="post" action="/enjoyLearning/courses/addToCart">
-        <input type="hidden" name="courseId" th:value="${courseId}" />
-        <div class="row m-5 p-5">
-            <div class="col-6">
-                <img th:src="@{'http://192.168.1.103/uploadImages/' + ${course.imageUrlString}}"
-                     class="imagesize card-img-top" alt="...">
+<div class="container">
+    <div class="coupon-container">
+        <!-- 使用 Thymeleaf 的 th:each 來迭代 coupons 列表 -->
+        <div th:each="coupon : ${coupons}" class="card coupon-card">
+            <div class="card-body">
+                <h5 class="card-title">專屬優惠</h5>
+                <h6 th:text="'代碼: ' + ${coupon.code}">代碼: COUPON123</h6>
+                <p class="card-text" th:text="${coupon.description}">享受購物時的專屬折扣，讓您的購物更加划算。</p>
+                <div>Discount Type: <span th:text="${coupon.discountType}"></span></div>
+                <div class="coupon-value" th:text="${coupon.discountType.name() == 'FIXED' ? '折扣: ' + #numbers.formatDecimal(coupon.discountValue, 1, 0) + '元' : '折扣: ' + coupon.discountValue + '%'}"></div>
+                <div>
+                    <small th:text="'有效期：' + ${#dates.format(coupon.startDate, 'yyyy-MM-dd')} + ' 至 ' + ${#dates.format(coupon.endDate, 'yyyy-MM-dd')}">有效期：2023-01-01 至 2023-12-31</small>
+                </div>
+                <div>
+                    <small th:text="'數量：' + ${coupon.quantity}">數量：100</small>
+                </div>
+                <a href="#" class="btn btn-coupon">領取</a>
             </div>
-            <div class="col-6">
-                <h2 th:text="${course.courseName}">課程名稱</h2>
-                <p th:text="${course.description}">課程描述</p>
-
-                <p>課程售價: <span th:text="${course.price}"></span>元</p>
-                <button type="submit" class="btn btn-primary mt-5 me-2">加入購物車</button>
-            </div>
-        </div>
-    </form>
-
-    <!-- 課程評論區 -->
-    <div class="comment-section">
-        <h3 class="mb-3">課程評論</h3>
-        <div class="col">
-            <div class="comment">
-                <div class="comment-header">
-                    阿賢 <span class="datefs text-muted">2023-11-10</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 260px;">課程很棒！</p>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <div class="comment">
-                <div class="comment-header">
-                    小美 <span class="datefs text-muted">2023-11-25</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9734;&#9734;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 700px;">希望能多出一點課程！</p>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <div class="comment">
-                <div class="comment-header">
-                    阿偉<span class="datefs text-muted">2023-11-30</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 260px;">學到不少東西！</p>
-                </div>
-            </div>
-            <div class="separator"></div>
         </div>
     </div>
-</section>
+</div>
+
+
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>

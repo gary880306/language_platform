@@ -21,15 +21,15 @@ public class CouponDaoImpl implements CouponDao {
 
     @Override
     public Coupon createCoupon(Coupon coupon) {
-        String sql = "INSERT INTO coupon (code, description, discount_type, discount_value, start_date, end_date, is_active) VALUES (:code, :description, :discountType, :discountValue, :startDate, :endDate, :isActive)";
+        String sql = "INSERT INTO coupon (code, description, discount_type, discount_value, start_date, end_date, quantity) VALUES (:code, :description, :discountType, :discountValue, :startDate, :endDate, :quantity)";
         Map<String, Object> map = new HashMap<>();
         map.put("code", coupon.getCode());
         map.put("description", coupon.getDescription());
-        map.put("discountType", coupon.getDiscountType());
+        map.put("discountType", coupon.getDiscountType().toString());
         map.put("discountValue", coupon.getDiscountValue());
         map.put("startDate", coupon.getStartDate());
         map.put("endDate", coupon.getEndDate());
-        map.put("isActive", coupon.isActive());
+        map.put("quantity", coupon.getQuantity());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -41,7 +41,7 @@ public class CouponDaoImpl implements CouponDao {
 
     @Override
     public Coupon getCouponById(Integer couponId) {
-        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active FROM coupon WHERE coupon_id = :couponId";
+        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity FROM coupon WHERE coupon_id = :couponId";
         Map<String, Object> map = new HashMap<>();
         map.put("couponId", couponId);
 
@@ -54,7 +54,7 @@ public class CouponDaoImpl implements CouponDao {
 
     @Override
     public Coupon updateCoupon(Integer couponId, Coupon coupon) {
-        String sql = "UPDATE coupon SET code = :code, description = :description, discount_type = :discountType, discount_value = :discountValue, start_date = :startDate, end_date = :endDate, is_active = :isActive WHERE coupon_id = :couponId";
+        String sql = "UPDATE coupon SET code =:code, description =:description, discount_type =:discountType, discount_value =:discountValue, start_date =:startDate, end_date =:endDate, is_active =:isActive, quantity =:quantity WHERE coupon_id =:couponId";
         Map<String, Object> map = new HashMap<>();
         map.put("couponId", couponId);
         map.put("code", coupon.getCode());
@@ -64,6 +64,7 @@ public class CouponDaoImpl implements CouponDao {
         map.put("startDate", coupon.getStartDate());
         map.put("endDate", coupon.getEndDate());
         map.put("isActive", coupon.isActive());
+        map.put("quantity", coupon.getQuantity());
 
         Integer updatedRows = namedParameterJdbcTemplate.update(sql, map);
         if (updatedRows > 0) {
@@ -85,7 +86,7 @@ public class CouponDaoImpl implements CouponDao {
 
     @Override
     public List<Coupon> getAllCoupons() {
-        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active FROM coupon";
+        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity FROM coupon";
         Map<String, Object> map = new HashMap<>();
         List<Coupon> coupons = namedParameterJdbcTemplate.query(sql, map, new CouponRowMapper());
         if(!coupons.isEmpty()){

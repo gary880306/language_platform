@@ -20,6 +20,7 @@ public class CouponRowMapper implements RowMapper<Coupon> {
         coupon.setStartDate(rs.getTimestamp("start_date"));
         coupon.setEndDate(rs.getTimestamp("end_date"));
         coupon.setActive(rs.getBoolean("is_active"));
+        coupon.setQuantity(rs.getInt("quantity"));
         return coupon;
     }
 }

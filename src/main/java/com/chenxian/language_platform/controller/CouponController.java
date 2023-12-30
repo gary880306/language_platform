@@ -22,6 +22,11 @@ public class CouponController {
         return "admin/managementCoupons";
     }
 
+    @GetMapping("/sendCoupons")
+    public String sendCoupons() {
+        return "admin/sendCoupons";
+    }
+
     // 創建新優惠券（RESTful API）
     @PostMapping
     @ResponseBody
@@ -49,20 +54,22 @@ public class CouponController {
         }
     }
 
-    // 更新優惠券（RESTful API）
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}/activate")
     @ResponseBody
-    public ResponseEntity<?> updateCoupon(@PathVariable int id, @RequestBody Coupon coupon) {
+    public ResponseEntity<?> updateCouponActiveStatus(@PathVariable int id, @RequestBody boolean isActive) {
         try {
-            Coupon updatedCoupon = couponService.updateCoupon(id, coupon);
-            if (updatedCoupon == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Coupon not found with ID: " + id);
+            Coupon coupon = couponService.getCouponById(id);
+            if (coupon == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("優惠券未找到，ID: " + id);
             }
+            coupon.setActive(isActive);
+            Coupon updatedCoupon = couponService.updateCoupon(coupon.getCouponId(),coupon);
             return ResponseEntity.ok(updatedCoupon);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating coupon: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("更新優惠券狀態時出錯：" + e.getMessage());
         }
     }
+
 
     // 刪除優惠券（RESTful API）
     @DeleteMapping("/{id}")
@@ -87,4 +94,10 @@ public class CouponController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving coupons: " + e.getMessage());
         }
     }
+
+    @ModelAttribute("discountTypes")
+    public Coupon.DiscountType[] discountTypes() {
+        return Coupon.DiscountType.values();
+    }
+
 }
