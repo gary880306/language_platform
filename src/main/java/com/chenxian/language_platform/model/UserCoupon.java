@@ -7,4 +7,5 @@ public class UserCoupon {
     private Integer userId;
     private Integer couponId;
     private boolean isUsed;
+    private Coupon coupon;
 }

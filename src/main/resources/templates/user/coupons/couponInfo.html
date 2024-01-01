@@ -99,6 +99,24 @@
             padding: 10px;
             width: 100%;
         }
+
+        #customAlert {
+            position: fixed;
+            left: 50%;
+            top: 20%;
+            transform: translate(-50%, -50%);
+            background-color: #4CAF50; /* 綠色背景 */
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: center;
+            width: 200px; /* 調整彈出框的寬度 */
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -142,18 +160,70 @@
                     <small th:text="'有效期：' + ${#dates.format(coupon.startDate, 'yyyy-MM-dd')} + ' 至 ' + ${#dates.format(coupon.endDate, 'yyyy-MM-dd')}">有效期：2023-01-01 至 2023-12-31</small>
                 </div>
                 <div>
-                    <small th:text="'數量：' + ${coupon.quantity}">數量：100</small>
+                    <small th:attr="data-coupon-quantity=${coupon.getCouponId}" th:text="'數量：' + ${coupon.quantity}">數量：100</small>
                 </div>
-                <a href="#" class="btn btn-coupon">領取</a>
+                <button th:attr="data-coupon-id=${coupon.getCouponId}" class="btn btn-coupon">領取</button>
             </div>
         </div>
     </div>
 </div>
 
 
+<div id="customAlert" style="display: none;">
+    <div class="custom-alert-content">
+        <span id="customAlertMessage">這裡是消息內容</span>
+    </div>
+</div>
+
+
+
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>
 </footer>
+
+<script>
+    function updateCouponQuantityDisplay(couponId, quantity) {
+        // 使用 data 屬性來找到對應的優惠券數量顯示元素
+        var quantityDisplays = document.querySelectorAll('[data-coupon-quantity="' + couponId + '"]');
+        quantityDisplays.forEach(function(display) {
+            display.innerText = '數量：' + quantity;
+        });
+    }
+
+    document.querySelectorAll('.btn-coupon').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var couponId = this.getAttribute('data-coupon-id');
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/enjoyLearning/coupons/addCoupon', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    if (this.status === 200) {
+                        var response = JSON.parse(this.responseText);
+                        showCustomAlert('添加成功');
+                        updateCouponQuantityDisplay(couponId, response.quantity);
+                    } else {
+                        showCustomAlert('添加失敗');
+                    }
+                }
+            };
+            xhr.send('couponId=' + couponId);
+        });
+    });
+
+    function showCustomAlert(message) {
+        var alertBox = document.getElementById('customAlert');
+        document.getElementById('customAlertMessage').innerText = message;
+        alertBox.style.display = 'block';
+
+        setTimeout(function() {
+            alertBox.style.display = 'none';
+        }, 2000);
+    }
+
+
+
+</script>
 </body>
 </html>

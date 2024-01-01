@@ -120,10 +120,9 @@
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/coupons">優惠券</a></li>
             </ul>
             <div class="ms-auto">
-                <!-- 使用 ms-auto 將元素向右推送，從而實現左右元素向中間靠攏 -->
-                <a href="../student/cart.jsp" class="text-dark"><i
-                        class="bi bi-cart"></i></a> <a href="../student/userInfo.jsp"
-                                                       class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
+                <a href="/enjoyLearning/cart" class="text-dark"><i class="bi bi-cart"></i></a>
+                <a href="#" class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
+                <a href="/user/logout" class="pure-menu-link">🔞 登出</a>
             </div>
         </div>
     </div>
@@ -134,7 +133,7 @@
 <section class="card-container d-flex flex-wrap">
     <!-- 卡片內容 -->
     <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.103/uploadImages/' + ${course.imageUrl}}"
+        <img th:src="@{'http://192.168.1.105/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
         <div class="card-body" th:attr="data-course-id=${course.courseId}">
             <p class="cardword mb-1">

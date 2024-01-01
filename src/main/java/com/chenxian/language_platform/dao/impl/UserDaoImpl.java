@@ -267,8 +267,6 @@ public class UserDaoImpl implements UserDao {
         }
 
 
-
-
     }
 
     // 紀錄用戶擁有的課程清單
@@ -322,6 +320,49 @@ public class UserDaoImpl implements UserDao {
         } else {
             throw new ItemAlreadyInCartException("商品已存在於購物車中");
         }
+    }
+
+    @Override
+    public boolean checkCouponExists(Integer userId, Integer couponId) {
+        String sql = "SELECT COUNT(*) FROM user_coupon WHERE user_id = :userId AND coupon_id = :couponId";
+
+        Map<String, Object> map = Map.of("userId", userId, "couponId", couponId);
+
+        int count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+
+        return count > 0;
+    }
+
+    @Override
+    public void addUserCoupon(Integer userId, Integer couponId) {
+        String sql = "INSERT INTO user_coupon (user_id, coupon_id) VALUES (:userId, :couponId)";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("couponId", couponId);
+
+        namedParameterJdbcTemplate.update(sql, map);
+    }
+
+    @Override
+    public List<UserCoupon> findUserCouponsByUserId(Integer userId) {
+        String sql = "SELECT uc.user_id, uc.coupon_id, uc.is_used, c.code, c.description, c.discount_type, c.discount_value," +
+                " c.start_date, c.end_date, c.is_active" +
+                " FROM user_coupon uc" +
+                " LEFT JOIN coupon c ON uc.coupon_id = c.coupon_id" +
+                " WHERE uc.user_id =:userId;";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        List<UserCoupon> userCoupons = namedParameterJdbcTemplate.query(sql,map,new UserCouponRowMapper());
+        return userCoupons;
+    }
+
+    @Override
+    public void decrementCouponQuantity(Integer couponId) {
+        String sql = "UPDATE coupon SET quantity = quantity - 1 WHERE coupon_id =:couponId AND quantity > 0";
+        Map<String,Object> map = new HashMap<>();
+        map.put("couponId",couponId);
+        namedParameterJdbcTemplate.update(sql,map);
     }
 
     // 自定義異常類

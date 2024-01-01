@@ -24,4 +24,8 @@ public interface UserService {
     void addCart(Cart cart);
     void addCartItem(CartItem cartItem);
     boolean updateUserActiveStatus(Integer userId, boolean isActive);
+    boolean checkCouponExists(Integer userId, Integer couponId);
+    void addUserCoupon(Integer userId, Integer couponId);
+    List<UserCoupon> findUserCouponsByUserId(Integer userId);
+    void decrementCouponQuantity(Integer couponId);
 }

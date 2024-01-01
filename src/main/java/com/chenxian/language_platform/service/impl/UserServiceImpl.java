@@ -104,5 +104,25 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @Override
+    public boolean checkCouponExists(Integer userId, Integer couponId) {
+        return userDao.checkCouponExists(userId,couponId);
+    }
+
+    @Override
+    public void addUserCoupon(Integer userId, Integer couponId) {
+        userDao.addUserCoupon(userId,couponId);
+    }
+
+    @Override
+    public List<UserCoupon> findUserCouponsByUserId(Integer userId) {
+        return userDao.findUserCouponsByUserId(userId);
+    }
+
+    @Override
+    public void decrementCouponQuantity(Integer couponId) {
+        userDao.decrementCouponQuantity(couponId);
+    }
+
 
 }
