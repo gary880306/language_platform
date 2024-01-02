@@ -21,6 +21,8 @@ public class UserInfoRowMapper implements RowMapper<User> {
         user.setLastModifiedDate(rs.getTimestamp("last_modified_date"));
         user.setLevelId(rs.getInt("levelId"));
         user.setActive(rs.getBoolean("is_active"));
+        user.setAuthType(rs.getString("authType"));
+        user.setAuthId(rs.getString("authId"));
         return user;
     }
 }

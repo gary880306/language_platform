@@ -27,7 +27,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> findALlUsers() {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active FROM user";
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active,authType,authId FROM user";
         Map<String,Object> map = new HashMap<>();
         List<User> users = namedParameterJdbcTemplate.query(sql,map,new UserInfoRowMapper());
         if(!users.isEmpty()){
@@ -39,8 +39,8 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Integer createUser(UserRegisterRequest userRegisterRequest) {
-        String sql = "INSERT INTO user(email,password,user_name,birth,phone_number,address,created_date,last_modified_date) " +
-                "VALUES(:email,:password,:user_name,:birth,:phone_number,:address,:created_date,:last_modified_date)";
+        String sql = "INSERT INTO user(email,password,user_name,birth,phone_number,address,created_date,last_modified_date,authType,authId) " +
+                "VALUES(:email,:password,:user_name,:birth,:phone_number,:address,:created_date,:last_modified_date,:authType,:authId)";
         Map<String,Object> map = new HashMap<>();
         map.put("email",userRegisterRequest.getEmail());
         map.put("password",userRegisterRequest.getPassword());
@@ -48,6 +48,8 @@ public class UserDaoImpl implements UserDao {
         map.put("birth",userRegisterRequest.getBirth());
         map.put("phone_number",userRegisterRequest.getPhoneNumber());
         map.put("address",userRegisterRequest.getAddress());
+        map.put("authType",userRegisterRequest.getAuthType());
+        map.put("authId",userRegisterRequest.getAuthId());
 
         Date now = new Date();
         map.put("created_date",now);
@@ -61,7 +63,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserById(Integer userId) {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active " +
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active,authType,authId " +
                 "FROM user WHERE user_id=:userId";
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
@@ -84,7 +86,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserIncludeActiveById(Integer userId) {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active " +
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active,authType,authId " +
                 "FROM user WHERE user_id=:userId";
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
@@ -97,7 +99,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserByEmail(String email) {
-        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active FROM user WHERE email=:email";
+        String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active,authType,authId FROM user WHERE email=:email";
         Map<String,Object> map = new HashMap<>();
         map.put("email",email);
         List<User> users = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());

@@ -67,6 +67,45 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <!-- nimbus-jose-jwt 依赖 -->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>9.15.2</version> <!-- 请使用最新的可用版本 -->
+        </dependency>
+
+        <!-- Apache HttpClient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version> <!-- 请检查获取最新版本 -->
+        </dependency>
+
+        <!-- Apache HttpClient Fluent API -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.5.13</version> <!-- 请检查获取最新版本 -->
+        </dependency>
+
+        <!-- JSON.org -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version> <!-- 请检查获取最新版本 -->
+        </dependency>
+
+                <dependency>
+                    <groupId>com.google.apis</groupId>
+                    <artifactId>google-api-services-people</artifactId>
+                    <version>v1-rev20210903-1.32.1</version>
+                </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client-jackson2 -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client-jackson2</artifactId>
+            <version>1.20.0</version>
+        </dependency>
 
 
     </dependencies>

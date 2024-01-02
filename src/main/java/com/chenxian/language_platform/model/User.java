@@ -19,4 +19,7 @@ public class User {
     private Integer levelId;
     private List<Service> services;
     private boolean isActive;
+    private String authType; // 授權來源
+    private String authId; // 授權Id
+
 }

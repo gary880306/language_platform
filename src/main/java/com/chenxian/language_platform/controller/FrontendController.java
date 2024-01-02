@@ -193,8 +193,6 @@ public class FrontendController {
     @GetMapping("/enjoyLearning/coupons")
     public String showCoupons(Model model) {
         List<Coupon> coupons = couponService.getAllCoupons();
-        System.out.println(coupons.get(1).getDiscountType());
-
         model.addAttribute("coupons", coupons);
         return "user/coupons/couponInfo";
     }
