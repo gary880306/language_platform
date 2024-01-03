@@ -2,7 +2,13 @@ package com.chenxian.language_platform.controller;
 
 import com.chenxian.language_platform.dto.CourseQueryParams;
 import com.chenxian.language_platform.dto.CourseRequest;
+import com.chenxian.language_platform.entity.Comment;
+import com.chenxian.language_platform.entity.Language;
+import com.chenxian.language_platform.entity.Post;
 import com.chenxian.language_platform.model.*;
+import com.chenxian.language_platform.repository.CommentRepository;
+import com.chenxian.language_platform.repository.LanguageRepository;
+import com.chenxian.language_platform.repository.PostRepository;
 import com.chenxian.language_platform.service.*;
 import jakarta.servlet.http.HttpSession;
 import lombok.Data;
@@ -35,6 +41,14 @@ public class FrontendController {
     private UserService userService;
     @Autowired
     private CouponService couponService;
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private LanguageRepository languageRepository;
+
 
     // 顯示主頁 main 資訊頁面
     @GetMapping("/enjoyLearning/courses")
@@ -306,7 +320,18 @@ public class FrontendController {
     }
 
 
+    @GetMapping("/enjoyLearning/forum")
+    public String showForum(Model model) {
+        List<Post> posts = postRepository.findAll();
+        List<Comment> comments = commentRepository.findAll();
+        List<Language> languages = languageRepository.findAll(); // 獲取語言列表
 
+        model.addAttribute("posts", posts);
+        model.addAttribute("comments", comments);
+        model.addAttribute("languages", languages); // 添加語言列表到模型中
+
+        return "user/forum/main"; // 返回視圖的名稱
+    }
 
 
 }

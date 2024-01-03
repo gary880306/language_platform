@@ -69,15 +69,7 @@ public class UserDaoImpl implements UserDao {
         map.put("userId",userId);
         List<User> userList = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());
 
-        String sql2 = "select s.serviceId, s.serviceLocation, s.serviceName, s.serviceUrl " +
-                "from level_ref_service r " +
-                "left join service s on s.serviceId = r.serviceId "+
-                "where r.levelId =:levelId";
-        Map<String,Object> map2 = new HashMap<>();
-        map2.put("levelId",userList.get(0).getLevelId());
-        List<Service> services = namedParameterJdbcTemplate.query(sql2,map2,new ServiceRowMapper());
-        userList.get(0).setServices(services);
-        if(userList.size() > 0){
+        if(!userList.isEmpty()){
             return userList.get(0);
         }else{
             return null;
@@ -103,15 +95,6 @@ public class UserDaoImpl implements UserDao {
         Map<String,Object> map = new HashMap<>();
         map.put("email",email);
         List<User> users = namedParameterJdbcTemplate.query(sql,map,new UserRowMapper());
-
-//        String sql2 = "select s.serviceId, s.serviceLocation, s.serviceName, s.serviceUrl " +
-//                "from level_ref_service r " +
-//                "left join service s on s.serviceId = r.serviceId "+
-//                "where r.levelId =:levelId";
-//        Map<String,Object> map2 = new HashMap<>();
-//        map2.put("levelId",userList.get(0).getLevelId());
-//        List<Service> services = namedParameterJdbcTemplate.query(sql2,map2,new ServiceRowMapper());
-//        userList.get(0).setServices(services);
         if(!users.isEmpty()){
             return users.get(0);
         }

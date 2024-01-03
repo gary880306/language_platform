@@ -1,12 +1,16 @@
 package com.chenxian.language_platform.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
 
 @Data
+@Entity
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
     private String email;
     private String password;
@@ -17,9 +21,9 @@ public class User {
     private Date createdDate;
     private Date lastModifiedDate;
     private Integer levelId;
-    private List<Service> services;
     private boolean isActive;
-    private String authType; // 授權來源
-    private String authId; // 授權Id
-
+    private String authType;
+    private String authId;
+    
 }
+
