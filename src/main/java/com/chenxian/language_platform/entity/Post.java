@@ -14,6 +14,7 @@ public class Post {
     private Integer id;
     private String title;
     private String content;
+    private transient Integer languageId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -25,4 +26,5 @@ public class Post {
 
     @Column(updatable = false)
     private LocalDateTime createTime = LocalDateTime.now();
+
 }

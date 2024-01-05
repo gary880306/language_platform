@@ -157,12 +157,32 @@
 <!-- JavaScript Bundle with Popper -->
 <!-- JavaScript Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- 刪除購物車課程 -->
 <script>
     function deleteItem(itemId) {
-        window.location.href='/enjoyLearning/cart/delete?itemId=' + itemId;
+        // 使用 SweetAlert2 顯示確認對話框
+        Swal.fire({
+            title: '您確定要刪除嗎？',
+            text: "這個操作無法撤銷！",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '是，刪除它！',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 如果用戶確認，則執行刪除操作
+                window.location.href = '/enjoyLearning/cart/delete?itemId=' + itemId;
+            }
+        });
     }
-
 </script>
+
+
+<!-- 查看優惠券 -->
 <script>
     document.getElementById('viewCouponsBtn').addEventListener('click', function() {
         fetch('/enjoyLearning/cart/myCoupons')
@@ -192,6 +212,7 @@
     });
 </script>
 
+<!-- 使用優惠券 -->
 <script>
     document.addEventListener('click', function(event) {
         var clickedElement = event.target.closest('.coupon-card');

@@ -45,6 +45,7 @@
             transform: scaleX(1);
         }
 
+
         footer {
             background-color: #333;
             color: #fff;
@@ -70,7 +71,7 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/courses">首頁</a></li>
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/myCourse">我的課程</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">語言交換</a></li>
+                <li class="nav-item"><a class="nav-link" href="/enjoyLearning/forum">討論區</a></li>
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/coupons">優惠券</a></li>
             </ul>
             <div class="ms-auto">
@@ -114,6 +115,7 @@
                             <label for="post-content" class="form-label">內容</label>
                             <textarea class="form-control" id="post-content"></textarea>
                         </div>
+                        <input type="hidden" id="user-id" th:value="${user.getUserId}" name="userId" />
                         <button type="submit" class="btn btn-success">新增</button>
                     </form>
                 </div>
@@ -124,20 +126,30 @@
 <!-- 歷史貼文和留言 -->
 <div class="container mt-4">
     <h2 class="text-center">討論區</h2>
-    <div th:each="post : ${posts}">
-        <div class="card my-3">
-            <div class="card-body">
-                <h1 th:text="${post.getUser().userName}"></h1>
-                <h5 class="card-title" th:text="${post.title}">貼文標題</h5>
-                <p class="card-text" th:text="${post.content}">貼文內容</p>
-                <!-- 貼文的留言 -->
-                <div th:each="comment : ${comments}" th:if="${comment.post.id == post.id}">
-                    <p th:text="${comment.user.userName + ': ' + comment.content}">留言內容</p>
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- 這裡是存放貼文的容器 -->
+            <div id="posts-list">
+                <div th:each="post : ${posts}">
+                    <div class="card my-3">
+                        <div class="card-body">
+                            <h1 th:text="${post.getUser() != null ? post.getUser().userName : '未知用戶'}"></h1>
+                            <h5 class="card-title" th:text="${post.title}">貼文標題</h5>
+                            <p class="card-text" th:text="${post.content}">貼文內容</p>
+                            <hr>
+                            <!-- 貼文的留言 -->
+                            <div th:each="comment : ${comments}" th:if="${comment.post.id == post.id}">
+                                <p th:text="${comment.user.userName + ': ' + comment.content}">留言內容</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>
@@ -154,5 +166,70 @@
     }
 </script>
 
+<script>
+    $(document).ready(function() {
+        $('#newPostForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var postTitle = $('#post-title').val();
+            var postLanguage = $('#post-language').val();
+            var postContent = $('#post-content').val();
+            var postUserId = $('#user-id').val();
+
+            var postData = {
+                title: postTitle,
+                content: postContent,
+                languageId: postLanguage,
+                userId: postUserId
+            };
+
+            $.ajax({
+                url: '/enjoyLearning/Posts',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(postData),
+                success: function(response) {
+                    console.log('Post added successfully', response);
+                    addPostToPage(response);
+                    $('#postModal').modal('hide'); // 關閉模態框
+                    $('#newPostForm')[0].reset(); // 清空表單
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error adding post', xhr, status, error);
+                }
+            });
+        });
+    });
+
+    function addPostToPage(post) {
+        // 假設您有一個顯示貼文的元素，例如 <div id="posts-list"></div>
+        var postElement = '<div>' +
+            '<h1>' + post.title + '</h1>' +
+            '<p>' + post.content + '</p>' +
+            // 添加更多貼文細節
+            '</div>';
+        $('#posts-list').prepend(postElement); // 將新貼文添加到列表的開頭
+    }
+</script>
+
+
+<script>
+    function addPostToPage(post) {
+        var userName = post.user ? post.user.userName : '未知用戶';
+        var postElement =
+            '<div class="card my-3">' +
+            '<div class="card-body">' +
+            '<h1>' + userName + '</h1>' +
+            '<h5 class="card-title">' + post.title + '</h5>' +
+            '<p class="card-text">' + post.content + '</p>' +
+            '<hr>' +
+            // 如果有留言，可以在這裡添加
+            '</div>' +
+            '</div>';
+
+        $('#posts-list').prepend(postElement); // 將新貼文添加到列表的開頭
+    }
+
+</script>
 </body>
 </html>

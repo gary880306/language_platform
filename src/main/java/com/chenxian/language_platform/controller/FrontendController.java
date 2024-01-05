@@ -321,14 +321,16 @@ public class FrontendController {
 
 
     @GetMapping("/enjoyLearning/forum")
-    public String showForum(Model model) {
+    public String showForum(Model model,HttpSession session) {
         List<Post> posts = postRepository.findAll();
         List<Comment> comments = commentRepository.findAll();
         List<Language> languages = languageRepository.findAll(); // 獲取語言列表
+        User user = (User)session.getAttribute("user");
 
         model.addAttribute("posts", posts);
         model.addAttribute("comments", comments);
         model.addAttribute("languages", languages); // 添加語言列表到模型中
+        model.addAttribute("user",user);
 
         return "user/forum/main"; // 返回視圖的名稱
     }
