@@ -129,6 +129,13 @@
             <version>1.20.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.ocpsoft.prettytime/prettytime -->
+        <dependency>
+            <groupId>org.ocpsoft.prettytime</groupId>
+            <artifactId>prettytime</artifactId>
+            <version>5.0.7.Final</version>
+        </dependency>
+
 
     </dependencies>
 

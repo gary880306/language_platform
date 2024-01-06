@@ -8,6 +8,7 @@ import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.rowmapper.*;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -108,6 +109,24 @@ public class UserDaoImpl implements UserDao {
         map.put("userId",user.getUserId());
         map.put("isActive",user.isActive());
         namedParameterJdbcTemplate.update(sql,map);
+    }
+
+    @Override
+    public boolean isCourseInUserCart(Integer userId, Integer courseId) {
+        String sql = "SELECT COUNT(*) FROM cart_item JOIN cart ON cart.cart_id = cart_item.cart_id WHERE cart.user_id = :userId AND cart_item.course_id = :courseId AND cart.isCheckout = FALSE";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("courseId", courseId);
+
+        try {
+            int count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+            return count > 0;
+        } catch (DataAccessException e) {
+            // 處理異常，例如記錄日誌或傳回預設值
+            // 日誌記錄等
+            return false;
+        }
     }
 
     @Override

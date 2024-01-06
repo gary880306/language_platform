@@ -8,11 +8,11 @@ import java.util.List;
 public interface UserDao {
     List<User> findALlUsers();
     Integer createUser(UserRegisterRequest userRegisterRequest);
-
     User getUserById(Integer userId);
     User getUserIncludeActiveById(Integer userId);
     User getUserByEmail(String email);
     void updateUserInfo(User user);
+    boolean isCourseInUserCart(Integer userId,Integer courseId);
     // 根據使用者ID來查找其未結帳的購物車資料(單筆)
     Cart findNoneCheckoutCartByUserId(Integer userId);
     CartItem findCartItemById(Integer itemId);

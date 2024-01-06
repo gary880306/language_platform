@@ -13,6 +13,7 @@ public interface UserService {
     User getUserIncludeActiveById(Integer userId);
     User getUserByEmail(String email);
     void updateUserInfo(User user);
+    boolean isCourseInUserCart(Integer userId,Integer courseId);
     Cart findNoneCheckoutCartByUserId(Integer userId);
     CartItem findCartItemById(Integer itemId);
     List<CartItem> findCartItemsById(Integer cartId);

@@ -47,6 +47,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean isCourseInUserCart(Integer userId, Integer courseId) {
+        return userDao.isCourseInUserCart(userId,courseId);
+    }
+
+    @Override
     public Cart findNoneCheckoutCartByUserId(Integer userId) {
         return userDao.findNoneCheckoutCartByUserId(userId);
     }

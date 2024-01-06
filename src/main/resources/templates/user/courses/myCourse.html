@@ -133,7 +133,7 @@
 <section class="card-container d-flex flex-wrap">
     <!-- 卡片內容 -->
     <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.108/uploadImages/' + ${course.imageUrl}}"
+        <img th:src="@{'http://192.168.1.104/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
         <div class="card-body" th:attr="data-course-id=${course.courseId}">
             <p class="cardword mb-1">

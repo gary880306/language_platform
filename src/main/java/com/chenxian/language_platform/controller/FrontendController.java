@@ -92,10 +92,27 @@ public class FrontendController {
         return "/user/courses/courseInfo";
     }
 
+
+    // 檢查購物車是否有此課程 (courseInfo 加入購物車按鈕顯示已存在購物車)
+    @GetMapping("/enjoyLearning/courses/checkCart")
+    @ResponseBody
+    public boolean isCourseInCart(@RequestParam("courseId") Integer courseId, HttpSession session) {
+        User user = (User) session.getAttribute("user"); // 獲取當前登錄的用戶
+        if (user == null) {
+            return false; // 如果沒有用戶登錄，返回 false
+        }
+
+        // 假設 userService 有一個方法可以檢查購物車
+        return userService.isCourseInUserCart(user.getUserId(), courseId);
+    }
+
+
     // 添加至購物車完成 addCart 頁面
+    // AJAX
     @PostMapping("/enjoyLearning/courses/addToCart")
-    public String addToCart(@RequestParam("courseId") Integer courseId,
-                            HttpSession session, Model model){
+    @ResponseBody
+    public ResponseEntity<?> addToCart(@RequestParam("courseId") Integer courseId,
+                                       HttpSession session) {
         // 1. 先找到 user 登入者
         User user = (User)session.getAttribute("user");
 
@@ -126,9 +143,7 @@ public class FrontendController {
 
         userService.addCartItem(cartItem);
 
-        model.addAttribute("course", courseService.getCourseById(courseId)); // 商品物件
-
-        return "/user/courses/addCart";
+        return ResponseEntity.ok().body("加入購物車成功");
     }
 
     // 購物車頁面
@@ -322,12 +337,13 @@ public class FrontendController {
 
     @GetMapping("/enjoyLearning/forum")
     public String showForum(Model model,HttpSession session) {
-        List<Post> posts = postRepository.findAll();
-        List<Comment> comments = commentRepository.findAll();
+        List<Post> posts = postRepository.findAllByOrderByCreateTimeDesc();
+        List<Comment> comments = commentRepository.findAllByOrderByCreateTimeDesc();
         List<Language> languages = languageRepository.findAll(); // 獲取語言列表
         User user = (User)session.getAttribute("user");
 
         model.addAttribute("posts", posts);
+        System.out.println(posts);
         model.addAttribute("comments", comments);
         model.addAttribute("languages", languages); // 添加語言列表到模型中
         model.addAttribute("user",user);

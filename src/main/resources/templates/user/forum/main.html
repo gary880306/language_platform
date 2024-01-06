@@ -45,6 +45,41 @@
             transform: scaleX(1);
         }
 
+        .post-title {
+            font-size: 1.5em;
+        }
+        .post-name {
+            font-size: 0.8em;
+        }
+        .post-language {
+            color: blue;
+            font-size: 0.8em;
+        }
+        .post-date {
+            font-size: 0.8em;
+        }
+        .card-body {
+            padding-bottom: 0;
+        }
+
+        /* 按鈕 hover 樣式 */
+        .btn-hover-color {
+            transition: background-color 0.3s ease; /* 平滑顏色過渡效果 */
+        }
+
+        .btn-hover-color:hover {
+            background-color: #f0f0f0; /* hover 時的背景顏色 */
+        }
+
+        .comment-item {
+            background-color: #f2f2f2; /* 浅灰色背景 */
+            padding: 10px;            /* 留言内边距 */
+            margin-bottom: 5px;       /* 留言之间的间隔 */
+            border-radius: 5px;       /* 圆角边框 */
+            display: inline-block;    /* 内联块级元素 */
+            word-wrap: break-word;    /* 自动换行 */
+            max-width: 100%;          /* 最大宽度限制 */
+        }
 
         footer {
             background-color: #333;
@@ -127,19 +162,58 @@
 <div class="container mt-4">
     <h2 class="text-center">討論區</h2>
     <div class="row">
-        <div class="col-md-8 mx-auto">
+        <div class="col-md-6 mx-auto">
             <!-- 這裡是存放貼文的容器 -->
             <div id="posts-list">
                 <div th:each="post : ${posts}">
                     <div class="card my-3">
                         <div class="card-body">
-                            <h1 th:text="${post.getUser() != null ? post.getUser().userName : '未知用戶'}"></h1>
-                            <h5 class="card-title" th:text="${post.title}">貼文標題</h5>
-                            <p class="card-text" th:text="${post.content}">貼文內容</p>
-                            <hr>
+                            <h6 class="post-name" th:text="${post.getUser != null ? post.getUser().userName : '未知用戶'}"></h6>
+                            <h3 class="card-title post-title" th:text="${post.title}">貼文標題</h3>
+                            <span class="post-language" th:text="${post.language.getName()}">語言</span>
+                            <span class="post-date" th:text="${post.timeAgo}">幾小時前</span>
+                            <p class="card-text mt-3" th:text="${post.content}">貼文內容</p>
+                            <hr class="mb-0">
+                            <!-- 按讚和留言按鈕 -->
+                            <div class="row">
+                                <div class="col">
+                                    <button type="button" class="btn w-100 btn-hover-color" id="likeButton" th:attr="data-post-id=${post.id}" th:class="${liked} ? 'liked' : ''">
+                                        <i class="bi bi-hand-thumbs-up me-1"></i>
+                                        <span th:text="${liked} ? '取消按讚' : '按讚'">按讚</span>
+                                    </button>
+                                </div>
+                                <div class="col">
+                                <button type="button" class="btn w-100 btn-hover-color"
+                                        th:data-post-id="${post.id}"
+                                        th:data-username="${user.userName}"
+                                        onclick="toggleCommentInput(this)">
+                                    <i class="bi bi-chat me-1"></i>留言
+                                </button>
+                                </div>
+                                <div class="col-12 mt-2 comment-input" style="display: none;" th:id="'comment-input-' + ${post.id}">
+                                    <span class="user-name-display" th:text="${user.userName}"></span>
+                                    <div style="display: flex; align-items: center;">
+                                        <input type="text" class="form-control" th:id="'comment-text-' + ${post.id}" placeholder="輸入留言">
+                                        <button class="btn btn-secondary" th:onclick="'submitComment(' + ${post.id} + ');'">
+                                            <i class="bi bi-cursor"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- 只需要在页面的一个地方放置一次 -->
+                                <input type="hidden" id="current-user-id" th:value="${user.getUserId}" />
+                            </div>
                             <!-- 貼文的留言 -->
-                            <div th:each="comment : ${comments}" th:if="${comment.post.id == post.id}">
-                                <p th:text="${comment.user.userName + ': ' + comment.content}">留言內容</p>
+                            <div th:id="'comment-list-' + ${post.id}">
+                                <div th:each="comment : ${comments}" th:if="${comment.post != null && comment.post.id == post.id}">
+                                    <div th:class="'comment-item'">
+                                        <p class="mb-0">
+                                            <strong th:text="${comment.user.userName}"></strong>:
+                                            <span th:text="${comment.content}"></span>
+                                            <br>
+                                            <small class='text-muted' th:text="${comment.formatTimeAgo}"></small>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -156,14 +230,25 @@
 </footer>
 
 <script>
-    function toggleCommentInput(id) {
-        var inputDiv = document.getElementById(id);
-        if (inputDiv.style.display === "none") {
-            inputDiv.style.display = "block";
-        } else {
-            inputDiv.style.display = "none";
+    function toggleCommentInput(buttonElement) {
+        var postId = buttonElement.getAttribute('data-post-id');
+        var userName = buttonElement.getAttribute('data-username');
+        var inputId = 'comment-input-' + postId;
+
+        var inputDiv = document.getElementById(inputId);
+        if (!inputDiv) return;
+
+
+        // 更新用戶名稱
+        var userNameSpan = inputDiv.querySelector('.user-name-display');
+        if (userNameSpan) {
+            userNameSpan.textContent = userName + ":";
         }
+
+        // 切換顯示狀態
+        inputDiv.style.display = inputDiv.style.display === "none" ? "block" : "none";
     }
+
 </script>
 
 <script>
@@ -201,35 +286,118 @@
         });
     });
 
-    function addPostToPage(post) {
-        // 假設您有一個顯示貼文的元素，例如 <div id="posts-list"></div>
-        var postElement = '<div>' +
-            '<h1>' + post.title + '</h1>' +
-            '<p>' + post.content + '</p>' +
-            // 添加更多貼文細節
-            '</div>';
-        $('#posts-list').prepend(postElement); // 將新貼文添加到列表的開頭
+    function timeAgo(date) {
+        const now = new Date();
+        const postDate = new Date(date);
+        const diff = now - postDate;
+
+        const minutes = Math.floor(diff / 60000);
+
+        if (minutes < 1) return "剛剛發布";
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (days > 0) return days + "天前";
+        if (hours > 0) return hours + "小時前";
+        return minutes + "分鐘前";
     }
-</script>
 
-
-<script>
     function addPostToPage(post) {
-        var userName = post.user ? post.user.userName : '未知用戶';
+        var userName = post.user ? post.user.userName : '未知用户';
+        var languageName = post.language && post.language.name ? post.language.name : '未知语言';
+        var timeAgoString = post.createTime ? timeAgo(post.createTime) : '';
+
+
         var postElement =
             '<div class="card my-3">' +
             '<div class="card-body">' +
-            '<h1>' + userName + '</h1>' +
-            '<h5 class="card-title">' + post.title + '</h5>' +
-            '<p class="card-text">' + post.content + '</p>' +
+            '<h6 class="post-name">' + userName + '</h6>' +
+            '<h3 class="card-title post-title">' + post.title + '</h3>' +
+            '<span class="post-language">' + languageName + '</span> ' +
+            '<span class="post-date">' + timeAgoString + '</span>' +
+            '<p class="card-text mt-3">' + post.content + '</p>' +
             '<hr>' +
-            // 如果有留言，可以在這裡添加
             '</div>' +
             '</div>';
 
-        $('#posts-list').prepend(postElement); // 將新貼文添加到列表的開頭
+        $('#posts-list').prepend(postElement);
+    }
+</script>
+
+<script>
+    function submitComment(postId) {
+        var commentContent = $('#comment-text-' + postId).val();
+        var userId = $('#current-user-id').val();
+
+        var commentData = {
+            content: commentContent,
+            userId: userId,
+            postId: postId
+        };
+
+        $.ajax({
+            url: '/enjoyLearning/comments',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(commentData),
+            success: function(response) {
+                console.log('留言成功', response);
+                addCommentToPage(postId, response);
+                $('#comment-text-' + postId).val('');
+                $('#comment-input-' + postId).hide();
+            },
+            error: function(xhr, status, error) {
+                console.error('留言失败', error);
+            }
+        });
+    }
+
+
+    function addCommentToPage(postId, comment) {
+        // 格式化時間
+        var formattedTime = timeAgo(comment.createTime);
+
+        // 創建新的留言元素並應用樣式
+        var newComment = $('<div>')
+            .addClass('comment-item')
+            .html(`<strong>${comment.user.userName}:</strong> ${comment.content} <br><small class='text-muted'>${formattedTime}</small>`);
+
+        // 將新留言添加到留言列表的頂部
+        $('#comment-list-' + postId).prepend(newComment);
     }
 
 </script>
+
+<script>
+    $(document).ready(function() {
+        // 監聽點讚按鈕的點擊事件
+        $('.likeButton').click(function() {
+            var postId = $(this).data('post-id'); // 獲取帖子ID
+            var isLiked = $(this).hasClass('liked'); // 檢查按鈕是否已經點讚
+
+            // 發送點讚或取消點讚的請求
+            $.ajax({
+                type: 'POST', // 或 'DELETE'，取決於您是點讚還是取消點讚
+                url: '/enjoyLearning/Posts/' + postId + '/like', // 後端點讚 API 的 URL
+                success: function(response) {
+                    // 成功後的處理邏輯
+                    if (isLiked) {
+                        // 如果已經點讚，取消點讚，更新按鈕樣式
+                        $(this).removeClass('liked').text('按讚');
+                    } else {
+                        // 如果未點讚，點讚，更新按鈕樣式
+                        $(this).addClass('liked').text('取消按讚');
+                    }
+                }.bind(this), // 使用bind(this)將點擊的按鈕元素傳遞給回調函數
+                error: function(error) {
+                    // 處理錯誤情況
+                    console.error('按讚失敗：', error);
+                }
+            });
+        });
+    });
+
+</script>
+
 </body>
 </html>
