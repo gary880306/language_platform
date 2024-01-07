@@ -3,6 +3,7 @@ package com.chenxian.language_platform.entity;
 import com.chenxian.language_platform.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -29,7 +30,11 @@ public class Post {
     private Language language;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @ToString.Exclude  // 排除likes屬性
     private List<Like> likes;  // 新增一對多關係，用於存儲按讚記錄
+
+    @Transient
+    private boolean liked;
 
     public String getTimeAgo() {
         return formatTimeAgo(this.createTime);

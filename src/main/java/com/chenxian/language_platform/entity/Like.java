@@ -3,6 +3,7 @@ package com.chenxian.language_platform.entity;
 import com.chenxian.language_platform.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,7 @@ public class Like {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
+    @ToString.Exclude  // 排除post屬性
     private Post post; // 關聯到帖子
 
     @ManyToOne

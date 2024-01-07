@@ -68,24 +68,37 @@
         }
 
         .btn-hover-color:hover {
-            background-color: #f0f0f0; /* hover 時的背景顏色 */
+            background-color: rgb(211, 211, 211); /* hover 時保持原始灰色 */; /* hover 時的背景設為完全透明 */
         }
 
         .comment-item {
             background-color: #f2f2f2; /* 浅灰色背景 */
-            padding: 10px;            /* 留言内边距 */
-            margin-bottom: 5px;       /* 留言之间的间隔 */
-            border-radius: 5px;       /* 圆角边框 */
-            display: inline-block;    /* 内联块级元素 */
-            word-wrap: break-word;    /* 自动换行 */
-            max-width: 100%;          /* 最大宽度限制 */
+            padding: 10px;             /* 留言內邊距 */
+            margin-bottom: 5px;        /* 留言之間的間隔 */
+            border-radius: 5px;        /* 圓角邊框 */
+            display: block;            /* 塊級元素 */
+            word-wrap: break-word;     /* 自動換行 */
+            max-width: 100%;           /* 最大寬度限制 */
+        }
+
+        /* 按讚按鈕的原始樣式 */
+        .likeButton {
+            color: rgb(70, 70, 70); /* 更深的灰色 */
+            transition: color 0.2s; /* 平滑顏色過渡 */
+        }
+
+        .likeButton:hover {
+            color: rgb(70, 70, 70); /* 更深的灰色 */
+        }
+
+        .liked, .liked:hover {
+            color: blue; /* 已點讚狀態和其 hover 時為藍色 */
         }
 
         footer {
             background-color: #333;
             color: #fff;
             text-align: center;
-            position: fixed;
             bottom: 0;
             padding: 10px;
             width: 100%;
@@ -177,9 +190,9 @@
                             <!-- 按讚和留言按鈕 -->
                             <div class="row">
                                 <div class="col">
-                                    <button type="button" class="btn w-100 btn-hover-color" id="likeButton" th:attr="data-post-id=${post.id}" th:class="${liked} ? 'liked' : ''">
-                                        <i class="bi bi-hand-thumbs-up me-1"></i>
-                                        <span th:text="${liked} ? '取消按讚' : '按讚'">按讚</span>
+                                    <button type="button" class="btn w-100 btn-hover-color likeButton" th:classappend="${post.liked} ? 'liked'" th:attr="data-post-id=${post.id}">
+                                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                                        <span class="like-button-text">讚</span>
                                     </button>
                                 </div>
                                 <div class="col">
@@ -207,7 +220,7 @@
                                 <div th:each="comment : ${comments}" th:if="${comment.post != null && comment.post.id == post.id}">
                                     <div th:class="'comment-item'">
                                         <p class="mb-0">
-                                            <strong th:text="${comment.user.userName}"></strong>:
+                                            <strong th:text="${comment.user.userName}"></strong> :
                                             <span th:text="${comment.content}"></span>
                                             <br>
                                             <small class='text-muted' th:text="${comment.formatTimeAgo}"></small>
@@ -360,7 +373,7 @@
         // 創建新的留言元素並應用樣式
         var newComment = $('<div>')
             .addClass('comment-item')
-            .html(`<strong>${comment.user.userName}:</strong> ${comment.content} <br><small class='text-muted'>${formattedTime}</small>`);
+            .html(`<strong>${comment.user.userName} :</strong> ${comment.content} <br><small class='text-muted'>${formattedTime}</small>`);
 
         // 將新留言添加到留言列表的頂部
         $('#comment-list-' + postId).prepend(newComment);
@@ -369,31 +382,25 @@
 </script>
 
 <script>
-    $(document).ready(function() {
-        // 監聽點讚按鈕的點擊事件
-        $('.likeButton').click(function() {
-            var postId = $(this).data('post-id'); // 獲取帖子ID
-            var isLiked = $(this).hasClass('liked'); // 檢查按鈕是否已經點讚
+    $('.likeButton').click(function() {
+        var postId = $(this).data('post-id');
+        var isLiked = $(this).hasClass('liked');
+        var methodType = isLiked ? 'DELETE' : 'POST';
 
-            // 發送點讚或取消點讚的請求
-            $.ajax({
-                type: 'POST', // 或 'DELETE'，取決於您是點讚還是取消點讚
-                url: '/enjoyLearning/Posts/' + postId + '/like', // 後端點讚 API 的 URL
-                success: function(response) {
-                    // 成功後的處理邏輯
-                    if (isLiked) {
-                        // 如果已經點讚，取消點讚，更新按鈕樣式
-                        $(this).removeClass('liked').text('按讚');
-                    } else {
-                        // 如果未點讚，點讚，更新按鈕樣式
-                        $(this).addClass('liked').text('取消按讚');
-                    }
-                }.bind(this), // 使用bind(this)將點擊的按鈕元素傳遞給回調函數
-                error: function(error) {
-                    // 處理錯誤情況
-                    console.error('按讚失敗：', error);
+        $.ajax({
+            type: methodType,
+            url: '/enjoyLearning/Posts/' + postId + '/like',
+            success: function(response) {
+                var button = $(this); // 獲取當前按鈕
+                if (button.hasClass('liked')) {
+                    button.removeClass('liked'); // 移除 liked 類別，恢復灰色
+                } else {
+                    button.addClass('liked'); // 添加 liked 類別，變為藍色
                 }
-            });
+            }.bind(this),
+            error: function(error) {
+                console.error('按讚操作失敗：', error);
+            }
         });
     });
 

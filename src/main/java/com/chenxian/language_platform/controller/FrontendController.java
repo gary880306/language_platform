@@ -8,6 +8,7 @@ import com.chenxian.language_platform.entity.Post;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.repository.CommentRepository;
 import com.chenxian.language_platform.repository.LanguageRepository;
+import com.chenxian.language_platform.repository.LikeRepository;
 import com.chenxian.language_platform.repository.PostRepository;
 import com.chenxian.language_platform.service.*;
 import jakarta.servlet.http.HttpSession;
@@ -48,6 +49,8 @@ public class FrontendController {
     private CommentRepository commentRepository;
     @Autowired
     private LanguageRepository languageRepository;
+    @Autowired
+    private LikeRepository likeRepository;
 
 
     // 顯示主頁 main 資訊頁面
@@ -336,17 +339,25 @@ public class FrontendController {
 
 
     @GetMapping("/enjoyLearning/forum")
-    public String showForum(Model model,HttpSession session) {
+    public String showForum(Model model, HttpSession session) {
         List<Post> posts = postRepository.findAllByOrderByCreateTimeDesc();
-        List<Comment> comments = commentRepository.findAllByOrderByCreateTimeDesc();
-        List<Language> languages = languageRepository.findAll(); // 獲取語言列表
         User user = (User)session.getAttribute("user");
 
+            // 檢查當前用戶對每個貼文的點讚狀態
+            if (user != null) {
+                for (Post post : posts) {
+                    boolean liked = likeRepository.existsByUser_UserIdAndPost_Id(user.getUserId(), post.getId());
+                    post.setLiked(liked);
+                }
+            }
+
+        List<Comment> comments = commentRepository.findAllByOrderByCreateTimeDesc();
+        List<Language> languages = languageRepository.findAll(); // 獲取語言列表
+
         model.addAttribute("posts", posts);
-        System.out.println(posts);
         model.addAttribute("comments", comments);
         model.addAttribute("languages", languages); // 添加語言列表到模型中
-        model.addAttribute("user",user);
+        model.addAttribute("user", user);
 
         return "user/forum/main"; // 返回視圖的名稱
     }

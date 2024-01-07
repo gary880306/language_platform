@@ -1,6 +1,7 @@
 package com.chenxian.language_platform.entity;
 
 import com.chenxian.language_platform.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,6 +26,7 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "post_id")
+    @JsonIgnore
     private Post post;
     @Column(updatable = false)
 

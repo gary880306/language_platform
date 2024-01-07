@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -81,6 +82,7 @@ public class PostController {
 
     //--------------------------------------------------------------------------------------------
     // 點讚區
+    @Transactional
     @PostMapping("/{postId}/like")
     public ResponseEntity<?> likePost(@PathVariable Integer postId, HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -88,29 +90,24 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用戶未登錄");
         }
 
-        // 檢查用戶是否已經點讚，如果沒有，則進行點讚
-        if (!hasLiked(user.getUserId(), postId)) {
-            // 創建一個新的按讚信息對象
-            Like likes = new Like();
-            likes.setUser(user); // 設置用戶
-
-            // 根據 postId 獲取相應的帖子對象
-            Post post = postRepository.findById(postId).orElse(null);
-            // 設置帖子到 Like 對象中
-            likes.setPostId(post.getId()); // 設置帖子ID
-            likes.setLikedAt(LocalDateTime.now()); // 設置按讚時間
-
-            // 保存按讚信息到數據庫
-            likeRepository.save(likes);
-
-            // 更新帖子的按讚數（如果需要的話）
-            postLikes.put(postId, postLikes.getOrDefault(postId, 0) + 1);
+        // 根據 postId 獲取相應的帖子對象
+        Post post = postRepository.findById(postId).orElse(null);
+        if (post == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到指定的帖子");
         }
+
+        Like likes = new Like();
+        likes.setUser(user); // 設置用戶
+        likes.setPost(post); // 設置帖子
+        likes.setLikedAt(LocalDateTime.now()); // 設置按讚時間
+        likeRepository.save(likes); // 保存按讚信息到數據庫
+        // 更新帖子的按讚數
+        postLikes.put(postId, postLikes.getOrDefault(postId, 0) + 1);
 
         return ResponseEntity.ok().build();
     }
 
-
+    @Transactional
     @DeleteMapping("/{postId}/like")
     public ResponseEntity<?> unlikePost(@PathVariable Integer postId, HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -118,10 +115,12 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用戶未登錄");
         }
 
-        // 檢查用戶是否已經點讚，如果已經點讚，則取消點讚
+        // 檢查用戶是否已經點讚
         if (hasLiked(user.getUserId(), postId)) {
+            // 從數據庫中刪除點讚信息
+            likeRepository.deleteByUserAndPost(user, postRepository.findById(postId).orElse(null));
+            // 更新帖子的按讚數
             postLikes.put(postId, postLikes.getOrDefault(postId, 0) - 1);
-            // 在這裡添加從數據庫中刪除點讚信息的邏輯，如果需要的話
         }
 
         return ResponseEntity.ok().build();
@@ -149,6 +148,6 @@ public class PostController {
         // 在這裡添加從數據庫或其他存儲中檢查用戶點讚狀態的邏輯
         // 返回 true 表示用戶已點讚，返回 false 表示用戶未點讚
         // 這裡只是一個示例，實際情況需要根據你的數據存儲方式來實現
-        return false;
+        return likeRepository.existsByUser_UserIdAndPost_Id(userId, postId);
     }
 }
