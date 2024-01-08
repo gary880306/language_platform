@@ -369,6 +369,17 @@ public class UserDaoImpl implements UserDao {
         namedParameterJdbcTemplate.update(sql,map);
     }
 
+    @Override
+    public Integer getCartCourseCount(Integer userId) {
+        String sql = "SELECT COUNT(*) FROM cart_item WHERE cart_id IN " +
+                "(SELECT cart_id FROM cart WHERE user_id = :userId AND isCheckout = false)";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+
+        return namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+    }
+
     // 自定義異常類
     public class ItemAlreadyInCartException extends RuntimeException {
         public ItemAlreadyInCartException(String message) {

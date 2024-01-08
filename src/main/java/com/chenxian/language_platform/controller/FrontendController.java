@@ -56,6 +56,7 @@ public class FrontendController {
     // 顯示主頁 main 資訊頁面
     @GetMapping("/enjoyLearning/courses")
     public String showCourses(Model model,
+                              HttpSession session,
                               // 查詢條件
                               @RequestParam(required = false) String search,
                               // 排序
@@ -63,12 +64,16 @@ public class FrontendController {
                               @RequestParam(defaultValue = "desc") String sort
                               // 分頁
                                 ) {
+        User user = (User) session.getAttribute("user");
+        // 獲取用戶購物車中的課程數量
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         CourseQueryParams courseQueryParams = new CourseQueryParams();
         courseQueryParams.setSearch(search);
         courseQueryParams.setOrderBy(orderBy);
         courseQueryParams.setSort(sort);
         List<Course> courses = frontendService.getAllCourses(courseQueryParams);
         List<CategoryData> categories = dataService.findAllCategoryData();
+        model.addAttribute("cartCourseCount",cartCourseCount);
         model.addAttribute("courses", courses);
         model.addAttribute("categories",categories);
         return "user/courses/main";
@@ -88,8 +93,10 @@ public class FrontendController {
                 return "/user/courses/courseMain";
             }
         }
-
+        // 獲取用戶購物車中的課程數量
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         CourseRequest course = courseService.getCourseById(courseId);
+        model.addAttribute("cartCourseCount",cartCourseCount);
         model.addAttribute("courseId", courseId);
         model.addAttribute("course", course);
         return "/user/courses/courseInfo";
@@ -145,8 +152,8 @@ public class FrontendController {
         cartItem.setCourseId(courseId);
 
         userService.addCartItem(cartItem);
-
-        return ResponseEntity.ok().body("加入購物車成功");
+        Integer updatedCartCount = userService.getCartCourseCount(user.getUserId());
+        return ResponseEntity.ok().body(updatedCartCount);
     }
 
     // 購物車頁面
@@ -157,8 +164,10 @@ public class FrontendController {
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
         if(cart != null){
+            Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
             int total =  cart.getCartItems().stream().
                     mapToInt(item ->  item.getCourse().getPrice()).sum();
+            model.addAttribute("cartCourseCount",cartCourseCount);
             model.addAttribute("cart", cart);
             model.addAttribute("total", total);
         }
@@ -167,19 +176,20 @@ public class FrontendController {
     }
 
     // 刪除購物車項目
-    @GetMapping("/enjoyLearning/cart/delete")
-    public String deleteCartItem(@RequestParam("itemId") Integer itemId,
-                                 HttpSession session, Model model) {
-        User user = (User)session.getAttribute("user");
-        // 如何得知 itemId 是屬於該使用者的 ?
-
+    // AJAX
+    @DeleteMapping("/enjoyLearning/cart/delete")
+    @ResponseBody
+    public ResponseEntity<?> deleteCartItem(@RequestParam("itemId") Integer itemId, HttpSession session) {
+        User user = (User) session.getAttribute("user");
         CartItem cartItem = userService.findCartItemById(itemId);
-        if(cartItem.getCart().getUserId().equals(user.getUserId())){
+
+        if(cartItem != null && cartItem.getCart().getUserId().equals(user.getUserId())) {
             userService.removeCartItemById(itemId);
+            Integer updatedCartCount = userService.getCartCourseCount(user.getUserId());
+            return ResponseEntity.ok().body(updatedCartCount);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("無權刪除此項目");
         }
-
-        return "redirect:/enjoyLearning/cart";
-
     }
 
     // 購物車結帳
@@ -208,13 +218,16 @@ public class FrontendController {
     public String myCourse(HttpSession session, Model model){
         // 1. 先找到 user 登入者
         User user = (User)session.getAttribute("user");
+        // 獲取用戶購物車中的課程數量
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
+
         List<UserCourse> userCourse = courseService.getPurchasedCourses(user.getUserId());
         List<Course> courses = new ArrayList<>();
         for (UserCourse uc : userCourse) {
             Course course = courseService.getCoursesByIdForCart(uc.getCourseId());
             courses.add(course);
         }
-
+        model.addAttribute("cartCourseCount",cartCourseCount);
         model.addAttribute("user", user);
         model.addAttribute("courses",courses);
         return  "/user/courses/myCourse";
@@ -223,8 +236,11 @@ public class FrontendController {
     // 優惠券  -------------------------------------------------------------------------------------
     // 獲取所有優惠劵頁面
     @GetMapping("/enjoyLearning/coupons")
-    public String showCoupons(Model model) {
+    public String showCoupons(Model model,HttpSession session) {
+        User user = (User)session.getAttribute("user");
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         List<Coupon> coupons = couponService.getAllCoupons();
+        model.addAttribute("cartCourseCount",cartCourseCount);
         model.addAttribute("coupons", coupons);
         return "user/coupons/couponInfo";
     }
@@ -353,12 +369,14 @@ public class FrontendController {
 
         List<Comment> comments = commentRepository.findAllByOrderByCreateTimeDesc();
         List<Language> languages = languageRepository.findAll(); // 獲取語言列表
-
+        // 獲取用戶購物車中的課程數量
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         model.addAttribute("posts", posts);
         model.addAttribute("comments", comments);
         model.addAttribute("languages", languages); // 添加語言列表到模型中
         model.addAttribute("user", user);
-
+        model.addAttribute("checkedUserId", user.getUserId());
+        model.addAttribute("cartCourseCount",cartCourseCount);
         return "user/forum/main"; // 返回視圖的名稱
     }
 

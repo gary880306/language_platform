@@ -15,18 +15,16 @@
     <script
             src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <style>
+        /* 導航欄樣式 */
         .navbar {
             background-color: #d1fdff;
         }
-
         .navbar-nav a {
             position: relative;
             text-decoration: none;
             color: #000000; /* 超連結文字顏色 */
-            transition: color 0.2s; /* 超連結文字顏色過渡效果 */
+            transition: color 0.2s; /* 文字顏色過渡效果 */
         }
-
-
         .navbar-nav a::after {
             content: "";
             position: absolute;
@@ -34,15 +32,52 @@
             height: 1.5px;
             bottom: 8px;
             left: 10px;
-            background-color: rgb(40, 195, 192); /* 底線的顏色 */
+            background-color: rgb(40, 195, 192); /* 底線顏色 */
             visibility: hidden;
             transform: scaleX(0);
             transition: all 0.3s ease-in-out;
         }
-
         .navbar-nav a:hover::after {
             visibility: visible;
             transform: scaleX(1);
+        }
+
+        /* 設定圖標和登出鏈接的樣式 */
+        .navbar .bi, .navbar .logout-link {
+            display: inline-block;
+            vertical-align: middle;
+            width: 24px;   /* 圖標寬度 */
+            height: 24px;  /* 圖標高度 */
+            text-align: center;
+            line-height: 24px; /* 垂直居中 */
+        }
+
+        /* 美化登出鏈接 */
+        .navbar .logout-link {
+            color: #000000; /* 文字顏色 */
+            text-decoration: none; /* 移除底線 */
+            transition: color 0.2s; /* 過渡效果 */
+        }
+
+        .navbar .logout-link:hover {
+            color: #0056b3; /* 滑鼠懸停時的顏色 */
+        }
+
+        .custom-badge {
+            position: absolute;
+            top: auto;
+            bottom: 4px;
+            right: 4px;
+            transform: translate(50%, 50%); /* 微調位置使其位於右下角 */
+            width: 15px;  /* 更小的固定寬度 */
+            height: 15px; /* 更小的固定高度 */
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6em; /* 更小的文字尺寸 */
+            border-radius: 50%; /* 圓形 */
+            background-color: red; /* 背景顏色 */
         }
 
         .post-title {
@@ -71,14 +106,53 @@
             background-color: rgb(211, 211, 211); /* hover 時保持原始灰色 */; /* hover 時的背景設為完全透明 */
         }
 
-        .comment-item {
-            background-color: #f2f2f2; /* 浅灰色背景 */
+        .comment {
+
             padding: 10px;             /* 留言內邊距 */
             margin-bottom: 5px;        /* 留言之間的間隔 */
             border-radius: 5px;        /* 圓角邊框 */
             display: block;            /* 塊級元素 */
             word-wrap: break-word;     /* 自動換行 */
             max-width: 100%;           /* 最大寬度限制 */
+        }
+
+        .comment-item {
+            background-color: #f2f2f2; /* 浅灰色背景 */
+            padding: 10px;             /* 留言內邊距 */
+            margin-bottom: 5px;        /* 留言之間的間隔 */
+            border-radius: 5px;        /* 圓角邊框 */
+            display: flex;             /* 使用 Flexbox 布局 */
+            justify-content: space-between; /* 內容和按鈕分散對齊 */
+            word-wrap: break-word;     /* 自動換行 */
+            max-width: 100%;           /* 最大寬度限制 */
+        }
+
+        .comment-content {
+            flex-grow: 1; /* 確保內容佔據大部分空間 */
+        }
+
+        .comment-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            width: 100px;
+            font-size: 0.8em; /* 縮小文字大小 */
+        }
+
+        .comment-buttons button {
+            background-color: transparent;
+            border: none;
+            color: #6c757d;
+            padding: 0;
+            margin-right:3px;
+        }
+
+        .comment-buttons button:hover {
+            color: #5a6268; /* 滑鼠懸停時的文字顏色 */
+        }
+
+        .comment-content, .comment-input {
+            width: 50%; /* 或其他適當的寬度 */
         }
 
         /* 按讚按鈕的原始樣式 */
@@ -106,13 +180,11 @@
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light  sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="./main.jsp">响學</a>
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+        <a class="navbar-brand" href="/enjoyLearning/courses">响學</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -123,9 +195,14 @@
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/coupons">優惠券</a></li>
             </ul>
             <div class="ms-auto">
-                <a href="/enjoyLearning/cart" class="text-dark"><i class="bi bi-cart"></i></a>
-                <a href="#" class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
-                <a href="/user/logout" class="pure-menu-link">🔞 登出</a>
+                <a href="/enjoyLearning/cart" class="text-dark position-relative me-3">
+                    <i class="bi bi-cart3"></i>
+                    <span class="position-absolute badge rounded-circle bg-danger custom-badge">
+                        [[${cartCourseCount}]] <!-- 使用 Thymeleaf 表達式動態顯示商品數 -->
+                    </span>
+                </a>
+                <a href=".././userInfo.jsp" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
+                <a href="/user/logout" class="text-dark logout-link me-3" style="width: auto">登出</a>
             </div>
         </div>
     </div>
@@ -203,7 +280,7 @@
                                     <i class="bi bi-chat me-1"></i>留言
                                 </button>
                                 </div>
-                                <div class="col-12 mt-2 comment-input" style="display: none;" th:id="'comment-input-' + ${post.id}">
+                                <div class="col-12 mt-2 comment" style="display: none;" th:id="'comment-input-' + ${post.id}">
                                     <span class="user-name-display" th:text="${user.userName}"></span>
                                     <div style="display: flex; align-items: center;">
                                         <input type="text" class="form-control" th:id="'comment-text-' + ${post.id}" placeholder="輸入留言">
@@ -218,13 +295,39 @@
                             <!-- 貼文的留言 -->
                             <div th:id="'comment-list-' + ${post.id}">
                                 <div th:each="comment : ${comments}" th:if="${comment.post != null && comment.post.id == post.id}">
-                                    <div th:class="'comment-item'">
+                                    <div th:class="'comment-item'" th:id="'comment-content-all-' + ${comment.id}">
+                                        <!-- 留言內容 -->
                                         <p class="mb-0">
                                             <strong th:text="${comment.user.userName}"></strong> :
-                                            <span th:text="${comment.content}"></span>
+                                            <span th:id="'comment-text-span-' + ${comment.id}" th:text="${comment.content}"></span>
                                             <br>
                                             <small class='text-muted' th:text="${comment.formatTimeAgo}"></small>
                                         </p>
+
+                                        <!-- 編輯和刪除按鈕 -->
+                                        <div th:id="'comment-item-' + ${comment.id}" th:class="'comment-item'">
+                                            <!-- 原本的留言內容 -->
+                                            <div class="comment-content" th:id="'comment-content-' + ${comment.id}">
+
+                                            </div>
+
+                                            <!-- 編輯留言的輸入框，初始隱藏 -->
+                                            <div class="col-12 mt-2 comment-input" style="display: none;" th:id="'comment-input-' + ${comment.id}">
+                                                <div style="display: flex; align-items: center;">
+                                                    <input type="text" class="form-control" th:id="'comment-edit-text-' + ${comment.id}" th:value="${comment.content}" placeholder="輸入留言">
+                                                    <button class="btn btn-secondary" th:onclick="'updateComment(' + ${comment.id} + ');'">
+                                                        <i class="bi bi-cursor"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- 編輯和刪除按鈕 -->
+                                            <div th:if="${checkedUserId == comment.user.userId}" class="comment-buttons">
+                                                <button type="button" class="btn btn-primary btn-sm" th:onclick="'editComment(' + ${comment.id} + ')'" >編輯</button>
+                                                <button type="button" class="btn btn-danger btn-sm" th:onclick="'deleteComment(' + ${comment.id} + ')'" >刪除</button>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -240,171 +343,223 @@
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>
-</footer>
+    </footer>
 
-<script>
-    function toggleCommentInput(buttonElement) {
-        var postId = buttonElement.getAttribute('data-post-id');
-        var userName = buttonElement.getAttribute('data-username');
-        var inputId = 'comment-input-' + postId;
+    <script>
+        function toggleCommentInput(buttonElement) {
+            var postId = buttonElement.getAttribute('data-post-id');
+            var userName = buttonElement.getAttribute('data-username');
+            var inputId = 'comment-input-' + postId;
 
-        var inputDiv = document.getElementById(inputId);
-        if (!inputDiv) return;
+            var inputDiv = document.getElementById(inputId);
+            if (!inputDiv) return;
 
 
-        // 更新用戶名稱
-        var userNameSpan = inputDiv.querySelector('.user-name-display');
-        if (userNameSpan) {
-            userNameSpan.textContent = userName + ":";
+            // 更新用戶名稱
+            var userNameSpan = inputDiv.querySelector('.user-name-display');
+            if (userNameSpan) {
+                userNameSpan.textContent = userName + ":";
+            }
+
+            // 切換顯示狀態
+            inputDiv.style.display = inputDiv.style.display === "none" ? "block" : "none";
         }
 
-        // 切換顯示狀態
-        inputDiv.style.display = inputDiv.style.display === "none" ? "block" : "none";
-    }
+    </script>
 
-</script>
+    <script>
+        $(document).ready(function() {
+            $('#newPostForm').on('submit', function(e) {
+                e.preventDefault();
 
-<script>
-    $(document).ready(function() {
-        $('#newPostForm').on('submit', function(e) {
-            e.preventDefault();
+                var postTitle = $('#post-title').val();
+                var postLanguage = $('#post-language').val();
+                var postContent = $('#post-content').val();
+                var postUserId = $('#user-id').val();
 
-            var postTitle = $('#post-title').val();
-            var postLanguage = $('#post-language').val();
-            var postContent = $('#post-content').val();
-            var postUserId = $('#user-id').val();
+                var postData = {
+                    title: postTitle,
+                    content: postContent,
+                    languageId: postLanguage,
+                    userId: postUserId
+                };
 
-            var postData = {
-                title: postTitle,
-                content: postContent,
-                languageId: postLanguage,
-                userId: postUserId
+                $.ajax({
+                    url: '/enjoyLearning/Posts',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(postData),
+                    success: function(response) {
+                        console.log('Post added successfully', response);
+                        addPostToPage(response);
+                        $('#postModal').modal('hide'); // 關閉模態框
+                        $('#newPostForm')[0].reset(); // 清空表單
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error adding post', xhr, status, error);
+                    }
+                });
+            });
+        });
+
+        function timeAgo(date) {
+            const now = new Date();
+            const postDate = new Date(date);
+            const diff = now - postDate;
+
+            const minutes = Math.floor(diff / 60000);
+
+            if (minutes < 1) return "剛剛發布";
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return days + "天前";
+            if (hours > 0) return hours + "小時前";
+            return minutes + "分鐘前";
+        }
+
+        function addPostToPage(post) {
+            var userName = post.user ? post.user.userName : '未知用户';
+            var languageName = post.language && post.language.name ? post.language.name : '未知语言';
+            var timeAgoString = post.createTime ? timeAgo(post.createTime) : '';
+
+
+            var postElement =
+                '<div class="card my-3">' +
+                '<div class="card-body">' +
+                '<h6 class="post-name">' + userName + '</h6>' +
+                '<h3 class="card-title post-title">' + post.title + '</h3>' +
+                '<span class="post-language">' + languageName + '</span> ' +
+                '<span class="post-date">' + timeAgoString + '</span>' +
+                '<p class="card-text mt-3">' + post.content + '</p>' +
+                '<hr>' +
+                '</div>' +
+                '</div>';
+
+            $('#posts-list').prepend(postElement);
+        }
+    </script>
+
+    <script>
+        function submitComment(postId) {
+            var commentContent = $('#comment-text-' + postId).val();
+            var userId = $('#current-user-id').val();
+
+            var commentData = {
+                content: commentContent,
+                userId: userId,
+                postId: postId
             };
 
             $.ajax({
-                url: '/enjoyLearning/Posts',
+                url: '/enjoyLearning/comments',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(postData),
+                data: JSON.stringify(commentData),
                 success: function(response) {
-                    console.log('Post added successfully', response);
-                    addPostToPage(response);
-                    $('#postModal').modal('hide'); // 關閉模態框
-                    $('#newPostForm')[0].reset(); // 清空表單
+                    console.log('留言成功', response);
+                    addCommentToPage(postId, response);
+                    $('#comment-text-' + postId).val('');
+                    $('#comment-input-' + postId).hide();
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error adding post', xhr, status, error);
+                    console.error('留言失败', error);
+                }
+            });
+        }
+
+
+        function addCommentToPage(postId, comment) {
+            // 格式化時間
+            var formattedTime = timeAgo(comment.createTime);
+
+            // 創建新的留言元素並應用樣式
+            var newComment = $('<div>')
+                .addClass('comment-item')
+                .html(`<strong>${comment.user.userName} :</strong> ${comment.content} <br><small class='text-muted'>${formattedTime}</small>`);
+
+            // 將新留言添加到留言列表的頂部
+            $('#comment-list-' + postId).prepend(newComment);
+        }
+
+    </script>
+
+    <script>
+        $('.likeButton').click(function() {
+            var postId = $(this).data('post-id');
+            var isLiked = $(this).hasClass('liked');
+            var methodType = isLiked ? 'DELETE' : 'POST';
+
+            $.ajax({
+                type: methodType,
+                url: '/enjoyLearning/Posts/' + postId + '/like',
+                success: function(response) {
+                    var button = $(this); // 獲取當前按鈕
+                    if (button.hasClass('liked')) {
+                        button.removeClass('liked'); // 移除 liked 類別，恢復灰色
+                    } else {
+                        button.addClass('liked'); // 添加 liked 類別，變為藍色
+                    }
+                }.bind(this),
+                error: function(error) {
+                    console.error('按讚操作失敗：', error);
                 }
             });
         });
-    });
 
-    function timeAgo(date) {
-        const now = new Date();
-        const postDate = new Date(date);
-        const diff = now - postDate;
+    </script>
 
-        const minutes = Math.floor(diff / 60000);
+    <script>
+        function editComment(commentId) {
+            // 切換顯示狀態
+            var commentContent = document.getElementById('comment-content-' + commentId);
+            var commentInput = document.getElementById('comment-input-' + commentId);
+            commentContent.style.display = 'none';
+            commentInput.style.display = 'block';
+        }
 
-        if (minutes < 1) return "剛剛發布";
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
+        function updateComment(commentId) {
+            var commentText = document.getElementById('comment-edit-text-' + commentId).value;
+            $.ajax({
+                url: '/enjoyLearning/comments/' + commentId,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({ content: commentText }),
+                success: function(response) {
+                    // 直接更新 <span> 标签的内容
+                    var commentSpan = document.getElementById('comment-text-span-' + commentId);
+                    commentSpan.innerText = commentText;
 
-        if (days > 0) return days + "天前";
-        if (hours > 0) return hours + "小時前";
-        return minutes + "分鐘前";
-    }
-
-    function addPostToPage(post) {
-        var userName = post.user ? post.user.userName : '未知用户';
-        var languageName = post.language && post.language.name ? post.language.name : '未知语言';
-        var timeAgoString = post.createTime ? timeAgo(post.createTime) : '';
-
-
-        var postElement =
-            '<div class="card my-3">' +
-            '<div class="card-body">' +
-            '<h6 class="post-name">' + userName + '</h6>' +
-            '<h3 class="card-title post-title">' + post.title + '</h3>' +
-            '<span class="post-language">' + languageName + '</span> ' +
-            '<span class="post-date">' + timeAgoString + '</span>' +
-            '<p class="card-text mt-3">' + post.content + '</p>' +
-            '<hr>' +
-            '</div>' +
-            '</div>';
-
-        $('#posts-list').prepend(postElement);
-    }
-</script>
-
-<script>
-    function submitComment(postId) {
-        var commentContent = $('#comment-text-' + postId).val();
-        var userId = $('#current-user-id').val();
-
-        var commentData = {
-            content: commentContent,
-            userId: userId,
-            postId: postId
-        };
-
-        $.ajax({
-            url: '/enjoyLearning/comments',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(commentData),
-            success: function(response) {
-                console.log('留言成功', response);
-                addCommentToPage(postId, response);
-                $('#comment-text-' + postId).val('');
-                $('#comment-input-' + postId).hide();
-            },
-            error: function(xhr, status, error) {
-                console.error('留言失败', error);
-            }
-        });
-    }
-
-
-    function addCommentToPage(postId, comment) {
-        // 格式化時間
-        var formattedTime = timeAgo(comment.createTime);
-
-        // 創建新的留言元素並應用樣式
-        var newComment = $('<div>')
-            .addClass('comment-item')
-            .html(`<strong>${comment.user.userName} :</strong> ${comment.content} <br><small class='text-muted'>${formattedTime}</small>`);
-
-        // 將新留言添加到留言列表的頂部
-        $('#comment-list-' + postId).prepend(newComment);
-    }
-
-</script>
-
-<script>
-    $('.likeButton').click(function() {
-        var postId = $(this).data('post-id');
-        var isLiked = $(this).hasClass('liked');
-        var methodType = isLiked ? 'DELETE' : 'POST';
-
-        $.ajax({
-            type: methodType,
-            url: '/enjoyLearning/Posts/' + postId + '/like',
-            success: function(response) {
-                var button = $(this); // 獲取當前按鈕
-                if (button.hasClass('liked')) {
-                    button.removeClass('liked'); // 移除 liked 類別，恢復灰色
-                } else {
-                    button.addClass('liked'); // 添加 liked 類別，變為藍色
+                    // 隐藏编辑框并显示更新后的留言内容
+                    document.getElementById('comment-input-' + commentId).style.display = 'none';
+                    document.getElementById('comment-content-' + commentId).style.display = 'block';
+                },
+                error: function(error) {
+                    console.error('更新留言失败', error);
                 }
-            }.bind(this),
-            error: function(error) {
-                console.error('按讚操作失敗：', error);
-            }
-        });
-    });
+            });
+        }
 
-</script>
 
-</body>
-</html>
+
+        function deleteComment(commentId) {
+            // 发送 AJAX 请求以删除留言
+            $.ajax({
+                url: '/enjoyLearning/comments/' + commentId,
+                type: 'DELETE',
+                success: function(response) {
+                    // 使用 jQuery 移除留言元素
+                    $('#comment-content-all-' + commentId).remove();
+                },
+                error: function(error) {
+                    console.error('删除留言失败', error);
+                }
+            });
+        }
+
+
+
+
+    </script>
+    </body>
+    </html>

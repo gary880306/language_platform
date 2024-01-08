@@ -32,4 +32,5 @@ public interface UserDao {
     void addUserCoupon(Integer userId, Integer couponId);
     List<UserCoupon> findUserCouponsByUserId(Integer userId);
     void decrementCouponQuantity(Integer couponId);
+    Integer getCartCourseCount(Integer userId);
 }

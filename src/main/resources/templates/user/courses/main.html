@@ -35,6 +35,44 @@
             transform: scaleX(1);
         }
 
+        /* 設定圖標和登出鏈接的樣式 */
+        .navbar .bi, .navbar .logout-link {
+            display: inline-block;
+            vertical-align: middle;
+            width: 24px;   /* 圖標寬度 */
+            height: 24px;  /* 圖標高度 */
+            text-align: center;
+            line-height: 24px; /* 垂直居中 */
+        }
+
+        /* 美化登出鏈接 */
+        .navbar .logout-link {
+            color: #000000; /* 文字顏色 */
+            text-decoration: none; /* 移除底線 */
+            transition: color 0.2s; /* 過渡效果 */
+        }
+
+        .navbar .logout-link:hover {
+            color: #0056b3; /* 滑鼠懸停時的顏色 */
+        }
+
+        .custom-badge {
+            position: absolute;
+            top: auto;
+            bottom: 4px;
+            right: 4px;
+            transform: translate(50%, 50%); /* 微調位置使其位於右下角 */
+            width: 15px;  /* 更小的固定寬度 */
+            height: 15px; /* 更小的固定高度 */
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6em; /* 更小的文字尺寸 */
+            border-radius: 50%; /* 圓形 */
+            background-color: red; /* 背景顏色 */
+        }
+
         /* 搜索欄位樣式 */
         .search-form {
             display: flex;
@@ -100,10 +138,6 @@
             color: #00A9B0;
         }
 
-
-        /* 其他樣式 */
-        /* ... */
-
         /* 頁腳樣式 */
         footer {
             background-color: #333;
@@ -136,9 +170,14 @@
                 </li>
             </ul>
             <div class="ms-auto">
-                <a href="/enjoyLearning/cart" class="text-dark"><i class="bi bi-cart"></i></a>
-                <a href=".././userInfo.jsp" class="ms-3 text-dark"><i class="bi bi-person-circle"></i></a>
-                <a href="/user/logout" class="pure-menu-link">🔞 登出</a>
+                <a href="/enjoyLearning/cart" class="text-dark position-relative me-3">
+                    <i class="bi bi-cart3"></i>
+                    <span class="position-absolute badge rounded-circle bg-danger custom-badge">
+                        [[${cartCourseCount}]] <!-- 使用 Thymeleaf 表達式動態顯示商品數 -->
+                    </span>
+                </a>
+                <a href=".././userInfo.jsp" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
+                <a href="/user/logout" class="text-dark logout-link me-3" style="width: auto">登出</a>
             </div>
         </div>
     </div>
@@ -148,7 +187,7 @@
 <section class="card-container d-flex flex-wrap">
     <!-- 卡片內容 -->
     <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.109/uploadImages/' + ${course.imageUrl}}"
+        <img th:src="@{'http://192.168.1.108/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
         <div class="card-body" th:attr="data-course-id=${course.courseId}">
             <p class="cardword mb-1">
