@@ -1,6 +1,7 @@
 package com.chenxian.language_platform.entity;
 
 import com.chenxian.language_platform.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -31,10 +32,12 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @ToString.Exclude  // 排除likes屬性
+    @JsonIgnore
     private List<Like> likes;  // 新增一對多關係，用於存儲按讚記錄
 
     @Transient
     private boolean liked;
+    private boolean isDeleted = false;
 
     public String getTimeAgo() {
         return formatTimeAgo(this.createTime);

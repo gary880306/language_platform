@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
     // 可添加自定義查詢方法
-    List<Post> findAllByOrderByCreateTimeDesc();
+    List<Post> findByIsDeletedFalseOrderByCreateTimeDesc();
 }

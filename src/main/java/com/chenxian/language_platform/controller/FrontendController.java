@@ -4,6 +4,7 @@ import com.chenxian.language_platform.dto.CourseQueryParams;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.entity.Comment;
 import com.chenxian.language_platform.entity.Language;
+import com.chenxian.language_platform.entity.Like;
 import com.chenxian.language_platform.entity.Post;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.repository.CommentRepository;
@@ -356,19 +357,22 @@ public class FrontendController {
 
     @GetMapping("/enjoyLearning/forum")
     public String showForum(Model model, HttpSession session) {
-        List<Post> posts = postRepository.findAllByOrderByCreateTimeDesc();
+        List<Post> posts = postRepository.findByIsDeletedFalseOrderByCreateTimeDesc();
         User user = (User)session.getAttribute("user");
-
+        List<Integer> likes = new ArrayList<>();
             // 檢查當前用戶對每個貼文的點讚狀態
             if (user != null) {
                 for (Post post : posts) {
                     boolean liked = likeRepository.existsByUser_UserIdAndPost_Id(user.getUserId(), post.getId());
                     post.setLiked(liked);
+                    Integer likesCount = likeRepository.countByPost(post);
+                    likes.add(likesCount);
                 }
             }
 
         List<Comment> comments = commentRepository.findAllByOrderByCreateTimeDesc();
         List<Language> languages = languageRepository.findAll(); // 獲取語言列表
+
         // 獲取用戶購物車中的課程數量
         Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         model.addAttribute("posts", posts);
@@ -377,6 +381,7 @@ public class FrontendController {
         model.addAttribute("user", user);
         model.addAttribute("checkedUserId", user.getUserId());
         model.addAttribute("cartCourseCount",cartCourseCount);
+        model.addAttribute("likes",likes);
         return "user/forum/main"; // 返回視圖的名稱
     }
 

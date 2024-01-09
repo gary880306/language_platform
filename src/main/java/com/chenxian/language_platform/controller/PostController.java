@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/enjoyLearning/Posts")
@@ -64,21 +65,32 @@ public class PostController {
 
 
     @PutMapping("/{id}")
-    public Post updatePost(@PathVariable Integer id, @RequestBody Post updatedPost) {
+    public Post updatePost(@PathVariable Integer id, @RequestBody PostDto postDto) {
         Post existingPost = postRepository.findById(id).orElse(null);
+        User user = userRepository.findById(postDto.getUserId()).orElse(null);
+        Language language = languageRepository.findById(postDto.getLanguageId()).orElse(null);
         if (existingPost != null) {
-            existingPost.setTitle(updatedPost.getTitle());
-            existingPost.setContent(updatedPost.getContent());
-            // Update other properties as needed
+            existingPost.setTitle(postDto.getTitle());
+            existingPost.setContent(postDto.getContent());
+            existingPost.setUser(user);
+            existingPost.setLanguage(language);
             return postRepository.save(existingPost);
         }
         return null;
     }
 
+
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable Integer id) {
-        postRepository.deleteById(id);
+    public ResponseEntity<?> deletePost(@PathVariable Integer id) {
+        return postRepository.findById(id)
+                .map(post -> {
+                    post.setDeleted(true);
+                    postRepository.save(post);
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
+
 
     //--------------------------------------------------------------------------------------------
     // 點讚區
@@ -102,9 +114,9 @@ public class PostController {
         likes.setLikedAt(LocalDateTime.now()); // 設置按讚時間
         likeRepository.save(likes); // 保存按讚信息到數據庫
         // 更新帖子的按讚數
-        postLikes.put(postId, postLikes.getOrDefault(postId, 0) + 1);
+        Integer like = likeRepository.countByPost(post);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(like);
     }
 
     @Transactional
@@ -115,15 +127,17 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用戶未登錄");
         }
 
+        Integer like = 0;
         // 檢查用戶是否已經點讚
         if (hasLiked(user.getUserId(), postId)) {
             // 從數據庫中刪除點讚信息
             likeRepository.deleteByUserAndPost(user, postRepository.findById(postId).orElse(null));
+            Post post = postRepository.getReferenceById(postId);
             // 更新帖子的按讚數
-            postLikes.put(postId, postLikes.getOrDefault(postId, 0) - 1);
+            like = likeRepository.countByPost(post);
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(like);
     }
 
     @GetMapping("/{postId}/likes/count")
