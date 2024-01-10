@@ -161,14 +161,29 @@ public class FrontendController {
     @GetMapping("/enjoyLearning/cart")
     public String cartPage(HttpSession session, Model model) {
         // 1. 先找到 user 登入者
-        User user = (User)session.getAttribute("user");
+        User user = (User) session.getAttribute("user");
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
-        if(cart != null){
+        System.out.println(cart);
+        if(cart != null) {
             Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
-            int total =  cart.getCartItems().stream().
-                    mapToInt(item ->  item.getCourse().getPrice()).sum();
-            model.addAttribute("cartCourseCount",cartCourseCount);
+            Integer total = cart.getCartItems().stream()
+                    .mapToInt(item -> item.getCourse().getPrice()).sum();
+
+            // 检查是否应用了优惠券
+            if(cart.getCouponId() != null) {
+                Coupon coupon = couponService.getCouponById(cart.getCouponId());
+                // 计算优惠后的总额
+                BigDecimal discount = calculateDiscountAmount(cart, coupon);
+                BigDecimal discountedTotal = new BigDecimal(total).subtract(discount);
+
+                System.out.println(discount);
+                System.out.println(discountedTotal);
+                model.addAttribute("discount", discount);
+                model.addAttribute("discountedTotal", discountedTotal);
+            }
+
+            model.addAttribute("cartCourseCount", cartCourseCount);
             model.addAttribute("cart", cart);
             model.addAttribute("total", total);
         }
@@ -203,11 +218,25 @@ public class FrontendController {
 
 
         if(cart != null){
-            int total =  cart.getCartItems().stream().
-                    mapToInt(item ->  item.getCourse().getPrice()).sum();
+            Integer totalInteger = cart.getCartItems().stream()
+                    .mapToInt(item -> item.getCourse().getPrice())
+                    .sum();
+            BigDecimal total = new BigDecimal(totalInteger);
+
+            if (cart.getCouponId() != null) {
+                // 獲取當前購物車的 coupon
+                Coupon coupon = couponService.getCouponById(cart.getCouponId());
+                // 根據優惠券計算折扣金額
+                BigDecimal discount = calculateDiscountAmount(cart, coupon);
+                total = total.subtract(discount);
+            }
+
+            // 如果需要將結果轉換回 Integer
+            totalInteger = total.intValue();
+
             userService.checkoutCartByUserId(cart.getUserId(),cart.getCartId()); // 結帳
             model.addAttribute("cart", cart);
-            model.addAttribute("total", total);
+            model.addAttribute("total", totalInteger);
 
         }
 
@@ -323,17 +352,50 @@ public class FrontendController {
         Map<String, Object> response = new HashMap<>();
         Coupon coupon = couponService.getCouponById(couponId);
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+        couponService.applyCouponToCart(user.getUserId(),couponId);
 
         // 驗證優惠券是否有效
-            // && coupon.isValid()
+
+                // && coupon.isValid()
+
+                // 計算折扣的金額
+                BigDecimal discounted = calculateDiscountAmount(cart,coupon);
+
                 // 計算折扣後的總金額
                 BigDecimal total = calculateDiscountedTotal(cart, coupon);
 
+                response.put("discounted",discounted.toString());
                 response.put("total", total.toString());
                 return response;
 
     }
 
+    // 計算折扣的金額方法
+    private BigDecimal calculateDiscountAmount(Cart cart, Coupon coupon) {
+        BigDecimal total = BigDecimal.valueOf(cart.getCartItems().stream()
+                .mapToInt(item -> item.getCourse().getPrice())
+                .sum());
+        BigDecimal discountAmount = BigDecimal.ZERO;
+
+        switch(coupon.getDiscountType()) {
+            case FIXED:
+                // 固定值折扣
+                discountAmount = BigDecimal.valueOf(coupon.getDiscountValue().doubleValue());
+                break;
+            case PERCENTAGE:
+                // 百分比折扣
+                BigDecimal discountRate = BigDecimal.valueOf(coupon.getDiscountValue().doubleValue() / 100.0);
+                discountAmount = total.multiply(discountRate);
+                break;
+        }
+
+        discountAmount = discountAmount.setScale(0, RoundingMode.HALF_UP);
+
+        // 確保折扣金額不會大於原始總金額
+        return discountAmount.compareTo(total) > 0 ? total : discountAmount;
+    }
+
+    // 計算折扣後的總金額方法
     private BigDecimal calculateDiscountedTotal(Cart cart, Coupon coupon) {
         BigDecimal total = BigDecimal.valueOf(cart.getCartItems().stream().mapToInt(item -> item.getCourse().getPrice()).sum());
 

@@ -30,4 +30,5 @@ public interface UserService {
     List<UserCoupon> findUserCouponsByUserId(Integer userId);
     void decrementCouponQuantity(Integer couponId);
     Integer getCartCourseCount(Integer userId);
+    void updateCartCoupon(Integer couponId , Integer cartId);
 }

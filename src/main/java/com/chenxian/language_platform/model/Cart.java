@@ -14,4 +14,5 @@ public class Cart {
     private boolean isCheckout;
     private Timestamp createdDate;
     private Timestamp checkoutDate;
+    private Integer couponId;
 }

@@ -131,7 +131,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Cart findNoneCheckoutCartByUserId(Integer userId) {
-        String sql = "SELECT cart_id, user_id, isCheckout, created_date, checkout_date FROM cart " +
+        String sql = "SELECT cart_id, user_id, isCheckout, created_date, checkout_date ,coupon_id FROM cart " +
                 "WHERE user_id = :userId AND (isCheckout = false OR isCheckout IS NULL)";
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
@@ -379,6 +379,18 @@ public class UserDaoImpl implements UserDao {
 
         return namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
     }
+
+    @Override
+    public void updateCartCoupon(Integer couponId, Integer cartId) {
+        String sql = "UPDATE cart SET coupon_id =:couponId WHERE cart_id =:cartId";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("couponId", couponId);
+        map.put("cartId", cartId);
+
+        namedParameterJdbcTemplate.update(sql, map);
+    }
+
 
     // 自定義異常類
     public class ItemAlreadyInCartException extends RuntimeException {

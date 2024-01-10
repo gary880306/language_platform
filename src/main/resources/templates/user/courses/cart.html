@@ -163,12 +163,16 @@
                         data-bs-toggle="modal"
                         data-bs-target="#couponModal">查看優惠券
                 </button>
-                <h5>總金額: NT$ <span id="totalValue" th:text="${total}"></span></h5>
+                <!-- 显示优惠券折扣 -->
+                <h5>優惠券折扣: -$ <span id="discounted" th:text="${discount != null ? discount : 0}"></span></h5>
+                <!-- 显示总金额 -->
+                <h5>總金額: $ <span id="totalValue" th:text="${discountedTotal != null ? discountedTotal : total}"></span></h5>
                 <form method="get" action="/enjoyLearning/checkout">
                     <button class="btn btn-success checkout-btn">結帳</button>
                 </form>
             </div>
         </div>
+
     </div>
 
     <!-- 優惠券模態框 -->
@@ -287,9 +291,10 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.total) {
+                    if (data) {
+                        console.log(data);
                         document.getElementById('totalValue').textContent = data.total;
-
+                        document.getElementById('discounted').textContent = data.discounted;
                         // 使用 Bootstrap 5 的方法關閉模態框
                         var couponModalElement = document.getElementById('couponModal');
                         var couponModal = bootstrap.Modal.getInstance(couponModalElement);

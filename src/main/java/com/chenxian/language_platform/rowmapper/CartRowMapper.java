@@ -11,11 +11,12 @@ public class CartRowMapper implements RowMapper<Cart> {
     @Override
     public Cart mapRow(ResultSet rs, int rowNum) throws SQLException {
         Cart cart = new Cart();
-        cart.setCartId(rs.getInt("cart_Id"));
+        cart.setCartId(rs.getInt("cart_id"));
         cart.setUserId(rs.getInt("user_id"));
         cart.setCheckout(rs.getBoolean("isCheckout"));
         cart.setCreatedDate(rs.getTimestamp("created_date"));
         cart.setCheckoutDate(rs.getTimestamp("checkout_date"));
+        cart.setCouponId(rs.getInt("coupon_id"));
         return cart;
     }
 }

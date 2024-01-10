@@ -15,4 +15,5 @@ public interface CouponDao {
     void deleteCoupon(Integer couponId);
     // 取得所有優惠券
     List<Coupon> getAllCoupons();
+
 }

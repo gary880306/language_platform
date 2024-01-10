@@ -205,20 +205,10 @@
     </div>
 </div>
 
-
-<div id="customAlert" style="display: none;">
-    <div class="custom-alert-content">
-        <span id="customAlertMessage">這裡是消息內容</span>
-    </div>
-</div>
-
-
-
-
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>
 </footer>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function updateCouponQuantityDisplay(couponId, quantity) {
         // 使用 data 屬性來找到對應的優惠券數量顯示元素
@@ -238,29 +228,22 @@
                 if (this.readyState === XMLHttpRequest.DONE) {
                     if (this.status === 200) {
                         var response = JSON.parse(this.responseText);
-                        showCustomAlert('添加成功');
+                        Swal.fire({
+                            title: '成功!',
+                            text: '已獲得優惠券!',
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
                         updateCouponQuantityDisplay(couponId, response.quantity);
                     } else {
-                        showCustomAlert('添加失敗');
+                        Swal.fire('失敗!', '已擁有此優惠券!', 'error');
                     }
                 }
             };
             xhr.send('couponId=' + couponId);
         });
     });
-
-    function showCustomAlert(message) {
-        var alertBox = document.getElementById('customAlert');
-        document.getElementById('customAlertMessage').innerText = message;
-        alertBox.style.display = 'block';
-
-        setTimeout(function() {
-            alertBox.style.display = 'none';
-        }, 2000);
-    }
-
-
-
 </script>
 </body>
 </html>

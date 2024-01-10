@@ -134,5 +134,10 @@ public class UserServiceImpl implements UserService {
         return userDao.getCartCourseCount(userId);
     }
 
+    @Override
+    public void updateCartCoupon(Integer couponId, Integer cartId) {
+        userDao.updateCartCoupon(couponId,cartId);
+    }
+
 
 }
