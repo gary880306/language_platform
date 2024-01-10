@@ -16,4 +16,6 @@ public interface CouponDao {
     // 取得所有優惠券
     List<Coupon> getAllCoupons();
 
+    boolean checkCouponExists(Integer userId, Integer couponId);
+
 }

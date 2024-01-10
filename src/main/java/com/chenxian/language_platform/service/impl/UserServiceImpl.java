@@ -110,13 +110,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkCouponExists(Integer userId, Integer couponId) {
-        return userDao.checkCouponExists(userId,couponId);
+    public void addUserCoupon(Integer userId, Integer couponId) {
+        userDao.addUserCoupon(userId,couponId);
     }
 
     @Override
-    public void addUserCoupon(Integer userId, Integer couponId) {
-        userDao.addUserCoupon(userId,couponId);
+    public void updateUserCoupon(Integer userId, Integer couponId) {
+        userDao.updateUserCoupon(userId,couponId);
     }
 
     @Override
@@ -137,6 +137,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateCartCoupon(Integer couponId, Integer cartId) {
         userDao.updateCartCoupon(couponId,cartId);
+    }
+
+    @Override
+    public void markCouponAsUsed(Integer userId, Integer couponId) {
+        userDao.markCouponAsUsed(userId,couponId);
+    }
+
+    @Override
+    public List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId) {
+        return userDao.findUnusedUserCouponsByUserId(userId);
     }
 
 

@@ -56,4 +56,9 @@ public class CouponServiceImpl implements CouponService {
         userService.updateCartCoupon(cart.getCouponId(),cart.getCartId());
     }
 
+    @Override
+    public boolean checkCouponExists(Integer userId, Integer couponId) {
+        return couponDao.checkCouponExists(userId,couponId);
+    }
+
 }

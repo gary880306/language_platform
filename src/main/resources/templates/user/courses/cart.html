@@ -151,7 +151,9 @@
             <tr th:each="item : ${cart.cartItems}">
                 <td th:text="${item.course.courseName}"></td>
                 <td th:text="${item.course.price}"></td>
-                <td><a href="#" th:onclick="'deleteItem(' + ${item.itemId} + ');'">刪除</a></td>
+                <td>
+                    <button type="button" class="btn btn-danger" th:onclick="'deleteItem(' + ${item.itemId} + ');'">刪除</button>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -164,7 +166,11 @@
                         data-bs-target="#couponModal">查看優惠券
                 </button>
                 <!-- 显示优惠券折扣 -->
-                <h5>優惠券折扣: -$ <span id="discounted" th:text="${discount != null ? discount : 0}"></span></h5>
+                <!-- 只有当 discount 不为 null 且不为 0 时显示优惠券折扣 -->
+                <!-- 使用 Thymeleaf 條件來控制顯示 -->
+                <h5 id="discountSection" th:style="${discount != null and discount != 0} ? 'display: block;' : 'display: none;'">
+                    優惠券折扣: -$ <span id="discounted" th:text="${discount}"></span>
+                </h5>
                 <!-- 显示总金额 -->
                 <h5>總金額: $ <span id="totalValue" th:text="${discountedTotal != null ? discountedTotal : total}"></span></h5>
                 <form method="get" action="/enjoyLearning/checkout">
@@ -285,7 +291,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    // 如需 CSRF 保護，請添加 CSRF token
+                    // 如需 CSRF 保護，添加 CSRF token
                 },
                 body: 'couponId=' + couponId
             })
@@ -293,9 +299,24 @@
                 .then(data => {
                     if (data) {
                         console.log(data);
-                        document.getElementById('totalValue').textContent = data.total;
-                        document.getElementById('discounted').textContent = data.discounted;
-                        // 使用 Bootstrap 5 的方法關閉模態框
+
+                        // 更新折扣顯示
+                        var discountSection = document.getElementById('discountSection');
+                        var discountedElement = document.getElementById('discounted');
+                        if (data.discounted && data.discounted != 0) {
+                            discountedElement.textContent = data.discounted;
+                            discountSection.style.display = 'block'; // 顯示折扣部分
+                        } else {
+                            discountSection.style.display = 'none'; // 隱藏折扣部分
+                        }
+
+                        // 更新總金額
+                        var totalValueElement = document.getElementById('totalValue');
+                        if (totalValueElement) {
+                            totalValueElement.textContent = data.total;
+                        }
+
+                        // 關閉模態框
                         var couponModalElement = document.getElementById('couponModal');
                         var couponModal = bootstrap.Modal.getInstance(couponModalElement);
                         couponModal.hide();

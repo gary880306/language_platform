@@ -125,6 +125,11 @@
             font-weight: bold;
         }
 
+        .btn-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         footer {
             background-color: #333;
             color: #fff;
@@ -134,23 +139,6 @@
             padding: 10px;
             width: 100%;
         }
-
-        #customAlert {
-            position: fixed;
-            left: 50%;
-            top: 20%;
-            transform: translate(-50%, -50%);
-            background-color: #4CAF50; /* 綠色背景 */
-            color: white;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            text-align: center;
-            width: 200px; /* 調整彈出框的寬度 */
-        }
-
-
 
     </style>
 </head>
@@ -199,7 +187,14 @@
                 <div>
                     <small th:attr="data-coupon-quantity=${coupon.getCouponId}" th:text="'數量：' + ${coupon.quantity}">數量：100</small>
                 </div>
-                <button th:attr="data-coupon-id=${coupon.getCouponId}" class="btn btn-coupon">領取</button>
+                <button th:attr="data-coupon-id=${coupon.getCouponId}"
+                        th:text="${coupon.quantity} > 0 ? '領取' : '已領完'"
+                        th:disabled="${coupon.quantity} <= 0"
+                        class="btn btn-coupon"
+                        th:classappend="${coupon.quantity} <= 0 ? 'btn-disabled' : ''">
+                    領取
+                </button>
+
             </div>
         </div>
     </div>
@@ -211,10 +206,15 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function updateCouponQuantityDisplay(couponId, quantity) {
-        // 使用 data 屬性來找到對應的優惠券數量顯示元素
         var quantityDisplays = document.querySelectorAll('[data-coupon-quantity="' + couponId + '"]');
         quantityDisplays.forEach(function(display) {
             display.innerText = '數量：' + quantity;
+            var button = display.closest('.coupon-card').querySelector('.btn-coupon');
+            if (quantity <= 0) {
+                button.innerText = '已領完';
+                button.disabled = true;
+                button.classList.add('btn-disabled');
+            }
         });
     }
 
@@ -237,7 +237,7 @@
                         });
                         updateCouponQuantityDisplay(couponId, response.quantity);
                     } else {
-                        Swal.fire('失敗!', '已擁有此優惠券!', 'error');
+                        Swal.fire('領取失敗!', '已擁有此優惠券!', 'error');
                     }
                 }
             };

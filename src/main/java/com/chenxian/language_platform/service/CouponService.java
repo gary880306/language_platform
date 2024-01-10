@@ -18,4 +18,5 @@ public interface CouponService {
     List<Coupon> getAllCoupons();
     // 當用戶選擇一個優惠券時，更新購物車實例的 couponId 屬性
     void applyCouponToCart(Integer userId ,Integer couponId);
+    boolean checkCouponExists(Integer userId, Integer couponId);
 }

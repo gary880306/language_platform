@@ -180,11 +180,11 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Cart findCartById(Integer cartId) {
-        String sql = "SELECT cart_id, user_id, isCheckout, created_date ,checkout_date FROM cart WHERE cart_id = :cartId";
+        String sql = "SELECT cart_id, user_id, isCheckout, created_date ,checkout_date, coupon_id FROM cart WHERE cart_id = :cartId";
         Map<String,Object> map = new HashMap<>();
         map.put("cartId",cartId);
         List<Cart> cartList = namedParameterJdbcTemplate.query(sql,map,new CartRowMapper());
-        if(cartList.size() > 0){
+        if(!cartList.isEmpty()){
             return cartList.get(0);
         }
         return null;
@@ -327,19 +327,19 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean checkCouponExists(Integer userId, Integer couponId) {
-        String sql = "SELECT COUNT(*) FROM user_coupon WHERE user_id = :userId AND coupon_id = :couponId";
+    public void addUserCoupon(Integer userId, Integer couponId) {
+        String sql = "INSERT INTO user_coupon (user_id, coupon_id) VALUES (:userId, :couponId)";
 
-        Map<String, Object> map = Map.of("userId", userId, "couponId", couponId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("couponId", couponId);
 
-        int count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
-
-        return count > 0;
+        namedParameterJdbcTemplate.update(sql, map);
     }
 
     @Override
-    public void addUserCoupon(Integer userId, Integer couponId) {
-        String sql = "INSERT INTO user_coupon (user_id, coupon_id) VALUES (:userId, :couponId)";
+    public void updateUserCoupon(Integer userId, Integer couponId) {
+        String sql = "UPDATE user_coupon SET is_used = false WHERE user_id =:userId AND coupon_id =:couponId";
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
@@ -390,6 +390,30 @@ public class UserDaoImpl implements UserDao {
 
         namedParameterJdbcTemplate.update(sql, map);
     }
+
+    @Override
+    public void markCouponAsUsed(Integer userId, Integer couponId) {
+        String sql = "UPDATE user_coupon SET is_used = TRUE WHERE user_id =:userId AND coupon_id =:couponId";
+        Map<String ,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        map.put("couponId",couponId);
+        namedParameterJdbcTemplate.update(sql,map);
+    }
+
+    @Override
+    public List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId) {
+        String sql = "SELECT uc.user_id, uc.coupon_id, uc.is_used, c.code, c.description, c.discount_type, c.discount_value, " +
+                "c.start_date, c.end_date, c.is_active " +
+                "FROM user_coupon uc " +
+                "LEFT JOIN coupon c ON uc.coupon_id = c.coupon_id " +
+                "WHERE uc.user_id = :userId AND uc.is_used = false";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        List<UserCoupon> userCoupons = namedParameterJdbcTemplate.query(sql, map, new UserCouponRowMapper());
+        return userCoupons.isEmpty() ? null : userCoupons;
+    }
+
 
 
     // 自定義異常類

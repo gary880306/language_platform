@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -164,28 +165,28 @@ public class FrontendController {
         User user = (User) session.getAttribute("user");
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
-        System.out.println(cart);
         if(cart != null) {
             Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
             Integer total = cart.getCartItems().stream()
                     .mapToInt(item -> item.getCourse().getPrice()).sum();
-
             // 检查是否应用了优惠券
-            if(cart.getCouponId() != null) {
+            if (cart.getCouponId() != null) {
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
-                // 计算优惠后的总额
-                BigDecimal discount = calculateDiscountAmount(cart, coupon);
-                BigDecimal discountedTotal = new BigDecimal(total).subtract(discount);
+                if (coupon != null) {
+                    // 计算优惠后的总额
+                    BigDecimal discount = calculateDiscountAmount(cart, coupon);
+                    BigDecimal discountedTotal = new BigDecimal(total).subtract(discount);
 
-                System.out.println(discount);
-                System.out.println(discountedTotal);
-                model.addAttribute("discount", discount);
-                model.addAttribute("discountedTotal", discountedTotal);
+                    System.out.println(discount);
+                    System.out.println(discountedTotal);
+                    model.addAttribute("discount", discount);
+                    model.addAttribute("discountedTotal", discountedTotal);
+                }
             }
+                model.addAttribute("cartCourseCount", cartCourseCount);
+                model.addAttribute("total", total);
 
-            model.addAttribute("cartCourseCount", cartCourseCount);
             model.addAttribute("cart", cart);
-            model.addAttribute("total", total);
         }
 
         return "/user/courses/cart";
@@ -199,8 +200,16 @@ public class FrontendController {
         User user = (User) session.getAttribute("user");
         CartItem cartItem = userService.findCartItemById(itemId);
 
-        if(cartItem != null && cartItem.getCart().getUserId().equals(user.getUserId())) {
+        if (cartItem != null && cartItem.getCart().getUserId().equals(user.getUserId())) {
             userService.removeCartItemById(itemId);
+
+            // 检查购物车是否为空
+            Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+            if (cart != null && cart.getCartItems().isEmpty()) {
+                // 如果购物车为空，设置 couponId 为 null
+                userService.updateCartCoupon(null, cart.getCartId());
+            }
+
             Integer updatedCartCount = userService.getCartCourseCount(user.getUserId());
             return ResponseEntity.ok().body(updatedCartCount);
         } else {
@@ -229,6 +238,8 @@ public class FrontendController {
                 // 根據優惠券計算折扣金額
                 BigDecimal discount = calculateDiscountAmount(cart, coupon);
                 total = total.subtract(discount);
+                // 將優惠券設置為已使用
+                userService.markCouponAsUsed(user.getUserId(), cart.getCouponId());
             }
 
             // 如果需要將結果轉換回 Integer
@@ -288,9 +299,9 @@ public class FrontendController {
                     .body(new MessageResponse("優惠券不可用"));
         }
 
-        boolean couponExists = userService.checkCouponExists(user.getUserId(), couponId);
+        boolean couponExists = couponService.checkCouponExists(user.getUserId(), couponId);
         if (!couponExists) {
-            userService.addUserCoupon(user.getUserId(), couponId);
+            userService.updateUserCoupon(user.getUserId(), couponId);
             userService.decrementCouponQuantity(couponId);
             int updatedQuantity = getCurrentCouponQuantity(couponId);
             return ResponseEntity
@@ -301,6 +312,7 @@ public class FrontendController {
                 .status(HttpStatus.CONFLICT)
                 .body(new MessageResponse("用戶已經擁有此優惠券"));
     }
+
 
     // MessageResponse class (add this as an inner class or a separate class)
     @Data
@@ -328,22 +340,23 @@ public class FrontendController {
         }
     }
 
+    // 購物車該用戶點選使用優惠券按鈕時獲取當前所擁有的優惠券
     @GetMapping("/enjoyLearning/cart/myCoupons")
     @ResponseBody
     public ResponseEntity<?> getUserCoupons(HttpSession session) {
         try {
-            // 假設用戶信息存儲在 session 中的 "user" 屬性中
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not logged in");
             }
-            Integer userId = user.getUserId(); // 或者任何獲取用戶ID的方法
-            List<UserCoupon> userCoupons = userService.findUserCouponsByUserId(userId);
+            Integer userId = user.getUserId();
+            List<UserCoupon> userCoupons = userService.findUnusedUserCouponsByUserId(userId);
             return ResponseEntity.ok(userCoupons);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving coupons: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/enjoyLearning/cart/myCoupons/applyCoupon")
     @ResponseBody

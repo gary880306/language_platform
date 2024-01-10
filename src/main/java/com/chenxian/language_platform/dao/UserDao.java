@@ -28,10 +28,12 @@ public interface UserDao {
     void addCart(Cart cart);
 
     void addCartItem(CartItem cartItem);
-    boolean checkCouponExists(Integer userId, Integer couponId);
     void addUserCoupon(Integer userId, Integer couponId);
+    void updateUserCoupon(Integer userId, Integer couponId);
     List<UserCoupon> findUserCouponsByUserId(Integer userId);
     void decrementCouponQuantity(Integer couponId);
     Integer getCartCourseCount(Integer userId);
     void updateCartCoupon(Integer couponId , Integer cartId);
+    void markCouponAsUsed(Integer userId, Integer couponId);
+    List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId);
 }
