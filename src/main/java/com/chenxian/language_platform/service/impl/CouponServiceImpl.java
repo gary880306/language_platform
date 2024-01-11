@@ -61,4 +61,9 @@ public class CouponServiceImpl implements CouponService {
         return couponDao.checkCouponExists(userId,couponId);
     }
 
+    @Override
+    public boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId) {
+        return couponDao.checkCouponExistsByIsUsed(userId,couponId);
+    }
+
 }

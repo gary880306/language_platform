@@ -24,10 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class FrontendController {
@@ -177,8 +174,6 @@ public class FrontendController {
                     BigDecimal discount = calculateDiscountAmount(cart, coupon);
                     BigDecimal discountedTotal = new BigDecimal(total).subtract(discount);
 
-                    System.out.println(discount);
-                    System.out.println(discountedTotal);
                     model.addAttribute("discount", discount);
                     model.addAttribute("discountedTotal", discountedTotal);
                 }
@@ -291,27 +286,40 @@ public class FrontendController {
     @ResponseBody
     public ResponseEntity<?> addCoupon(@RequestParam("couponId") Integer couponId, HttpSession session) {
         User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("用戶未登入"));
+        }
 
         Coupon coupon = couponService.getCouponById(couponId);
-        if (coupon == null || coupon.getQuantity() <= 0) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new MessageResponse("優惠券不可用"));
+        if (coupon == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("優惠券不存在"));
         }
 
+        // 检查用户是否曾经领取过这个优惠券
         boolean couponExists = couponService.checkCouponExists(user.getUserId(), couponId);
         if (!couponExists) {
-            userService.updateUserCoupon(user.getUserId(), couponId);
+            // 用户完全没有领取过此优惠券，添加新的用户优惠券关联
+            userService.addUserCoupon(user.getUserId(), couponId);
             userService.decrementCouponQuantity(couponId);
             int updatedQuantity = getCurrentCouponQuantity(couponId);
-            return ResponseEntity
-                    .ok(new CouponResponse("優惠券添加成功", updatedQuantity));
+            return ResponseEntity.ok(new CouponResponse("優惠券添加成功", updatedQuantity));
+        } else {
+            // 用户之前已领取过此优惠券，检查是否已使用
+            boolean isUsed = couponService.checkCouponExistsByIsUsed(user.getUserId(), couponId);
+            if (!isUsed) {
+                // 优惠券已经被使用，可以重新激活
+                userService.updateUserCoupon(user.getUserId(), couponId);
+                userService.decrementCouponQuantity(couponId);
+                int updatedQuantity = getCurrentCouponQuantity(couponId);
+                return ResponseEntity.ok(new CouponResponse("重新獲取成功", updatedQuantity));
+            } else {
+                // 用户已经拥有此优惠券且尚未使用，无需重复添加
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(new MessageResponse("用戶已擁有此優惠券"));
+            }
         }
-
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(new MessageResponse("用戶已經擁有此優惠券"));
     }
+
+
 
 
     // MessageResponse class (add this as an inner class or a separate class)
@@ -340,6 +348,28 @@ public class FrontendController {
         }
     }
 
+        // 查看購物車當前套用的優惠券
+        @GetMapping("/enjoyLearning/cart/currentCoupon")
+        @ResponseBody
+        public ResponseEntity<?> getCurrentCoupon(HttpSession session) {
+            try {
+                User user = (User) session.getAttribute("user");
+                if (user == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not logged in");
+                }
+                Integer userId = user.getUserId();
+                Integer couponId = userService.getCurrentCouponIdByUserId(userId);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("couponId", couponId);
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving current coupon: " + e.getMessage());
+            }
+        }
+
+
+
     // 購物車該用戶點選使用優惠券按鈕時獲取當前所擁有的優惠券
     @GetMapping("/enjoyLearning/cart/myCoupons")
     @ResponseBody
@@ -351,11 +381,42 @@ public class FrontendController {
             }
             Integer userId = user.getUserId();
             List<UserCoupon> userCoupons = userService.findUnusedUserCouponsByUserId(userId);
+
+            // 利用時間設置優惠券狀態
+            Date now = new Date();
+            for (UserCoupon userCoupon : userCoupons) {
+                Coupon coupon = userCoupon.getCoupon();
+                if (now.before(coupon.getStartDate())) {
+                    userCoupon.setStatus("Not Started");
+                } else if (now.after(coupon.getEndDate())) {
+                    userCoupon.setStatus("Expired");
+                } else {
+                    userCoupon.setStatus("Active");
+                }
+            }
             return ResponseEntity.ok(userCoupons);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving coupons: " + e.getMessage());
         }
     }
+
+    @PostMapping("/enjoyLearning/cart/myCoupons/cancelCoupon")
+    @ResponseBody
+    public ResponseEntity<?> cancelCoupon(HttpSession session) {
+        try {
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用户未登录");
+            }
+            userService.cancelCoupon(user.getUserId());
+            System.out.println("123");
+            return ResponseEntity.ok().body("優惠券已取消");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("取消優惠券失敗: " + e.getMessage());
+        }
+    }
+
+
 
 
     @PostMapping("/enjoyLearning/cart/myCoupons/applyCoupon")

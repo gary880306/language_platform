@@ -15,7 +15,7 @@ public interface CouponDao {
     void deleteCoupon(Integer couponId);
     // 取得所有優惠券
     List<Coupon> getAllCoupons();
-
     boolean checkCouponExists(Integer userId, Integer couponId);
+    boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId);
 
 }

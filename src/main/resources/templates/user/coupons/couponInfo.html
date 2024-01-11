@@ -227,23 +227,35 @@
             xhr.onreadystatechange = function() {
                 if (this.readyState === XMLHttpRequest.DONE) {
                     if (this.status === 200) {
-                        var response = JSON.parse(this.responseText);
-                        Swal.fire({
-                            title: '成功!',
-                            text: '已獲得優惠券!',
-                            icon: 'success',
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                        updateCouponQuantityDisplay(couponId, response.quantity);
+                        try {
+                            var response = JSON.parse(this.responseText);
+                            Swal.fire({
+                                title: '成功!',
+                                text: response.message,  // 使用服务器返回的消息
+                                icon: 'success',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            updateCouponQuantityDisplay(couponId, response.quantity);
+                        } catch (error) {
+                            console.error("解析JSON失败", error);
+                            // 处理解析错误
+                        }
                     } else {
-                        Swal.fire('領取失敗!', '已擁有此優惠券!', 'error');
+                        try {
+                            var errorResponse = JSON.parse(this.responseText);
+                            Swal.fire('領取失敗!', errorResponse.message, 'error');  // 显示错误消息
+                        } catch (error) {
+                            console.error("解析JSON失败", error);
+                            Swal.fire('領取失敗!', '發生未知錯誤', 'error');
+                        }
                     }
                 }
             };
             xhr.send('couponId=' + couponId);
         });
     });
+
 </script>
 </body>
 </html>

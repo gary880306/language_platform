@@ -33,4 +33,6 @@ public interface UserService {
     void updateCartCoupon(Integer couponId , Integer cartId);
     void markCouponAsUsed(Integer userId, Integer couponId);
     List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId);
+    Integer getCurrentCouponIdByUserId(Integer userId);
+    void cancelCoupon(Integer userId);
 }

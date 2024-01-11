@@ -97,6 +97,16 @@ public class CouponDaoImpl implements CouponDao {
 
     @Override
     public boolean checkCouponExists(Integer userId, Integer couponId) {
+        String sql = "SELECT COUNT(*) FROM user_coupon WHERE user_id = :userId AND coupon_id = :couponId";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("couponId", couponId);
+        Integer count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId) {
         String sql = "SELECT COUNT(*) FROM user_coupon WHERE user_id = :userId AND coupon_id = :couponId AND is_used = false";
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
@@ -105,6 +115,5 @@ public class CouponDaoImpl implements CouponDao {
         Integer count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
         return count != null && count > 0;
     }
-
 
 }

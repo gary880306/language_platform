@@ -9,6 +9,7 @@ import com.chenxian.language_platform.rowmapper.*;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -414,6 +415,25 @@ public class UserDaoImpl implements UserDao {
         return userCoupons.isEmpty() ? null : userCoupons;
     }
 
+    @Override
+    public Integer getCurrentCouponIdByUserId(Integer userId) {
+        String sql = "SELECT coupon_id FROM cart WHERE user_id = :userId AND isCheckout = FALSE";
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        try {
+            return namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+        } catch (EmptyResultDataAccessException e) {
+            return null; // 如果没有结果，返回 null
+        }
+    }
+
+    @Override
+    public void cancelCoupon(Integer userId) {
+        String sql = "UPDATE cart SET coupon_id = NULL WHERE user_id =:userId AND isCheckout = false";
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        namedParameterJdbcTemplate.update(sql,map);
+    }
 
 
     // 自定義異常類

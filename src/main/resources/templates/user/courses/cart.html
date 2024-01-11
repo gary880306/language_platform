@@ -105,6 +105,41 @@
         .card-body {
             flex-grow: 1; /* 確保內容填滿容器 */
         }
+
+        /* 已过期优惠券样式 */
+        .expired-coupon {
+            color: #666; /* 灰色文字 */
+            background-color: #f0f0f0; /* 浅灰色背景 */
+            border: 1px solid #ccc; /* 灰色边框 */
+            text-decoration: line-through; /* 文字中划线效果 */
+            cursor: not-allowed; /* 不允许的光标 */
+
+            opacity: 0.6; /* 半透明显示 */
+        }
+
+        /* 未开始优惠券样式 */
+        .not-started-coupon {
+            color: #333; /* 深色文字 */
+            background-color: #ffeb3b; /* 黄色背景 */
+            border: 1px solid #ffd600; /* 深黄色边框 */
+            cursor: not-allowed; /* 不允许的光标 */
+
+            opacity: 0.6; /* 半透明显示 */
+        }
+
+        .delete-btn {
+            background-color: #f0f0f0; /* 淡灰色背景 */
+            color: #666; /* 淡灰色文字 */
+            border: none; /* 无边框 */
+            cursor: pointer; /* 鼠标指针样式 */
+            padding: 5px 10px; /* 内边距 */
+            margin-left: 10px; /* 左边距 */
+        }
+
+        .delete-btn:hover {
+            background-color: #e0e0e0; /* 鼠标悬停时稍微深一点的背景色 */
+        }
+
     </style>
 </head>
 <body>
@@ -253,31 +288,88 @@
 <!-- 查看優惠券 -->
 <script>
     document.getElementById('viewCouponsBtn').addEventListener('click', function() {
-        fetch('/enjoyLearning/cart/myCoupons')
-            .then(response => response.json())
-            .then(userCoupons => {
-                var modalBody = document.getElementById('couponModal').querySelector('.modal-body');
-                modalBody.innerHTML = ''; // 清空現有內容
-
-                userCoupons.forEach(item => {
-                    var coupon = item.coupon;
-                    var couponId = item.couponId;
-                    var couponDiv = document.createElement('div');
-                    couponDiv.className = 'coupon-card btn btn-primary';
-                    couponDiv.dataset.couponId = couponId;
-                    couponDiv.innerHTML = `
-                        <div class="card-body">
-                            <h5 class="card-title">優惠券代碼：${coupon.code}</h5>
-                            <p class="card-text">${coupon.description}</p>
-                            <div>折扣類型：${coupon.discountType}</div>
-                        </div>
-                    `;
-                    modalBody.appendChild(couponDiv);
-                });
+        Promise.all([
+            fetch('/enjoyLearning/cart/myCoupons').then(response => {
+                if (response.ok && response.headers.get('content-type').includes('application/json')) {
+                    return response.json();
+                }
+                throw new Error('加载优惠券数据失败');
+            }),
+            fetch('/enjoyLearning/cart/currentCoupon').then(response => {
+                if (response.ok && response.headers.get('content-type').includes('application/json')) {
+                    return response.json();
+                }
+                throw new Error('加载当前优惠券数据失败');
             })
-            .catch(error => console.error('Error fetching coupons:', error));
+        ]).then(([userCoupons, currentCouponResponse]) => {
+            var modalBody = document.getElementById('couponModal').querySelector('.modal-body');
+            modalBody.innerHTML = ''; // 清空现有内容
 
+            var currentCouponId = currentCouponResponse.couponId; // 提取当前购物车使用的优惠券ID
+
+            userCoupons.forEach(item => {
+                var coupon = item.coupon;
+                var couponId = item.couponId;
+                var status = item.status; // 获取优惠券状态
+                var couponDiv = document.createElement('div');
+                couponDiv.dataset.couponId = couponId;
+                couponDiv.className = 'coupon-card btn btn-primary';
+
+                // 根据优惠券的状态应用不同的样式和禁用行为
+                if (status === "Expired" || status === "Not Started") {
+                    couponDiv.classList.add(status === "Expired" ? 'expired-coupon' : 'not-started-coupon');
+                    couponDiv.classList.remove('btn-primary'); // 移除原有的按钮样式
+                    couponDiv.disabled = true; // 禁用按钮
+                }
+
+                couponDiv.innerHTML = `
+                <div class="card-body">
+                    <h5 class="card-title">优惠券代码：${coupon.code}</h5>
+                    <p class="card-text">${coupon.description}</p>
+                    <div>折扣类型：${coupon.discountType}</div>
+                    <div>状态：${status}</div>
+                </div>
+            `;
+
+                // 只有当优惠券被购物车使用时，才显示取消按钮
+                if (couponId === currentCouponId) {
+                    var cancelButton = document.createElement('button');
+                    cancelButton.className = 'cancel-btn';
+                    cancelButton.textContent = '取消';
+                    cancelButton.onclick = function() {
+                        event.stopPropagation(); // 阻止事件冒泡
+                        fetch('/enjoyLearning/cart/myCoupons/cancelCoupon', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                // 添加认证或其他必要的头部信息
+                            },
+
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    return response.text();
+                                } else {
+                                    throw new Error('请求失败');
+                                }
+                            })
+                            .then(data => {
+                                console.log(data); // "优惠券已取消"
+                                window.location.href = '/enjoyLearning/cart'; // 重定向到购物车页面
+
+                            })
+                            .catch(error => console.error('取消优惠券失败:', error));
+                    };
+                    couponDiv.appendChild(cancelButton); // 将取消按钮添加到卡片中
+                }
+
+                modalBody.appendChild(couponDiv);
+            });
+        })
+            .catch(error => console.error('Error fetching coupons:', error));
     });
+
+
 </script>
 
 <!-- 使用優惠券 -->

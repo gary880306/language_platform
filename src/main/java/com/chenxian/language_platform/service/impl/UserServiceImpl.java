@@ -149,5 +149,15 @@ public class UserServiceImpl implements UserService {
         return userDao.findUnusedUserCouponsByUserId(userId);
     }
 
+    @Override
+    public Integer getCurrentCouponIdByUserId(Integer userId) {
+        return userDao.getCurrentCouponIdByUserId(userId);
+    }
+
+    @Override
+    public void cancelCoupon(Integer userId) {
+        userDao.cancelCoupon(userId);
+    }
+
 
 }
