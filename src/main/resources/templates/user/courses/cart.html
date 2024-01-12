@@ -112,18 +112,17 @@
             background-color: #f0f0f0; /* 浅灰色背景 */
             border: 1px solid #ccc; /* 灰色边框 */
             text-decoration: line-through; /* 文字中划线效果 */
-            cursor: not-allowed; /* 不允许的光标 */
-
-            opacity: 0.6; /* 半透明显示 */
+            pointer-events: none; /* 禁用所有鼠标事件 */
+            opacity: 0.6; /* 使元素看起来像是禁用的 */
         }
+
 
         /* 未开始优惠券样式 */
         .not-started-coupon {
             color: #333; /* 深色文字 */
             background-color: #ffeb3b; /* 黄色背景 */
             border: 1px solid #ffd600; /* 深黄色边框 */
-            cursor: not-allowed; /* 不允许的光标 */
-
+            pointer-events: none;
             opacity: 0.6; /* 半透明显示 */
         }
 

@@ -1,31 +1,13 @@
 package com.chenxian.language_platform.dto;
 
+import lombok.Data;
+
+@Data
 public class CourseQueryParams {
-    String search;
-    String orderBy;
-    String sort;
+    private String search;
+    private String orderBy;
+    private String sort;
+    private Integer page;  // 默认第1页
+    private Integer size;  // 默认每页4条数据
 
-    public String getSearch() {
-        return search;
-    }
-
-    public void setSearch(String search) {
-        this.search = search;
-    }
-
-    public String getOrderBy() {
-        return orderBy;
-    }
-
-    public void setOrderBy(String orderBy) {
-        this.orderBy = orderBy;
-    }
-
-    public String getSort() {
-        return sort;
-    }
-
-    public void setSort(String sort) {
-        this.sort = sort;
-    }
 }

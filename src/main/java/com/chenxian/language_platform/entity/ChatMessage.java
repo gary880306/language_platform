@@ -17,5 +17,12 @@ public class ChatMessage {
     private Long senderId;
     private String sender; // 添加 sender 属性
     private String message;
+    private MessageType type;
+
+    public enum MessageType {
+        CHAT,
+        JOIN,
+        LEAVE
+    }
 
 }

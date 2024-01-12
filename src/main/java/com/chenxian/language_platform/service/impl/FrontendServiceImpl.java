@@ -17,4 +17,9 @@ public class FrontendServiceImpl implements FrontendService {
     public List<Course> getAllCourses(CourseQueryParams courseQueryParams) {
         return frontendDao.getAllCourses(courseQueryParams);
     }
+
+    @Override
+    public Integer getCoursesCount(CourseQueryParams courseQueryParams) {
+        return frontendDao.getCoursesCount(courseQueryParams);
+    }
 }

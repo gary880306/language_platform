@@ -54,29 +54,36 @@ public class FrontendController {
 
     // 顯示主頁 main 資訊頁面
     @GetMapping("/enjoyLearning/courses")
-    public String showCourses(Model model,
-                              HttpSession session,
-                              // 查詢條件
+    public String showCourses(Model model, HttpSession session,
                               @RequestParam(required = false) String search,
-                              // 排序
                               @RequestParam(defaultValue = "created_date") String orderBy,
-                              @RequestParam(defaultValue = "desc") String sort
-                              // 分頁
-                                ) {
+                              @RequestParam(defaultValue = "desc") String sort,
+                              @RequestParam(defaultValue = "1") Integer page,  // 分页参数
+                              @RequestParam(defaultValue = "4") Integer size) { // 分页参数
         User user = (User) session.getAttribute("user");
-        // 獲取用戶購物車中的課程數量
-        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
+
         CourseQueryParams courseQueryParams = new CourseQueryParams();
         courseQueryParams.setSearch(search);
         courseQueryParams.setOrderBy(orderBy);
         courseQueryParams.setSort(sort);
+        courseQueryParams.setPage(page);
+        courseQueryParams.setSize(size);
+
         List<Course> courses = frontendService.getAllCourses(courseQueryParams);
-        List<CategoryData> categories = dataService.findAllCategoryData();
-        model.addAttribute("cartCourseCount",cartCourseCount);
+        model.addAttribute("size", size);
+        model.addAttribute("cartCourseCount", userService.getCartCourseCount(user.getUserId()));
         model.addAttribute("courses", courses);
-        model.addAttribute("categories",categories);
+        // 传递分页信息到前端
+        model.addAttribute("currentPage", page);
+        Integer totalCourses = frontendService.getCoursesCount(courseQueryParams);
+        Integer totalPages = (int) Math.ceil((double) totalCourses / size);
+        model.addAttribute("totalPages", totalPages);
+
+        model.addAttribute("categories", dataService.findAllCategoryData());
+
         return "user/courses/main";
     }
+
 
     // 顯示商品資訊 courseInfo 頁面
     @GetMapping("/enjoyLearning/courses/courseInfo/{courseId}")
@@ -216,18 +223,18 @@ public class FrontendController {
     @GetMapping("/enjoyLearning/checkout")
     public String checkout(HttpSession session, Model model) {
         // 1. 先找到 user 登入者
-        User user = (User)session.getAttribute("user");
+        User user = (User) session.getAttribute("user");
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
 
-
-        if(cart != null){
+        if (cart != null) {
             Integer totalInteger = cart.getCartItems().stream()
                     .mapToInt(item -> item.getCourse().getPrice())
                     .sum();
             BigDecimal total = new BigDecimal(totalInteger);
 
-            if (cart.getCouponId() != null) {
+            // 檢查 couponId 是否為0
+            if (cart.getCouponId() != 0) {
                 // 獲取當前購物車的 coupon
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
                 // 根據優惠券計算折扣金額
@@ -240,14 +247,17 @@ public class FrontendController {
             // 如果需要將結果轉換回 Integer
             totalInteger = total.intValue();
 
-            userService.checkoutCartByUserId(cart.getUserId(),cart.getCartId()); // 結帳
+            // 結帳
+            userService.checkoutCartByUserId(cart.getUserId(), cart.getCartId());
+
             model.addAttribute("cart", cart);
             model.addAttribute("total", totalInteger);
-
         }
 
         return "/user/courses/purchasedResult";
     }
+
+
 
     // 我的課程頁面
     @GetMapping("/enjoyLearning/myCourse")

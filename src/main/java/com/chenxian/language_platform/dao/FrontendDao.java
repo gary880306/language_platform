@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface FrontendDao {
     List<Course> getAllCourses(CourseQueryParams courseQueryParams);
+    Integer getCoursesCount(CourseQueryParams courseQueryParams);
 }

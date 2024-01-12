@@ -143,6 +143,8 @@
             background-color: #333;
             color: #fff;
             text-align: center;
+            position: fixed;
+            bottom: 0;
             padding: 10px;
             width: 100%;
         }
@@ -187,7 +189,7 @@
 <section class="card-container d-flex flex-wrap">
     <!-- 卡片內容 -->
     <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.109/uploadImages/' + ${course.imageUrl}}"
+        <img th:src="@{'http://192.168.1.108/uploadImages/' + ${course.imageUrl}}"
              class="imagesize card-img-top" alt="...">
         <div class="card-body" th:attr="data-course-id=${course.courseId}">
             <p class="cardword mb-1">
@@ -208,14 +210,26 @@
 <div class="d-flex justify-content-center mt-4">
     <nav aria-label="Page navigation">
         <ul class="pagination">
-            <li class="page-item"><a class="page-link" href="#">上一頁</a></li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">下一頁</a></li>
+            <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${currentPage > 1 ? currentPage - 1 : currentPage}, size=${size})}">上一頁</a>
+            </li>
+
+            <li th:each="pageNum : ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${currentPage.equals(pageNum) ? 'active' : ''}">
+                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${pageNum}, size=${size})}" th:text="${pageNum}"></a>
+            </li>
+
+
+
+
+            <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${currentPage < totalPages ? currentPage + 1 : currentPage}, size=${size})}">下一頁</a>
+            </li>
+
+
         </ul>
     </nav>
 </div>
+
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>

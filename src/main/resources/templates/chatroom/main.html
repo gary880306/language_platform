@@ -32,11 +32,30 @@
             margin-top: 10px;
         }
 
-        /* 消息框 */
+        .message-area {
+            display: flex;
+            flex-direction: column;
+        }
+
         .message-box {
-            margin: 10px auto; /* 垂直居中，水平居中 */
-            padding: 5px;
-            border-radius: 5px;
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .my-message {
+            justify-content: flex-end;
+        }
+
+        .other-message {
+            justify-content: flex-start;
+        }
+
+        .center-message {
+            justify-content: center;
+        }
+
+        .system-message {
+            color: green; /* 系统消息颜色 */
             text-align: center;
         }
 
@@ -48,9 +67,10 @@
 </head>
 <body>
 <div class="container mt-4 chat-container">
-    <h1 class="text-center">群聊</h1>
+    <h1 class="text-center">123</h1>
     <!-- 顯示用戶名稱 -->
     <span id="username" class="username" th:text="${user.userName}"></span>
+    <button id="leaveButton" class="btn btn-secondary">離開聊天室</button>
     <div class="chat-messages" id="messageArea"></div>
     <div class="input-group">
         <input type="text" id="message" class="form-control" placeholder="輸入消息">
@@ -61,9 +81,16 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.2/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<!-- 将 roomId 传递给 JavaScript 的代码 -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var roomId = [[${roomId}]]; // 从 Thymeleaf 模板获取 roomId
+    /*]]>*/
+</script>
 <script>
     var stompClient = null;
     var username = null;
+
 
     // WebSocket連接函數
     function connectWebSocket() {
@@ -71,27 +98,18 @@
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function(frame) {
-            setConnected(true);
             console.log('Connected: ' + frame);
 
-            stompClient.subscribe('/topic/public', function(message) {
+            // 確保在WebSocket連接建立後調用 joinRoom
+            joinRoom();
+
+            // 訂閱對應的聊天室
+            stompClient.subscribe('/topic/chatroom/' + roomId, function(message) {
                 showMessage(JSON.parse(message.body));
             });
-
-            stompClient.send("/app/chat.addUser",
-                {},
-                JSON.stringify({ sender: username, type: 'JOIN' })
-            );
+        }, function(error) {
+            console.log('WebSocket connection error: ' + error);
         });
-    }
-
-    function setConnected(connected) {
-        // 此處可以添加處理連接狀態的邏輯
-        if (connected) {
-            console.log('WebSocket is connected!');
-        } else {
-            console.log('WebSocket is disconnected!');
-        }
     }
 
     // 顯示聊天訊息的函數
@@ -99,56 +117,102 @@
         var messageArea = document.getElementById('messageArea');
         var messageBox = document.createElement('div');
         messageBox.classList.add('message-box');
-        // 創建一個段落元素，用於顯示消息
+
         var paragraph = document.createElement('p');
-        paragraph.textContent = message.sender + ': ' + message.message;
-        paragraph.classList.add('text-muted'); // 添加灰色文字類別
+
+        // 判断消息类型
+        if (message.type === 'LEAVE' || message.type === 'JOIN') {
+            // 系统消息（加入或离开）
+            paragraph.textContent = message.sender + (message.type === 'JOIN' ? ' 已上線' : ' 已下線');
+            paragraph.classList.add('system-message');
+            messageBox.classList.add('center-message');
+        } else {
+            // 普通聊天消息
+            paragraph.textContent = message.sender + ': ' + message.message;
+            paragraph.classList.add('chat-message');
+            messageBox.classList.add(message.sender === username ? 'my-message' : 'other-message');
+        }
 
         messageBox.appendChild(paragraph);
-
         messageArea.appendChild(messageBox);
-
-        // 捲動到最新訊息
         messageArea.scrollTop = messageArea.scrollHeight;
     }
 
-
-
     // 修改sendMessage函数
-    function sendMessage() {
+    function sendMessage(roomId) {
         var messageInput = document.getElementById('message');
-        var messageContent = messageInput.value.trim(); // 获取消息内容并移除前后空格
+        var messageContent = messageInput.value.trim();
 
         if (messageContent !== '') {
-            // 创建消息对象，按照ChatMessage格式
             var message = {
                 sender: username,
-                message: messageContent // 使用后端ChatMessage类的message属性
+                message: messageContent
             };
 
-            // 发送消息
-            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(message));
-            // 清空输入框
+            var headers = {
+                roomId: roomId // 设置 roomId
+            };
+
+            stompClient.send("/app/chat.sendMessage", headers, JSON.stringify(message));
             messageInput.value = '';
         }
     }
 
+    // 修改joinRoom函数
+    function joinRoom() {
+        stompClient.send("/app/chat/" + roomId + "/addUser",
+            {},
+            JSON.stringify({sender: username, type: 'JOIN'})
+        );
+    }
 
-    // 在頁面載入後自動連接WebSocket
+    // 修改leaveChatRoom函数
+    function leaveChatRoom() {
+        var leaveMessage = {
+            sender: username,
+            type: 'LEAVE'
+        };
+        stompClient.send("/app/chat/" + roomId + "/leaveUser", {}, JSON.stringify(leaveMessage));
+
+        // 断开WebSocket连接
+        if (stompClient) {
+            stompClient.disconnect(function() {
+                console.log('Disconnected from chat room.');
+                // 断开连接后重定向到指定页面
+                window.location.href = '/enjoyLearning/chatroom';
+            });
+        } else {
+            // 如果WebSocket没有连接，直接重定向
+            window.location.href = '/enjoyLearning/chatroom';
+        }
+    }
+
+    // 為離開按鈕添加事件監聽器
+    document.getElementById('leaveButton').addEventListener('click', leaveChatRoom);
+
+    // 在页面加载后
     document.addEventListener("DOMContentLoaded", function(event) {
         username = document.getElementById('username').textContent;
         if (username) {
-            connectWebSocket();
+            // 检查用户是否已加入聊天室
+            checkUserStatus().then(isJoined => {
+                if (!isJoined) {
+                    connectWebSocket();
+                }
+            });
 
-            // 設置用戶名稱
-            var usernameSpan = document.getElementById('username');
-            usernameSpan.style.display = 'none';
-
-            // 綁定發送按鈕的點擊事件
-            var sendMessageButton = document.getElementById('sendMessageButton');
-            sendMessageButton.addEventListener('click', sendMessage);
+            document.getElementById('sendMessageButton').addEventListener('click', function() {
+                sendMessage(roomId);
+            });
         }
     });
+
+    // 检查用户状态的函数
+    function checkUserStatus() {
+        return fetch('/api/chat/checkStatus')
+            .then(response => response.json())
+            .catch(error => console.error('Error:', error));
+    }
 
 </script>
 </body>
