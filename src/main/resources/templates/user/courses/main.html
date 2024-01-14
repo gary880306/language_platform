@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>响學</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <style>
@@ -56,6 +56,28 @@
             color: #0056b3; /* 滑鼠懸停時的顏色 */
         }
 
+
+        /* 新增樣式 */
+
+        .course-header h2 {
+            text-align: center; /* 居中標題 */
+        }
+
+        .course-header hr {
+            margin-bottom: 10px; /* 添加一些底部邊距 */
+        }
+
+        .course-links {
+            text-align: right; /* 將超連結對齊到右邊 */
+            margin-bottom: 20px; /* 添加一些底部邊距 */
+        }
+
+        .course-link {
+            color: #808080; /* 淡灰色字體 */
+            text-decoration: none; /* 移除下劃線 */
+        }
+
+
         .custom-badge {
             position: absolute;
             top: auto;
@@ -87,6 +109,16 @@
             padding: 0 10px;
             white-space: nowrap;
         }
+
+        .highlighted-search {
+            font-size: larger; /* 调整字体大小 */
+        }
+
+
+        .course-link.active {
+            color: rgb(40, 195, 192);
+        }
+
 
         /* 主體樣式 */
         body {
@@ -138,16 +170,36 @@
             color: #00A9B0;
         }
 
+        .pagination .page-link {
+            color: black;
+            border: none; /* 移除邊框 */
+        }
+
+        .pagination .custom-page:hover .page-link,
+        .pagination .custom-active .page-link {
+            background-color: transparent;
+            color: rgb(40, 195, 192); /* 懸停和活動狀態的文字顏色 */
+        }
+
+        .pagination .custom-active .page-link {
+            background-color: transparent; /* 活動狀態的背景色，可按需調整 */
+        }
+
+
         /* 頁腳樣式 */
         footer {
             background-color: #333;
             color: #fff;
             text-align: center;
-            position: fixed;
-            bottom: 0;
             padding: 10px;
             width: 100%;
         }
+
+        .fixed-footer {
+            position: fixed;
+            bottom: 0;
+        }
+
     </style>
 </head>
 <body>
@@ -164,12 +216,10 @@
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/myCourse">我的課程</a></li>
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/forum">討論區</a></li>
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/coupons">優惠券</a></li>
-                <li class="nav-item">
-                    <form class="search-form" method="get" action="/enjoyLearning/courses">
-                        <input class="form-control search-input" type="search" placeholder="英文" aria-label="Search" name="search">
-                        <button class="btn btn-outline-success search-button" type="submit">搜索</button>
-                    </form>
-                </li>
+                <form class="search-form" method="get" action="/enjoyLearning/courses">
+                    <input class="form-control search-input" type="search" placeholder="請輸入關鍵字" aria-label="Search" name="search">
+                    <button class="btn btn-outline-success search-button" type="submit"><i class="bi bi-search"></i></button>
+                </form>
             </ul>
             <div class="ms-auto">
                 <a href="/enjoyLearning/cart" class="text-dark position-relative me-3">
@@ -184,55 +234,111 @@
         </div>
     </div>
 </nav>
-
-<!-- 卡片容器區塊 -->
 <section class="card-container d-flex flex-wrap">
+    <!-- 標題和超連結 -->
+    <div class="course-header w-100">
+        <h2 class="mb-4">
+    <span th:if="${search != null and !search.isEmpty()}">
+        <span class="highlighted-search">「<span th:text="${search}"></span>」搜索結果</span>
+    </span>
+            <span th:if="${search == null or search.isEmpty()}">所有課程</span>
+        </h2>
+        <hr>
+        <div class="course-links">
+            <!-- 購買人數排序 -->
+            <a th:href="@{/enjoyLearning/courses(page=${currentPage}, size=${size}, orderBy='userCount', sort='desc', search=${search != null and !search.isEmpty() ? search : null})}" class="course-link" th:classappend="${orderBy == 'userCount' ? 'active' : ''}">
+                最熱門
+            </a> |
+
+            <!-- 上架時間排序 -->
+            <a th:href="@{/enjoyLearning/courses(page=${currentPage}, size=${size}, orderBy='created_date', sort=${(orderBy == 'created_date' && sort == 'asc') ? 'desc' : 'asc'}, search=${search != null and !search.isEmpty() ? search : null})}" class="course-link" th:classappend="${orderBy == 'created_date' ? 'active' : ''}">
+                上架日期 <span th:if="${orderBy == 'created_date'}" th:text="${sort == 'asc' ? '↓' : '↑'}"></span>
+            </a> |
+
+            <!-- 課程時長排序 -->
+            <a th:href="@{/enjoyLearning/courses(page=${currentPage}, size=${size}, orderBy='time', sort=${(orderBy == 'time' && sort == 'asc') ? 'desc' : 'asc'}, search=${search != null and !search.isEmpty() ? search : null})}" class="course-link" th:classappend="${orderBy == 'time' ? 'active' : ''}">
+                課程時長 <span th:if="${orderBy == 'time'}" th:text="${sort == 'asc' ? '↓' : '↑'}"></span>
+            </a> |
+
+            <!-- 價格排序 -->
+            <a th:href="@{/enjoyLearning/courses(page=${currentPage}, size=${size}, orderBy='price', sort=${(orderBy == 'price' && sort == 'asc') ? 'desc' : 'asc'}, search=${search != null and !search.isEmpty() ? search : null})}" class="course-link" th:classappend="${orderBy == 'price' ? 'active' : ''}">
+                價格 <span th:if="${orderBy == 'price'}" th:text="${sort == 'asc' ? '↓' : '↑'}"></span>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- 检查是否有课程 -->
+    <div th:if="${!hasCourses}" class="no-results">
+        查無任何結果 😥
+    </div>
+
+
+    <!-- 卡片容器區塊 -->
     <!-- 卡片內容 -->
     <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.108/uploadImages/' + ${course.imageUrl}}"
-             class="imagesize card-img-top" alt="...">
+        <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrl}}"
+             class="card-img-top" alt="...">
         <div class="card-body" th:attr="data-course-id=${course.courseId}">
-            <p class="cardword mb-1">
+            <p class="mb-1">
                 <span class="tag rounded-2 me-1"><strong th:text="${course.getCategoryName}"></strong></span>
                 <span th:text="${course.getCourseName}"></span>
             </p>
             <p class="card-title mb-2 fs-6 text-muted" th:text="'by ' + ${course.getTeacher}"></p>
             <p class="card-title mb-2 fs-6 text-muted">
-                <i class="bi bi-clock"></i> <span th:text="${course.getTime}"></span> (小時) <i class="bi bi-people"></i> 5442
+                <i class="bi bi-clock"></i> <span th:text="${course.getTime}"></span> (小時)
+                <i class="bi bi-people"></i> <span th:text="${courseUserCounts[__${course.courseId}__] != null ? courseUserCounts[__${course.courseId}__] : 0}"></span>
             </p>
-            <h4 th:text="'NT$' + ${course.getPrice}"></h4>
+            <h4 th:text="'NT$' + ${course.formattedPrice}"></h4>
         </div>
         <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
     </div>
 </section>
 
-<!-- 分頁導航 -->
-<div class="d-flex justify-content-center mt-4">
+<!-- 分頁 -->
+<div class="d-flex justify-content-center mt-4" th:if="${hasCourses}">
     <nav aria-label="Page navigation">
         <ul class="pagination">
             <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${currentPage > 1 ? currentPage - 1 : currentPage}, size=${size})}">上一頁</a>
+                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${currentPage > 1 ? currentPage - 1 : currentPage}, size=${size}, orderBy=${orderBy}, sort=${sort} + (${search} != null and ${search} != '' ? '&search=' + ${search} : ''))}">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
             </li>
 
-            <li th:each="pageNum : ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${currentPage.equals(pageNum) ? 'active' : ''}">
-                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${pageNum}, size=${size})}" th:text="${pageNum}"></a>
+            <li th:each="pageNum : ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${currentPage.equals(pageNum) ? 'active custom-active' : 'custom-page'}">
+                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${pageNum}, size=${size}, orderBy=${orderBy}, sort=${sort} + (${search} != null and ${search} != '' ? '&search=' + ${search} : ''))}" th:text="${pageNum}"></a>
             </li>
-
-
-
 
             <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${currentPage < totalPages ? currentPage + 1 : currentPage}, size=${size})}">下一頁</a>
+                <a class="page-link" th:href="@{/enjoyLearning/courses(page=${currentPage < totalPages ? currentPage + 1 : currentPage}, size=${size}, orderBy=${orderBy}, sort=${sort} + (${search} != null and ${search} != '' ? '&search=' + ${search} : ''))}">
+                    <i class="bi bi-arrow-right"></i>
+                </a>
             </li>
-
-
         </ul>
     </nav>
 </div>
 
 
-<footer>
+
+<footer th:classappend="${!hasCourses} ? 'fixed-footer' : ''">
     <p class="mb-0">&copy; 2023 响學</p>
 </footer>
+
+<script>
+    function toggleSort(orderBy) {
+        var currentUrl = new URL(window.location);
+        var currentSort = currentUrl.searchParams.get("sort") || "desc";
+        var newSort = currentSort === "desc" ? "asc" : "desc";
+
+        // 更新指示符
+        document.getElementById(orderBy + "_indicator").textContent = newSort === "desc" ? "↓" : "↑";
+
+        // 更新 URL 參數
+        currentUrl.searchParams.set("orderBy", orderBy);
+        currentUrl.searchParams.set("sort", newSort);
+        window.location.href = currentUrl.href;
+    }
+</script>
+
 </body>
 </html>

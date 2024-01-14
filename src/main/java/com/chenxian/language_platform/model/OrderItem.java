@@ -13,5 +13,7 @@ public class OrderItem {
     private String courseName;
     private String imageUrlString;
     private Timestamp created_date;
+    private String formattedCreatedDate;
     private Integer totalAmount;
+    private String formattedAmount;
 }

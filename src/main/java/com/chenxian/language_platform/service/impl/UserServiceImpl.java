@@ -1,5 +1,6 @@
 package com.chenxian.language_platform.service.impl;
 
+import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.dao.UserDao;
 import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
@@ -77,7 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean checkoutCartByUserId(Integer userId,Integer cartId) {
+    public CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId) {
         return userDao.checkoutCartByUserId(userId,cartId);
     }
 

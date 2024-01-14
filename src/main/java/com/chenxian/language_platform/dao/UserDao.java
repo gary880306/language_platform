@@ -1,5 +1,6 @@
 package com.chenxian.language_platform.dao;
 
+import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 
@@ -19,7 +20,7 @@ public interface UserDao {
     List<CartItem> findCartItemsById(Integer cartId);
     Boolean removeCartItemById(Integer itemId);
     Cart findCartById(Integer cartId);
-    Boolean checkoutCartByUserId(Integer userId,Integer cartId);
+    CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId);
     Order createOrder(Integer userId,List<CartItem> cartItems);
     void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems);
     void createUserCourse(Integer userId,List<CartItem> cartItems );

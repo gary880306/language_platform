@@ -19,5 +19,7 @@ public class Course {
     private String creatDate;
     private String lastModifiedDate;
     private String videoUrl;
+    private Integer userCount;
+    private String formattedPrice;
 
 }

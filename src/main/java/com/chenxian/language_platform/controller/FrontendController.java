@@ -1,10 +1,10 @@
 package com.chenxian.language_platform.controller;
 
+import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.dto.CourseQueryParams;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.entity.Comment;
 import com.chenxian.language_platform.entity.Language;
-import com.chenxian.language_platform.entity.Like;
 import com.chenxian.language_platform.entity.Post;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.repository.CommentRepository;
@@ -18,13 +18,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class FrontendController {
@@ -50,16 +54,17 @@ public class FrontendController {
     private LanguageRepository languageRepository;
     @Autowired
     private LikeRepository likeRepository;
+    @Autowired
+    private OrderedInfoService orderedInfoService;
 
 
-    // 顯示主頁 main 資訊頁面
     @GetMapping("/enjoyLearning/courses")
     public String showCourses(Model model, HttpSession session,
                               @RequestParam(required = false) String search,
                               @RequestParam(defaultValue = "created_date") String orderBy,
                               @RequestParam(defaultValue = "desc") String sort,
-                              @RequestParam(defaultValue = "1") Integer page,  // 分页参数
-                              @RequestParam(defaultValue = "4") Integer size) { // 分页参数
+                              @RequestParam(defaultValue = "1") Integer page,
+                              @RequestParam(defaultValue = "8") Integer size) {
         User user = (User) session.getAttribute("user");
 
         CourseQueryParams courseQueryParams = new CourseQueryParams();
@@ -69,41 +74,73 @@ public class FrontendController {
         courseQueryParams.setPage(page);
         courseQueryParams.setSize(size);
 
-        List<Course> courses = frontendService.getAllCourses(courseQueryParams);
+        List<Course> courses;
+        Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
+
+
+        // 仅当需要根据用户数量排序时使用 getAllCoursesWithUserCount 方法
+        if ("userCount".equals(orderBy)) {
+            courses = frontendService.getAllCoursesWithUserCount(courseQueryParams);
+            courses.forEach(course -> {
+                String formattedPrice = formatCoursePrice(course.getPrice());
+                course.setFormattedPrice(formattedPrice); // 假设Course类有一个方法来设置格式化后的价格
+            });
+        } else {
+            courses = frontendService.getAllCourses(courseQueryParams);
+            courses.forEach(course -> {
+                String formattedPrice = formatCoursePrice(course.getPrice());
+                course.setFormattedPrice(formattedPrice); // 假设Course类有一个方法来设置格式化后的价格
+            });
+        }
+        List<Course> searchCourses = "userCount".equals(orderBy) ?
+                frontendService.getAllCoursesWithUserCount(courseQueryParams) :
+                frontendService.getAllCourses(courseQueryParams);
+        boolean hasCourses = searchCourses != null && !searchCourses.isEmpty();
+
+        courses = courses.stream()
+                .peek(course -> course.setPrice((course.getPrice())))
+                .collect(Collectors.toList());
+        model.addAttribute("hasCourses", hasCourses);
+        model.addAttribute("search", search);
         model.addAttribute("size", size);
         model.addAttribute("cartCourseCount", userService.getCartCourseCount(user.getUserId()));
         model.addAttribute("courses", courses);
-        // 传递分页信息到前端
+        model.addAttribute("courseUserCounts", courseUserCounts); // 总是添加 courseUserCounts 到模型
+        model.addAttribute("orderBy", orderBy);
+        model.addAttribute("sort", sort);
         model.addAttribute("currentPage", page);
         Integer totalCourses = frontendService.getCoursesCount(courseQueryParams);
         Integer totalPages = (int) Math.ceil((double) totalCourses / size);
         model.addAttribute("totalPages", totalPages);
-
         model.addAttribute("categories", dataService.findAllCategoryData());
 
         return "user/courses/main";
     }
 
 
+
+
     // 顯示商品資訊 courseInfo 頁面
     @GetMapping("/enjoyLearning/courses/courseInfo/{courseId}")
-    public String getCourseInfo(@PathVariable("courseId") Integer courseId,HttpSession session,Model model){
+    public String getCourseInfo(@PathVariable("courseId") Integer courseId, HttpSession session, Model model){
         User user = (User) session.getAttribute("user");
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         if (user != null) {
-        boolean hasPurchased = courseService.hasUserPurchasedCourse(user.getUserId(), courseId);
-        if (hasPurchased) {
-                // 如果用戶已購買該課程，則導向課程主頁面
+            boolean hasPurchased = courseService.hasUserPurchasedCourse(user.getUserId(), courseId);
+            if (hasPurchased) {
                 CourseRequest course = courseService.getCourseById(courseId);
-                model.addAttribute("courseId", courseId);
+                model.addAttribute("formattedPrice", formatCoursePrice(course.getPrice()));
                 model.addAttribute("course", course);
+                model.addAttribute("cartCourseCount", cartCourseCount);
                 return "/user/courses/courseMain";
             }
         }
-        // 獲取用戶購物車中的課程數量
-        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         CourseRequest course = courseService.getCourseById(courseId);
-        model.addAttribute("cartCourseCount",cartCourseCount);
-        model.addAttribute("courseId", courseId);
+
+        Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
+        model.addAttribute("courseUserCounts", courseUserCounts);
+        model.addAttribute("cartCourseCount", cartCourseCount);
+        model.addAttribute("formattedPrice", formatCoursePrice(course.getPrice()));
         model.addAttribute("course", course);
         return "/user/courses/courseInfo";
     }
@@ -169,8 +206,9 @@ public class FrontendController {
         User user = (User) session.getAttribute("user");
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         if(cart != null) {
-            Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
+            cartCourseCount = userService.getCartCourseCount(user.getUserId());
             Integer total = cart.getCartItems().stream()
                     .mapToInt(item -> item.getCourse().getPrice()).sum();
             // 检查是否应用了优惠券
@@ -190,7 +228,7 @@ public class FrontendController {
 
             model.addAttribute("cart", cart);
         }
-
+        model.addAttribute("cartCourseCount", cartCourseCount);
         return "/user/courses/cart";
     }
 
@@ -221,11 +259,12 @@ public class FrontendController {
 
     // 購物車結帳
     @GetMapping("/enjoyLearning/checkout")
-    public String checkout(HttpSession session, Model model) {
+    public String checkout(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         // 1. 先找到 user 登入者
         User user = (User) session.getAttribute("user");
         // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+        BigDecimal discount = BigDecimal.ZERO; // 初始化折扣金额为0
 
         if (cart != null) {
             Integer totalInteger = cart.getCartItems().stream()
@@ -238,7 +277,7 @@ public class FrontendController {
                 // 獲取當前購物車的 coupon
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
                 // 根據優惠券計算折扣金額
-                BigDecimal discount = calculateDiscountAmount(cart, coupon);
+                discount = calculateDiscountAmount(cart, coupon);
                 total = total.subtract(discount);
                 // 將優惠券設置為已使用
                 userService.markCouponAsUsed(user.getUserId(), cart.getCouponId());
@@ -246,15 +285,62 @@ public class FrontendController {
 
             // 如果需要將結果轉換回 Integer
             totalInteger = total.intValue();
+            String formattedTotalAmount = formatCoursePrice(totalInteger);
 
             // 結帳
-            userService.checkoutCartByUserId(cart.getUserId(), cart.getCartId());
+            CheckoutResponse checkoutResponse = userService.checkoutCartByUserId(cart.getUserId(), cart.getCartId());
+            Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
 
-            model.addAttribute("cart", cart);
-            model.addAttribute("total", totalInteger);
+            Integer discountInteger = discount.intValue();
+            String formattedDiscount = formatCoursePrice(discountInteger);
+            redirectAttributes.addAttribute("total", formattedTotalAmount);
+            redirectAttributes.addAttribute("cartCourseCount", cartCourseCount);
+            redirectAttributes.addAttribute("formattedDiscount", formattedDiscount);
+            // 添加订单编号到模型
+            if (checkoutResponse != null && checkoutResponse.getSuccess()) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                List<OrderItem> orderItems = orderedInfoService.findOrderItemByOrderId(checkoutResponse.getOrderId());
+                if (!orderItems.isEmpty()) {
+                    for (OrderItem item : orderItems) {
+                        Timestamp timestamp = item.getCreated_date();
+                        String formattedDate = dateFormat.format(timestamp);
+                        String formattedAmount = formatCoursePrice(item.getAmount());
+                        item.setFormattedAmount(formattedAmount);
+                        item.setFormattedCreatedDate(formattedDate);
+                    }
+                    ;
+                }
+                redirectAttributes.addAttribute("orderId", checkoutResponse.getOrderId());
+                return "redirect:/enjoyLearning/orderResult";
+            }
+        }
+        return null;
+    }
+
+    @GetMapping("/enjoyLearning/orderResult")
+    public String orderResult(@RequestParam("orderId") Integer orderId,
+                              @RequestParam("total") String total,
+                              @RequestParam("cartCourseCount") Integer cartCourseCount,
+                              @RequestParam("formattedDiscount") String formattedDiscount,
+                              Model model) {
+        List<OrderItem> orderItems = orderedInfoService.findOrderItemByOrderId(orderId);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        // 格式化订单项数据
+        for (OrderItem item : orderItems) {
+            String formattedDate = dateFormat.format(item.getCreated_date());
+            String formattedAmount = formatCoursePrice(item.getAmount());
+            item.setFormattedAmount(formattedAmount);
+            item.setFormattedCreatedDate(formattedDate);
         }
 
-        return "/user/courses/purchasedResult";
+        // 添加订单信息到模型
+        model.addAttribute("orderItems", orderItems);
+        model.addAttribute("total", total);
+        model.addAttribute("cartCourseCount", cartCourseCount);
+        model.addAttribute("formattedDiscount", formattedDiscount);
+
+        return "/user/courses/orderResult";
     }
 
 
@@ -531,5 +617,10 @@ public class FrontendController {
         return "user/forum/main"; // 返回視圖的名稱
     }
 
+
+    private String formatCoursePrice(Integer price) {
+        NumberFormat formatter = NumberFormat.getIntegerInstance(Locale.US);
+        return formatter.format(price);
+    }
 
 }

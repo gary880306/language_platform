@@ -2,20 +2,14 @@
 <html lang="ch" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>LearnFromWorld</title>
+    <title></title>
     <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css"
             rel="stylesheet">
 
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script
-            src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <style type="text/css">
+    <style>
         /* 導航欄樣式 */
         .navbar {
             background-color: #d1fdff;
@@ -64,6 +58,20 @@
             color: #0056b3; /* 滑鼠懸停時的顏色 */
         }
 
+        .currency {
+            font-size: larger; /* 或者具體的像素大小，如 20px */
+        }
+
+        .row.m-5.p-5 {
+            position: relative; /* 為 row 設置相對定位 */
+        }
+
+        #submit-button {
+            position: absolute; /* 絕對定位 */
+            right: 48px; /* 距離右側的距離 */
+            bottom: 46px; /* 距離底部的距離 */
+        }
+
         .custom-badge {
             position: absolute;
             top: auto;
@@ -81,50 +89,13 @@
             background-color: red; /* 背景顏色 */
         }
 
-        /* 卡片容器樣式 */
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start; /* 从左侧开始排列卡片 */
-            margin: auto;
-            padding: 50px 150px; /* 增加左右邊距 */
-        }
-
-        /* 卡片樣式 */
-        .card {
-            overflow: hidden;
-            border: 1px solid transparent;
-            margin-right: 15px; /* 添加右边距以分隔卡片 */
-            margin-bottom: 15px; /* 添加底部边距以在换行时有间距 */
-            flex-basis: calc(25% - 15px); /* 计算卡片宽度，减去间距 */
-            height: 320px; /* 固定卡片高度 */
-            border-radius: 10px; /* 設置卡片邊框圓角 */
-            transition: transform 0.3s ease-in-out;
-        }
-
-
-        .card img {
-            height: 150px;
-            width: auto;
-            border-radius: 10px;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .card img:hover {
-            transform: scale(1.1);
-            transform-origin: center center;
-        }
-        .card:hover img {
-            transform: scale(1.1);
-            transform-origin: center center;
-        }
-        /* 標籤樣式 */
-        .tag {
-            background-color: aquamarine;
-            border: 2px;
-            padding: 4px;
-            font-size: 14px;
-            color: #00A9B0;
+        /* 自定义表格样式 */
+        .no-border-no-background,
+        .no-border-no-background th,
+        .no-border-no-background td,
+        .no-border-no-background tr {
+            border: none !important;
+            background-color: transparent !important;
         }
 
         footer {
@@ -166,38 +137,43 @@
         </div>
     </div>
 </nav>
+<div class="d-flex justify-content-center align-items-center mt-5">
+<div class="container w-50">
+<h2 class="text-center mt-1 mb-4">感謝您的購買</h2>
+<h3>訂單資訊</h3>
+    <hr style="margin-top: 20px;">
+    <table class="table no-border-no-background">
+    <tbody>
+    <tr th:each="orderItem : ${orderItems}">
+        <td class="align-middle text-center">
+            <img th:src="@{'http://192.168.1.107/uploadImages/' + ${orderItem.imageUrlString}}" alt="課程圖片" style="min-width: 81px;max-width: 100px; max-height: 65px;"/>
+        </td>
+        <td class="align-middle text-center" th:text="${orderItem.courseName}"></td>
+        <td class="align-middle text-center" th:text="'NT$ ' + ${orderItem.formattedAmount}"></td>
+    </tr>
+    </tbody>
+</table>
+<!-- 水平分隔线 -->
+<hr style="margin-top: 20px;">
 
-
-<div class="container">
-    <h1 class="my-4">歡迎回來，<span th:text="${user.userName}">使用者名稱</span>!</h1>
-<!-- 卡片容器區塊 -->
-<section class="card-container d-flex flex-wrap">
-    <!-- 卡片內容 -->
-    <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrl}}"
-             class="imagesize card-img-top" alt="...">
-        <div class="card-body" th:attr="data-course-id=${course.courseId}">
-            <p class="cardword mb-1">
-                <span class="tag rounded-2 me-1"><strong th:text="${course.getCategoryName}"></strong></span>
-                <span th:text="${course.getCourseName}"></span>
-            </p>
-            <p class="card-title mb-2 fs-6 text-muted">
-                <span th:text="'by ' + ${course.teacher}"></span>
-                <span>&nbsp|&nbsp</span>
-                <i class="bi bi-clock"></i>
-                <span th:text="${course.time} + ' 小時'"></span>
-            </p>
-
-            <p class="card-title mb-2 fs-6 text-muted">點擊快去上課吧!</p>
-        </div>
-        <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
-    </div>
-</section>
+<!-- 订单额外信息 -->
+<div style="text-align: right;">
+    <div th:if="${orderItems != null and not #lists.isEmpty(orderItems)}">
+        <p><strong>合計</strong> : <span th:text="${#lists.size(orderItems) + '件'}"></span></p>
+    <p id="discountSection" th:style="${formattedDiscount != null and formattedDiscount != '0' and formattedDiscount != '0.00'} ? 'display: block;' : 'display: none;'">
+        <strong>優惠券折扣:</strong> -NT$ <span id="discounted" th:text="${formattedDiscount}"></span>
+    </p>
+    <p><strong>金額：</strong>NT$ <span th:text="${total} "></span></p>
+    <p><strong>訂單編號：</strong><span th:text="${orderItems[0].orderId}"></span></p>
+    <p><strong>訂單時間：</strong><span th:text="${orderItems[0].formattedCreatedDate}"></span></p>
 </div>
-
+</div>
+</div>
+</div>
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>
 </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 </body>
 </html>
-

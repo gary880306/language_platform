@@ -18,8 +18,6 @@ import java.util.List;
 public class OrderedInfoController {
     @Autowired
     private OrderedInfoService orderedInfoService;
-    @Autowired
-    private UserService userService;
     @GetMapping("/admin/orderedInfo")
     public String showAllOrderedInfo(Model model){
         List<Order> orders = orderedInfoService.findAllOrder(); // 獲取所有訂單資訊

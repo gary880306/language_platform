@@ -58,6 +58,25 @@
             color: #0056b3; /* 滑鼠懸停時的顏色 */
         }
 
+        .imageSize {
+            height: 400px;
+            border-radius: 20px;
+        }
+
+        .currency {
+            font-size: larger; /* 或者具體的像素大小，如 20px */
+        }
+
+        .row.m-5.p-5 {
+            position: relative; /* 為 row 設置相對定位 */
+        }
+
+        #submit-button {
+            position: absolute; /* 絕對定位 */
+            right: 48px; /* 距離右側的距離 */
+            bottom: 46px; /* 距離底部的距離 */
+        }
+
         .custom-badge {
             position: absolute;
             top: auto;
@@ -75,25 +94,11 @@
             background-color: red; /* 背景顏色 */
         }
 
-        /* 搜索欄位樣式 */
-        .search-form {
-            display: flex;
-            align-items: center;
-        }
-        .search-input {
-            height: 32px;
-            margin-right: 5px;
-        }
-        .search-button {
-            height: 32px;
-            padding: 0 10px;
-            white-space: nowrap;
-        }
-
         footer {
             background-color: #333;
             color: #fff;
             text-align: center;
+            position: fixed;
             bottom: 0;
             padding: 10px;
             width: 100%;
@@ -134,59 +139,20 @@
         <input type="hidden" id="courseId" name="courseId" th:value="${courseId}" />
         <div class="row m-5 p-5">
             <div class="col-6">
-                <img th:src="@{'http://192.168.1.108/uploadImages/' + ${course.imageUrlString}}"
-                     class="imagesize card-img-top" alt="...">
+                <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrlString}}"
+                     class="card-img-top imageSize" alt="...">
             </div>
             <div class="col-6">
-                <h2 th:text="${course.courseName}">課程名稱</h2>
+                <h1 th:text="${course.courseName}">課程名稱</h1>
                 <p th:text="${course.description}">課程描述</p>
-
-                <p>課程售價: <span th:text="${course.price}"></span>元</p>
+                <p class="mt-4">授課老師: <span th:text="${course.teacher}"></span>
+                <p><i class="bi bi-clock"></i> <span th:text="${course.time}"></span> (小時)</p>
+                <p><i class="bi bi-people"></i> <span th:text="${courseUserCounts[__${courseId}__] != null ? courseUserCounts[__${courseId}__] : 0}"></span>人參與課程</p>
+                <p>課程售價: <span class="currency">NT$</span><span class="price currency" th:text="${formattedPrice}"></span></p>
                 <button type="button" class="btn btn-primary mt-5 me-2" id="submit-button">加入購物車</button>
             </div>
         </div>
     </form>
-
-    <!-- 課程評論區 -->
-    <div class="comment-section">
-        <h3 class="mb-3">課程評論</h3>
-        <div class="col">
-            <div class="comment">
-                <div class="comment-header">
-                    阿賢 <span class="datefs text-muted">2023-11-10</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 260px;">課程很棒！</p>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <div class="comment">
-                <div class="comment-header">
-                    小美 <span class="datefs text-muted">2023-11-25</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9734;&#9734;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 700px;">希望能多出一點課程！</p>
-                </div>
-            </div>
-
-            <div class="separator"></div>
-
-            <div class="comment">
-                <div class="comment-header">
-                    阿偉<span class="datefs text-muted">2023-11-30</span>
-                </div>
-                <div class="star-rating">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
-                <div class="comment-body">
-                    <p class="d-inline-block text-truncate" style="max-width: 260px;">學到不少東西！</p>
-                </div>
-            </div>
-            <div class="separator"></div>
-        </div>
-    </div>
 </section>
 
 <footer>

@@ -1,5 +1,6 @@
 package com.chenxian.language_platform.dao.impl;
 
+import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.dao.CourseDao;
 import com.chenxian.language_platform.dao.UserDao;
 import com.chenxian.language_platform.dto.CourseRequest;
@@ -194,12 +195,12 @@ public class UserDaoImpl implements UserDao {
     // 結帳
     @Transactional
     @Override
-    public Boolean checkoutCartByUserId(Integer userId,Integer cartId) {
+    public CheckoutResponse checkoutCartByUserId(Integer userId,Integer cartId) {
         // 1. 檢索購物車項目
         List<CartItem> cartItems = findCartItemsById(cartId);
 
         if (cartItems.isEmpty()) {
-            return false;
+            return new CheckoutResponse(false, null);
         }
         // 2. 創建新訂單
         Order order = createOrder(userId, cartItems);
@@ -214,7 +215,8 @@ public class UserDaoImpl implements UserDao {
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
 
-        return namedParameterJdbcTemplate.update(sql,map) == 1;
+        boolean updateResult = namedParameterJdbcTemplate.update(sql, map) == 1;
+        return new CheckoutResponse(updateResult, order.getOrderId());
 
     }
 

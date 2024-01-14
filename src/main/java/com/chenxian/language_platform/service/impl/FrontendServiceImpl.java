@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class FrontendServiceImpl implements FrontendService {
@@ -19,7 +20,17 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
+    public List<Course> getAllCoursesWithUserCount(CourseQueryParams courseQueryParams) {
+        return frontendDao.getAllCoursesWithUserCount(courseQueryParams);
+    }
+
+    @Override
     public Integer getCoursesCount(CourseQueryParams courseQueryParams) {
         return frontendDao.getCoursesCount(courseQueryParams);
+    }
+
+    @Override
+    public Map<Integer, Integer> getCourseUserCounts() {
+        return frontendDao.getCourseUserCounts();
     }
 }
