@@ -170,30 +170,37 @@
 
 <div class="container">
     <h1 class="my-4">歡迎回來，<span th:text="${user.userName}">使用者名稱</span>!</h1>
-<!-- 卡片容器區塊 -->
-<section class="card-container d-flex flex-wrap">
-    <!-- 卡片內容 -->
-    <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-        <img th:src="@{'http://192.168.1.107/uploadImages/' + ${course.imageUrl}}"
-             class="imagesize card-img-top" alt="...">
-        <div class="card-body" th:attr="data-course-id=${course.courseId}">
-            <p class="cardword mb-1">
-                <span class="tag rounded-2 me-1"><strong th:text="${course.getCategoryName}"></strong></span>
-                <span th:text="${course.getCourseName}"></span>
-            </p>
-            <p class="card-title mb-2 fs-6 text-muted">
-                <span th:text="'by ' + ${course.teacher}"></span>
-                <span>&nbsp|&nbsp</span>
-                <i class="bi bi-clock"></i>
-                <span th:text="${course.time} + ' 小時'"></span>
-            </p>
-
-            <p class="card-title mb-2 fs-6 text-muted">點擊快去上課吧!</p>
-        </div>
-        <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
+    <!-- 檢查課程列表是否為空 -->
+    <div th:if="${courses.isEmpty()}">
+        <h4>沒有任何課程 😪</h4>
     </div>
-</section>
+    <div th:unless="${courses.isEmpty()}">
+        <!-- 卡片容器區塊 -->
+        <section class="card-container d-flex flex-wrap">
+            <!-- 迭代顯示課程卡片 -->
+            <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
+                <img th:src="@{'http://192.168.1.108/uploadImages/' + ${course.imageUrl}}"
+                     class="imagesize card-img-top" alt="...">
+                <div class="card-body" th:attr="data-course-id=${course.courseId}">
+                    <p class="cardword mb-1">
+                        <span class="tag rounded-2 me-1"><strong th:text="${course.getCategoryName}"></strong></span>
+                        <span th:text="${course.getCourseName}"></span>
+                    </p>
+                    <p class="card-title mb-2 fs-6 text-muted">
+                        <span th:text="'by ' + ${course.teacher}"></span>
+                        <span>&nbsp|&nbsp</span>
+                        <i class="bi bi-clock"></i>
+                        <span th:text="${course.time} + ' 小時'"></span>
+                    </p>
+
+                    <p class="card-title mb-2 fs-6 text-muted">點擊快去上課吧!</p>
+                </div>
+                <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
+            </div>
+        </section>
+    </div>
 </div>
+
 
 <footer>
     <p class="mb-0">&copy; 2023 响學</p>

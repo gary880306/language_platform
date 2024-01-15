@@ -38,7 +38,6 @@ public class SecureCallbackOauth2Controller {
     public String callbackGoogle(@RequestParam("code") String code, HttpSession session) throws Exception {
         // 已有授權碼(code)之後，可以跟 Google 來得到 token (訪問令牌)
         // 有了 token 就可以得到客戶的公開資訊例如: userInfo
-
         // 1. 使用 code 獲取 token
         JSONObject tokenInfo = oauthService.getTokenInfo(code);
         String accessToken = tokenInfo.getString("access_token");

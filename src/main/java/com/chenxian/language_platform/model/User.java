@@ -24,6 +24,7 @@ public class User {
     private boolean isActive;
     private String authType;
     private String authId;
+    private String resetToken;
     
 }
 

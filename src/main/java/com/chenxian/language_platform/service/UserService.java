@@ -36,4 +36,5 @@ public interface UserService {
     List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId);
     Integer getCurrentCouponIdByUserId(Integer userId);
     void cancelCoupon(Integer userId);
+    String generateResetToken(String email);
 }

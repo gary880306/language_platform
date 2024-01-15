@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**") // 指定攔截的路徑
-                .excludePathPatterns("/user/loginPage", "/user/login", "/user/logout", "/user/register", "/user/registerResult", "/admin/login",
-                        "/secure/oidc/login/google", "/secure/oidc/callback/google", "/images/**"); // 排除靜態資源路徑
+                .excludePathPatterns("/user/loginPage", "/user/login", "/user/logout", "/user/register", "/user/registerResult", "/user/forgetPassword", "/sendResetPasswordLink", "user/login&register/sendEmailResult", "/admin/login",
+                        "/secure/oidc/login/google", "/secure/oidc/callback/google", "/login/github", "/secure/oauth2/callback/github", "/images/**" ,"/getCode"); // 排除靜態資源路徑
     }
 }

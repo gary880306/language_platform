@@ -5,17 +5,21 @@ import com.chenxian.language_platform.dao.UserDao;
 import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
+import com.chenxian.language_platform.repository.UserRepository;
 import com.chenxian.language_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserDao userDao;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<User> findALlUsers() {
@@ -158,6 +162,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public void cancelCoupon(Integer userId) {
         userDao.cancelCoupon(userId);
+    }
+
+    @Override
+    public String generateResetToken(String email) {
+        // 從數據庫查找用戶
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            // 處理用戶不存在的情況
+            return null;
+        }
+
+        // 生成唯一令牌
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+
+        // 更新用戶信息以保存令牌
+        userRepository.save(user);
+
+        return token;
     }
 
 
