@@ -7,10 +7,13 @@ import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.repository.UserRepository;
 import com.chenxian.language_platform.service.UserService;
+import com.chenxian.language_platform.util.MyEncryptionComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +23,8 @@ public class UserServiceImpl implements UserService {
     private UserDao userDao;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private MyEncryptionComponent myEncryptionComponent;
 
     @Override
     public List<User> findALlUsers() {
@@ -176,11 +181,51 @@ public class UserServiceImpl implements UserService {
         // 生成唯一令牌
         String token = UUID.randomUUID().toString();
         user.setResetToken(token);
+        user.setTokenCreationTime(Instant.now());
 
         // 更新用戶信息以保存令牌
         userRepository.save(user);
 
         return token;
+    }
+
+    @Override
+    public boolean resetPasswordWithToken(String token,String newPassword) throws Exception {
+        // 檢查該用戶令牌是否存在於數據庫中
+        User user =  userRepository.findByResetToken(token);
+        boolean isTokenValid = checkTokenValidity(token);
+        if (isTokenValid) {
+            // 将新密码加密
+            String encodedNewPassword = myEncryptionComponent.encrypt(newPassword);
+
+            // 更新用户的密码
+            user.setPassword(encodedNewPassword);
+            user.setResetToken(null); // 清除令牌
+            user.setTokenCreationTime(null); // 清除令牌創建時間
+            userRepository.save(user); // 更新用戶資訊
+
+            return true; // 密碼重製成功
+        }
+
+        return false; // 令牌無效或用戶不存在
+    }
+
+    @Override
+    public boolean checkTokenValidity(String token) {
+        User user =  userRepository.findByResetToken(token);
+        // 获取当前时间
+        Instant currentTime = Instant.now();
+
+        // 获取令牌的创建时间（假设令牌创建时间存储在token对象中）
+        Instant tokenCreationTime = user.getTokenCreationTime();
+
+        // 计算令牌的有效期为30秒
+        Instant tokenExpirationTime = tokenCreationTime.plus(30, ChronoUnit.SECONDS);
+
+        // 检查当前时间是否在有效期内
+        boolean isValid = currentTime.isBefore(tokenExpirationTime);
+
+        return isValid;
     }
 
 

@@ -3,6 +3,7 @@ package com.chenxian.language_platform.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class User {
     private String authType;
     private String authId;
     private String resetToken;
+    private Instant tokenCreationTime; // 存储令牌创建时间的字段
     
 }
 

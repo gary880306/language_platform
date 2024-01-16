@@ -146,7 +146,7 @@
     <tbody>
     <tr th:each="orderItem : ${orderItems}">
         <td class="align-middle text-center">
-            <img th:src="@{'http://192.168.1.108/uploadImages/' + ${orderItem.imageUrlString}}" alt="課程圖片" style="min-width: 81px;max-width: 100px; max-height: 65px;"/>
+            <img th:src="@{'http://172.20.10.5/uploadImages/' + ${orderItem.imageUrlString}}" alt="課程圖片" style="min-width: 81px;max-width: 100px; max-height: 65px;"/>
         </td>
         <td class="align-middle text-center" th:text="${orderItem.courseName}"></td>
         <td class="align-middle text-center" th:text="'NT$ ' + ${orderItem.formattedAmount}"></td>

@@ -37,4 +37,6 @@ public interface UserService {
     Integer getCurrentCouponIdByUserId(Integer userId);
     void cancelCoupon(Integer userId);
     String generateResetToken(String email);
+    boolean resetPasswordWithToken(String token,String newPassword) throws Exception;
+    boolean checkTokenValidity(String token);
 }
