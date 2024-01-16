@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +93,7 @@ public class CourseController {
     private String uploadFile(MultipartFile file) {
         if (!file.isEmpty()) {
             try {
-                String directory = "C:\\uploadImages";
+                String directory = "C:\\images";
                 Path path = Paths.get(directory);
 
                 // 如果資料夾不存在，則創建
@@ -104,18 +105,9 @@ public class CourseController {
                 String filename = file.getOriginalFilename();
                 Path filePath = path.resolve(filename);
 
-                // 檢查是否已經存在相同的檔案，如果存在，可以在文件名上做一些更改，以區別它們
-                int counter = 1;
-                while (Files.exists(filePath)) {
-                    String baseFilename = filename.substring(0, filename.lastIndexOf('.'));
-                    String extension = filename.substring(filename.lastIndexOf('.'));
-                    String newFilename = baseFilename + "_" + counter + extension;
-                    filePath = path.resolve(newFilename);
-                    counter++;
-                }
-
                 // 將文件儲存到系統
-                Files.copy(file.getInputStream(), filePath);
+                // 使用 StandardCopyOption.REPLACE_EXISTING 來覆蓋存在的文件
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
                 return filePath.toString(); // 返回文件路徑
             } catch (IOException e) {
@@ -125,6 +117,7 @@ public class CourseController {
         }
         return null; // 如果沒有文件，返回null或者預設值
     }
+
 
     @PostMapping("/validateCourseData")
     public ResponseEntity<?> validateCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {

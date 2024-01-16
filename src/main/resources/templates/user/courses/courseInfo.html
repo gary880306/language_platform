@@ -139,8 +139,7 @@
         <input type="hidden" id="courseId" name="courseId" th:value="${courseId}" />
         <div class="row m-5 p-5">
             <div class="col-6">
-                <img th:src="@{'http://172.20.10.5/uploadImages/' + ${course.imageUrlString}}"
-                     class="card-img-top imageSize" alt="...">
+                <img th:src="@{/images/{filename}(filename=${course.imageUrlString})}" class="card-img-top imageSize" alt="课程图片">
             </div>
             <div class="col-6">
                 <h1 th:text="${course.courseName}">課程名稱</h1>

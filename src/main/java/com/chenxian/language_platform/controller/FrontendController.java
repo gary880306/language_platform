@@ -136,7 +136,6 @@ public class FrontendController {
             }
         }
         CourseRequest course = courseService.getCourseById(courseId);
-
         Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
         model.addAttribute("courseUserCounts", courseUserCounts);
         model.addAttribute("cartCourseCount", cartCourseCount);

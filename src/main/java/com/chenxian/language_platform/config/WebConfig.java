@@ -16,6 +16,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**") // 指定攔截的路徑
                 .excludePathPatterns("/user/loginPage", "/user/login", "/user/logout", "/user/register", "/user/registerResult", "/user/forgetPassword","user/login&register/forgetPassword", "/sendResetPasswordLink", "user/login&register/sendEmailResult", "user/login&register/changePassword","/user/resetPassword","user/login&register/changeSuccess","/admin/login",
-                        "/secure/oidc/login/google", "/secure/oidc/callback/google", "/login/github", "/secure/oauth2/callback/github", "/images/**" ,"/getCode"); // 排除靜態資源路徑
+                        "/secure/oidc/login/google", "/secure/oidc/callback/google", "/login/github", "/secure/oauth2/callback/github", "/images/**","/icons/**","/getCode"); // 排除靜態資源路徑
     }
 }
