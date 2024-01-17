@@ -190,6 +190,7 @@
     </dependencies>
 
     <build>
+        <finalName>ROOT</finalName> <!-- 這裡設置最終的 WAR 檔名稱為 ROOT -->
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
