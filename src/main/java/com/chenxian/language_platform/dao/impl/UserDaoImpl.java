@@ -41,6 +41,17 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
+    public List<User> findAllNonAdminUsers() {
+        String sql = "SELECT user_id, email, password, user_name, birth, phone_number, address, created_date, last_modified_date, levelId, is_active, authType, authId "
+                + "FROM user WHERE levelId <> :adminLevelId"; // 排除管理員
+        Map<String, Object> params = new HashMap<>();
+        params.put("adminLevelId", 2); // 假設管理員的levelId為2
+
+        List<User> users = namedParameterJdbcTemplate.query(sql, params, new UserInfoRowMapper());
+        return users.isEmpty() ? null : users;
+    }
+
+    @Override
     public Integer createUser(UserRegisterRequest userRegisterRequest) {
         String sql = "INSERT INTO user(email,password,user_name,birth,phone_number,address,created_date,last_modified_date,authType,authId) " +
                 "VALUES(:email,:password,:user_name,:birth,:phone_number,:address,:created_date,:last_modified_date,:authType,:authId)";

@@ -1,5 +1,7 @@
 package com.chenxian.language_platform.service.impl;
 
+import com.chenxian.language_platform.customize.CategoryUserCount;
+import com.chenxian.language_platform.customize.CourseSalesData;
 import com.chenxian.language_platform.dao.CourseDao;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.Course;
@@ -52,5 +54,15 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public boolean hasUserPurchasedCourse(Integer userId, Integer courseId) {
         return courseDao.hasUserPurchasedCourse(userId,courseId);
+    }
+
+    @Override
+    public List<CourseSalesData> findCourseSalesData() {
+        return courseDao.findCourseSalesData();
+    }
+
+    @Override
+    public List<CategoryUserCount> findCategoryUserCounts() {
+        return courseDao.findCategoryUserCounts();
     }
 }

@@ -482,11 +482,11 @@ public class FrontendController {
             for (UserCoupon userCoupon : userCoupons) {
                 Coupon coupon = userCoupon.getCoupon();
                 if (now.before(coupon.getStartDate())) {
-                    userCoupon.setStatus("Not Started");
+                    userCoupon.setStatus("未開始");
                 } else if (now.after(coupon.getEndDate())) {
-                    userCoupon.setStatus("Expired");
+                    userCoupon.setStatus("已過期");
                 } else {
-                    userCoupon.setStatus("Active");
+                    userCoupon.setStatus("有效");
                 }
             }
             return ResponseEntity.ok(userCoupons);

@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface UserService {
     List<User> findALlUsers();
+    List<User> findAllNonAdminUsers();
     Integer register(UserRegisterRequest userRegisterRequest);
     User getUserById(Integer userId);
     User getUserIncludeActiveById(Integer userId);

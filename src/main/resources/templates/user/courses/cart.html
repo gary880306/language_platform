@@ -334,7 +334,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="couponModalLabel">優惠券</h5>
+                    <h5 class="modal-title" id="couponModalLabel">我的優惠券</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -437,18 +437,18 @@
                 couponDiv.className = 'coupon-card btn btn-primary';
 
                 // 根据优惠券的状态应用不同的样式和禁用行为
-                if (status === "Expired" || status === "Not Started") {
-                    couponDiv.classList.add(status === "Expired" ? 'expired-coupon' : 'not-started-coupon');
+                if (status === "已過期" || status === "未開始") {
+                    couponDiv.classList.add(status === "已過期" ? 'expired-coupon' : 'not-started-coupon');
                     couponDiv.classList.remove('btn-primary'); // 移除原有的按钮样式
                     couponDiv.disabled = true; // 禁用按钮
                 }
 
                 couponDiv.innerHTML = `
                 <div class="card-body">
-                    <h5 class="card-title">优惠券代码：${coupon.code}</h5>
+                    <h5 class="card-title">優惠券代碼：${coupon.code}</h5>
                     <p class="card-text">${coupon.description}</p>
-                    <div>折扣类型：${coupon.discountType}</div>
-                    <div>状态：${status}</div>
+                    <div>折扣類型：${coupon.discountType}</div>
+                    <div>狀態：${status}</div>
                 </div>
             `;
 

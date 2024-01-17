@@ -1,5 +1,7 @@
 package com.chenxian.language_platform.dao;
 
+import com.chenxian.language_platform.customize.CategoryUserCount;
+import com.chenxian.language_platform.customize.CourseSalesData;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.Course;
 import com.chenxian.language_platform.model.UserCourse;
@@ -15,4 +17,6 @@ public interface CourseDao {
     void updateCourse(Integer courseId,CourseRequest courseRequest);
     boolean deleteCourseById(Integer courseId);
     boolean hasUserPurchasedCourse(Integer userId,Integer courseId);
+    List<CourseSalesData> findCourseSalesData();
+    List<CategoryUserCount> findCategoryUserCounts();
 }

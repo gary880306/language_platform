@@ -51,18 +51,6 @@
             color: black;
         }
 
-        #content {
-            flex-grow: 1;
-            padding: 20px;
-            box-sizing: border-box;
-            display: flex;
-        }
-
-        #productTable {
-            flex: 1;
-            margin-right: 20px;
-        }
-
         table {
             width: 100%;
             margin-top: 20px;
@@ -80,21 +68,19 @@
 
     </style>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" th:inline="javascript">
         google.charts.load("current", {packages:["corechart"]});
         google.charts.setOnLoadCallback(drawChart);
         function drawChart() {
             var data = google.visualization.arrayToDataTable([
-                ['Task', 'Hours per Day'],
-                ['Work',     11],
-                ['Eat',      2],
-                ['Commute',  2],
-                ['Watch TV', 2],
-                ['Sleep',    7]
+                ['Category', 'User Count'],
+                /*[# th:each="category : ${categoryUserCounts}"]*/
+                ['[[${category.categoryName}]]', [[${category.userCount}]]],
+                /*[/]*/
             ]);
 
             var options = {
-                title: 'My Daily Activities',
+                title: '當前語言排行榜',
                 is3D: true,
             };
 
@@ -102,6 +88,34 @@
             chart.draw(data, options);
         }
     </script>
+
+
+    <script type="text/javascript" th:inline="javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Course Name', 'Sales'],
+                /* Thymeleaf 動態數據 */
+                /*[# th:each="row : ${salesData}"]*/
+                ['[[${row.courseName}]]', [[${row.purchaseCount}]]],
+                /*[/]*/
+            ]);
+
+            var options = {
+                title: '課程銷售現況',
+                vAxis: {
+                    format: '0', // 設置為整數格式
+                    minValue: 0 // 確保 Y 軸從 0 開始
+                }
+            };
+
+            var chart = new google.visualization.ColumnChart(document.getElementById('salesChart'));
+            chart.draw(data, options);
+        }
+    </script>
+
 </head>
 <body>
 <div id="navbar">
@@ -115,7 +129,12 @@
         <a href="/admin/coupons" id="couponInfoLink">優惠券管理</a>
         <a href="/admin/reportInfo" id="salesReportLink"  class="active">銷售報表</a>
     </div>
-    <div id="piechart_3d" style="width: 900px; height: 500px;"></div>
+
+    <!-- 語言排行榜圓餅圖 -->
+    <div id="piechart_3d" style="width: 800px; height: 500px;"></div>
+
+    <!-- 課程銷售情況樹狀圖 -->
+    <div id="salesChart" style="width: 800px; height: 500px;"></div>
 </div>
 
 

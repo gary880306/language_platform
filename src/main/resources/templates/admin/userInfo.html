@@ -120,7 +120,7 @@
             <th>手機號碼</th>
             <th>地址</th>
             <th>加入時間</th>
-            <th>權限</th>
+            <th>來源</th>
             <th>狀態</th>
         </tr>
         </thead>
@@ -133,7 +133,7 @@
             <td class="align-middle text-center" th:text="${user.phoneNumber}"></td>
             <td class="align-middle text-center" th:text="${user.address}"></td>
             <td class="align-middle text-center" th:text="${user.createdDate}"></td>
-            <td class="align-middle text-center" th:text="${user.levelId}"></td>
+            <td class="align-middle text-center" th:text="${user.authType}"></td>
             <td class="align-middle text-center">
                 <button class="btn status-btn" th:data-user-id="${user.userId}" th:data-active="${user.isActive}" th:onclick="'toggleUserActiveStatus(' + ${user.userId} + ')'" th:class="${user.isActive} ? 'btn btn-success' : 'btn btn-danger'" th:text="${user.isActive} ? '啟用' : '停用'"></button>
             </td>

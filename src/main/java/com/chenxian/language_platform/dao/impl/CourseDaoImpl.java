@@ -1,5 +1,7 @@
 package com.chenxian.language_platform.dao.impl;
 
+import com.chenxian.language_platform.customize.CategoryUserCount;
+import com.chenxian.language_platform.customize.CourseSalesData;
 import com.chenxian.language_platform.dao.CourseDao;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.Course;
@@ -127,5 +129,29 @@ public class CourseDaoImpl implements CourseDao {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<CourseSalesData> findCourseSalesData() {
+        String sql = "SELECT c.course_name, COUNT(uc.user_id) AS purchase_count FROM user_course uc JOIN course c ON uc.course_id = c.course_id GROUP BY c.course_name";
+
+        return namedParameterJdbcTemplate.query(sql, (rs, rowNum) -> new CourseSalesData(rs.getString("course_name"), rs.getInt("purchase_count")));
+    }
+
+    @Override
+    public List<CategoryUserCount> findCategoryUserCounts() {
+        String sql = "SELECT cat.category_name, COUNT(uc.user_id) AS user_count "
+                + "FROM user_course uc "
+                + "JOIN course co ON uc.course_id = co.course_id "
+                + "JOIN category cat ON co.category_id = cat.category_id "
+                + "GROUP BY cat.category_name";
+
+        return namedParameterJdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new CategoryUserCount(
+                        rs.getString("category_name"),
+                        rs.getInt("user_count")
+                )
+        );
     }
 }

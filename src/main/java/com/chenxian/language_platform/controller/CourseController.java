@@ -1,5 +1,6 @@
 package com.chenxian.language_platform.controller;
 
+import com.chenxian.language_platform.customize.CourseSalesData;
 import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.CategoryData;
 import com.chenxian.language_platform.model.Course;
@@ -142,5 +143,6 @@ public class CourseController {
         // 驗證通過的處理邏輯
         return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
     }
+
 
 }

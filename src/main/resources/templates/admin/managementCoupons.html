@@ -180,7 +180,7 @@
                 const tableBody = document.getElementById('couponTableBody');
                 data.forEach(coupon => {
                     const activeButtonClass = coupon.active ? 'btn-success' : 'btn-danger';
-                    const activeButtonText = coupon.active ? '有效' : '無效';
+                    const activeButtonText = coupon.active ? '上架' : '下架';
                     const activeButtonAction = coupon.active ? `deactivateCoupon('${coupon.couponId}')` : `activateCoupon('${coupon.couponId}')`;
 
                     let row = `<tr>

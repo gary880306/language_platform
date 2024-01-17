@@ -32,6 +32,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> findAllNonAdminUsers() {
+        return userDao.findAllNonAdminUsers();
+    }
+
+    @Override
     public Integer register(UserRegisterRequest userRegisterRequest) {
         return userDao.createUser(userRegisterRequest);
     }

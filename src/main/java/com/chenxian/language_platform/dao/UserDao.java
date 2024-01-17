@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface UserDao {
     List<User> findALlUsers();
+    List<User> findAllNonAdminUsers();
     Integer createUser(UserRegisterRequest userRegisterRequest);
     User getUserById(Integer userId);
     User getUserIncludeActiveById(Integer userId);

@@ -19,7 +19,7 @@ public class UserInfoController {
     private UserService userService;
     @GetMapping("/admin/userInfo")
     public String showAllReport(Model model){
-        List<User> users = userService.findALlUsers();
+        List<User> users = userService.findAllNonAdminUsers();
         model.addAttribute("users",users);
         return "admin/userInfo";
     }

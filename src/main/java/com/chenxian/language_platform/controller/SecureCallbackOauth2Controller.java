@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,7 +36,7 @@ public class SecureCallbackOauth2Controller {
     }
 
     @RequestMapping("/secure/oidc/callback/google")
-    public String callbackGoogle(@RequestParam("code") String code, HttpSession session) throws Exception {
+    public String callbackGoogle(@RequestParam("code") String code, HttpSession session, Model model) throws Exception {
         // 已有授權碼(code)之後，可以跟 Google 來得到 token (訪問令牌)
         // 有了 token 就可以得到客戶的公開資訊例如: userInfo
         // 1. 使用 code 獲取 token
@@ -72,6 +73,14 @@ public class SecureCallbackOauth2Controller {
         }
         User user = null;
         user = userService.getUserByEmail(userEmail);
+
+        // 檢查用戶是否被停權
+        if (user != null && !user.isActive()) {
+            session.invalidate(); // 使 session 過期失效
+            model.addAttribute("loginMessage", "該帳號已被停權");
+            return "user/login/login"; // 將失敗消息渲染到登入頁面
+        }
+
 
         // 4. 新增成功就自行自動登入 (例如: 建立 user 物件並存放到 session 中)
         session.setAttribute("user", user);
