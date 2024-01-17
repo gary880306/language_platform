@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 public class UserLoginRequest {
-    @NotBlank
-    @Email
+    @NotBlank(message = "電子郵件不可為空")
+    @Email(message = "Email格式不正確")
     private String email;
-    @NotBlank
+    @NotBlank(message = "密碼不可為空")
     private String password;
 }

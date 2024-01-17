@@ -7,6 +7,7 @@ import com.chenxian.language_platform.model.User;
 import com.chenxian.language_platform.service.UserService;
 import com.chenxian.language_platform.util.EmailService;
 import com.chenxian.language_platform.util.MyEncryptionComponent;
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -15,8 +16,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.FieldError;
+
+
 
 import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
@@ -24,7 +29,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Controller
 public class UserController {
@@ -90,26 +98,29 @@ public class UserController {
     // 用戶登入頁面
     @GetMapping("/user/loginPage")
     public String loginPage() {
-        return "user/login&register/login";
+        return "user/login/login";
     }
 
     // 用戶登入功能實作
     @PostMapping("/user/login")
-    public String login(@RequestParam @Valid String email,
-                        @RequestParam @Valid String password,
+    public String login(@ModelAttribute @Valid UserLoginRequest userLoginRequest,
+                        BindingResult bindingResult,
                         @RequestParam String code,
                         HttpSession session, Model model) throws Exception {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> formErrors = bindingResult.getFieldErrors().stream()
+                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (msg1, msg2) -> String.join(", ", msg1, msg2)));
+            model.addAttribute("formErrors", formErrors);
+            return "user/login/login";
+        }
+
         // 比對驗證碼
         if (!code.equals(session.getAttribute("code") + "")) {
             session.invalidate(); // session 過期失效
             model.addAttribute("loginMessage", "驗證碼錯誤");
-            return "user/login&register/login";
+            return "user/login/login";
         }
 
-        // 接收輸入的帳號密碼
-        UserLoginRequest userLoginRequest = new UserLoginRequest();
-        userLoginRequest.setEmail(email);
-        userLoginRequest.setPassword(password);
         // 使用接收到的密碼查找資料庫是否有此用戶資訊
         User user = userService.getUserByEmail(userLoginRequest.getEmail());
         // 若有此用戶的邏輯
@@ -118,10 +129,9 @@ public class UserController {
             if (!user.isActive()) {
                 session.invalidate(); // 使 session 過期失效
                 model.addAttribute("loginMessage", "該帳號已被停權");
-                return "user/login&register/login"; // 將失敗消息渲染到登入頁面
+                return "user/login/login"; // 將失敗消息渲染到登入頁面
             }
-
-            String encryptedPassword = myEncryptionComponent.encrypt(password);
+            String encryptedPassword = myEncryptionComponent.encrypt(userLoginRequest.getPassword());
 
             // 比對密碼成功的邏輯
             if (user.getPassword().equals(encryptedPassword)) {
@@ -131,13 +141,13 @@ public class UserController {
             } else {
                 session.invalidate(); // 使 session 過期失效
                 model.addAttribute("loginMessage", "帳號或密碼錯誤");
-                return "user/login&register/login"; // 將失敗消息渲染到登入頁面
+                return "user/login/login"; // 將失敗消息渲染到登入頁面
             }
             // 資料庫無此用戶的邏輯
         } else {
             session.invalidate(); // 使 session 過期失效
             model.addAttribute("loginMessage", "無此用戶");
-            return "user/login&register/login"; // 將失敗消息渲染到登入頁面
+            return "user/login/login"; // 將失敗消息渲染到登入頁面
         }
     }
 
@@ -145,7 +155,7 @@ public class UserController {
     // 管理員登入頁面
     @GetMapping("/admin/login")
     public String loginBackendPage() {
-        return "user/login&register/loginBackend";
+        return "user/login/loginBackend";
     }
 
     // 管理員登入功能實作
@@ -153,14 +163,6 @@ public class UserController {
     public String loginBackend(@RequestParam("email") String email,
                                @RequestParam("password") String password,
                                HttpSession session, Model model) throws Exception {
-        // 比對驗證碼
-//		if(!code.equals(session.getAttribute("code")+"")) {
-//			session.invalidate(); // session 過期失效
-//			model.addAttribute("loginMessage", "驗證碼錯誤");
-//			return "group_buy/login";
-//		}
-        // 根據 username 查找 user 物件
-        // 接收輸入的帳號密碼
         UserLoginRequest userLoginRequest = new UserLoginRequest();
         userLoginRequest.setEmail(email);
         userLoginRequest.setPassword(password);
@@ -177,18 +179,18 @@ public class UserController {
                 }
                 session.invalidate(); // session 過期失效
                 model.addAttribute("loginMessage", "無權限登入後台");
-                return "/user/login&register/loginBackend";
+                return "/user/login/loginBackend";
                 // 比對密碼失敗邏輯
             } else {
                 session.invalidate(); // session 過期失效
                 model.addAttribute("loginMessage", "帳號或密碼錯誤");
-                return "/user/login&register/loginBackend"; // 將失敗訊息渲染到登入頁面
+                return "/user/login/loginBackend"; // 將失敗訊息渲染到登入頁面
             }
             // 資料庫無此用戶邏輯
         } else {
             session.invalidate(); // session 過期失效
             model.addAttribute("loginMessage", "無此使用者");
-            return "/user/login&register/loginBackend"; // 將失敗訊息渲染到登入頁面
+            return "/user/login/loginBackend"; // 將失敗訊息渲染到登入頁面
         }
     }
 
@@ -202,52 +204,58 @@ public class UserController {
     // 註冊頁面
     @GetMapping("/user/register")
     public String register() {
-        return "user/login&register/register";
+        return "user/login/register";
     }
 
     // 註冊功能實作
     @PostMapping("/user/registerResult")
-    public String registerResult(@RequestParam String email,
-                                 @RequestParam String password,
-                                 @RequestParam String userName,
-                                 @RequestParam String birth,
-                                 @RequestParam String phoneNumber,
-                                 @RequestParam String address,
-                                 Model model) throws Exception {
-        // 驗證 Email 是否已被註冊
-        User user = userService.getUserByEmail(email);
-        if (user != null) {
-            model.addAttribute("emailRegistered", "Email已被註冊");
-            return "/user/login&register/register"; // 將失敗訊息渲染到註冊頁面
+    public String registerResult(@Valid UserRegisterRequest userRegisterRequest,
+                                 BindingResult bindingResult, Model model) throws Exception{
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+
+            bindingResult.getFieldErrors().forEach(error -> {
+                if ("phoneNumber".equals(error.getField()) && error.getDefaultMessage().contains("格式錯誤")) {
+                    if (!StringUtils.isEmpty(userRegisterRequest.getPhoneNumber())) {
+                        errors.put(error.getField(), error.getDefaultMessage());
+                    }
+                } else {
+                    errors.put(error.getField(), error.getDefaultMessage());
+                }
+            });
+            model.addAttribute("formErrors", errors);
+            return "user/login/register";
         }
 
-        String encryptedPassword = myEncryptionComponent.encrypt(password);
+        // 驗證 Email 是否已被註冊
+        User user = userService.getUserByEmail(userRegisterRequest.getEmail());
+        if (user != null) {
+            model.addAttribute("emailRegistered", "Email已被註冊");
+            return "/user/login/register"; // 將失敗訊息渲染到註冊頁面
+        }
 
-        // 成功則創建新的用戶資料
-        UserRegisterRequest userRegisterRequest = new UserRegisterRequest();
-        userRegisterRequest.setEmail(email);
+        // 註冊密碼加密
+        String encryptedPassword = myEncryptionComponent.encrypt(userRegisterRequest.getPassword());
+
         userRegisterRequest.setPassword(encryptedPassword);
-        userRegisterRequest.setUserName(userName);
-        userRegisterRequest.setBirth(birth);
-        userRegisterRequest.setPhoneNumber(phoneNumber);
-        userRegisterRequest.setAddress(address);
+        userRegisterRequest.setAuthType("local");
         // 使用 register 方法將會員資料存到資料庫
         userService.register(userRegisterRequest);
         // 導向登入成功頁面
-        return "user/login&register/result";
+        return "user/login/registerResult";
     }
 
     @GetMapping("/user/forgetPassword")
     public String enterEmail(Model model) {
         model.addAttribute("emailForm", new EmailForm());
-        return "user/login&register/forgetPassword";
+        return "user/login/forgetPassword";
     }
 
     @PostMapping("/sendResetPasswordLink")
     public String generateAndSendResetToken(@Valid EmailForm emailForm, BindingResult bindingResult, Model model) throws MessagingException, UnsupportedEncodingException {
         if (bindingResult.hasErrors()) {
 
-            return "user/login&register/forgetPassword";
+            return "user/login/forgetPassword";
         }
         String email = emailForm.getEmail();
         // 驗證用戶是否存在
@@ -262,10 +270,10 @@ public class UserController {
             // 發送重置郵件
             emailService.sendResetPasswordLink(email, resetUrl);
 
-            return "user/login&register/sendEmailResult";
+            return "user/login/sendEmailResult";
         }
         model.addAttribute("errorMessage", "無此用戶");
-        return "user/login&register/forgetPassword";
+        return "user/login/forgetPassword";
     }
 
     // 用戶點擊 email 中的 url 之後跳轉到修改密碼畫面
@@ -276,10 +284,10 @@ public class UserController {
         if (isValid) {
             // 令牌有效，顯示修改密碼的表單
             model.addAttribute("token", token);
-            return "user/login&register/changePassword";
+            return "user/login/changePassword";
         } else {
             // 令牌無效，顯示錯誤頁面或提示
-            return "user/login&register/timeInvalid";
+            return "user/login/timeInvalid";
         }
 
     }
@@ -292,23 +300,23 @@ public class UserController {
                 newPasswordChecked == null || newPasswordChecked.trim().isEmpty()) {
             model.addAttribute("token", token);
             model.addAttribute("errorMessage", "欄位不可為空");
-            return "user/login&register/changePassword"; // 返回到密码重置表单页面
+            return "user/login/changePassword"; // 返回到密码重置表单页面
         }
 
         if (!newPassword.equals(newPasswordChecked)) {
             model.addAttribute("token", token);
             model.addAttribute("errorMessage", "密碼不一致");
-            return "user/login&register/changePassword"; // 返回到密码重置表单页面
+            return "user/login/changePassword"; // 返回到密码重置表单页面
         }
 
         boolean isResetSuccessful = userService.resetPasswordWithToken(token,newPassword);
         if (isResetSuccessful) {
             // 密碼重置成功，導向成功頁面
-            return "user/login&register/changeSuccess"; // 請確保你有相應的視圖定義
+            return "user/login/changeSuccess"; // 請確保你有相應的視圖定義
         } else {
             // 密碼重置失敗，導向錯誤頁面，可以向模型添加錯誤消息
             model.addAttribute("errorMessage", "密碼重置失敗，請檢查令牌的有效性");
-            return "user/login&register/login"; // 請確保你有相應的視圖定義
+            return "user/login/login"; // 請確保你有相應的視圖定義
         }
     }
 }

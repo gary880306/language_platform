@@ -16,6 +16,13 @@
             /* 圖標寬度自動調整 */
         }
 
+        .logo {
+            height: 80px;
+            /* 圖標高度 */
+            width: auto;
+            /* 圖標寬度自動調整 */
+        }
+
         .or-text {
             margin: 10px 0; /* "OR" 文本的上下邊距 */
         }
@@ -34,6 +41,17 @@
             border-color: #c0c0c0; /* 鼠標懸停時的邊框顏色 */
         }
 
+        /* 自定義超連結樣式 */
+        a.custom-link {
+            text-decoration: none; /* 移除下劃線 */
+            color: #7D7DFF;
+        }
+
+        a.custom-link:hover {
+            color: #4A4AFF;
+        }
+
+
     </style>
 </head>
 <body>
@@ -42,15 +60,20 @@
             <div class="col-md-6">
                 <div class="card" style="background-image: linear-gradient(to top, #c4c5c7 0%, #dcdddf 52%, #ebebeb 100%);">
                     <div class="card-body">
-                        <h3 class="card-title text-center">登入</h3>
+                        <div style="text-align: center;">
+                            <img src="/icons/响學logo.png" alt="logo" class="logo mb-3">
+                        </div>
                         <form id="loginForm" method="post" action="/user/login">
                             <div class="mb-3">
                                 <label for="email" class="form-label">電子郵件</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="輸入電子郵件">
+                                <input class="form-control" id="email" name="email" placeholder="輸入電子郵件">
+                                <span th:if="${formErrors != null and formErrors.containsKey('email')}" th:text="${formErrors['email']}" class="error mt-1" style="color: red"></span>
                             </div>
+
                             <div class="mb-3">
                                 <label for="password" class="form-label">密碼</label>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="輸入密碼">
+                                <span th:if="${formErrors != null and formErrors.containsKey('password')}" th:text="${formErrors['password']}" class="error mt-1" style="color: red"></span>
                             </div>
                             <div class="mb-3">
                                 <label for="code" class="form-label">驗證碼</label>
@@ -61,6 +84,8 @@
                                         <i class="bi bi-arrow-clockwise"></i>
                                     </button>
                                 </div>
+                                <!-- 用於顯示通用登入錯誤信息的部分 -->
+                                <div class="mb-3" style="color: red" th:if="${loginMessage != null}" th:text="${loginMessage}"></div>
                             </div>
 
                             <script>
@@ -83,12 +108,11 @@
                                 </div>
                             </div>
                         </form>
-                        <div style="color: red" th:text="${loginMessage}">Default Login Message</div>
                         <div class="text-center mt-3">
-                            <small>尚未加入會員？<a href="/user/register">註冊</a></small>
+                            <small>尚未加入會員？<a href="/user/register" class="custom-link"> 註冊</a></small>
                         </div>
                         <div class="text-center mt-2">
-                            <a href="/user/forgetPassword">忘記密碼</a>
+                            <small>還敢忘記密碼？<a href="/user/forgetPassword" class="custom-link"> 忘記密碼</a></small>
                         </div>
                     </div>
                 </div>

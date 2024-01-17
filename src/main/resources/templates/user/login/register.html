@@ -24,28 +24,39 @@
                             <div class="mb-3">
                                 <label for="email" class="form-label">電子郵件</label>
                                 <input type="email" class="form-control" id="email" name="email" placeholder="輸入電子郵件">
-                                <div th:if="${emailRegistered}" th:text="${emailRegistered}" class="error"></div>
+                                <span th:if="${formErrors != null and formErrors.containsKey('email')}" th:text="${formErrors['email']}" class="error"></span>
+                                <span th:if="${emailRegistered}" th:text="${emailRegistered}" class="error"></span>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">密碼</label>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="輸入密碼">
+                                <span th:if="${formErrors != null and formErrors.containsKey('password')}" th:text="${formErrors['password']}" class="error"></span>
                             </div>
+
                             <div class="mb-3">
                                 <label for="userName" class="form-label">用戶名</label>
                                 <input type="text" class="form-control" id="userName" name="userName" placeholder="輸入用戶名">
+                                <span th:if="${formErrors != null and formErrors.containsKey('userName')}" th:text="${formErrors['userName']}" class="error"></span>
                             </div>
+
                             <div class="mb-3">
                                 <label for="birth" class="form-label">生日</label>
                                 <input type="date" class="form-control" id="birth" name="birth">
+                                <span th:if="${formErrors != null and formErrors.containsKey('birth')}" th:text="${formErrors['birth']}" class="error"></span>
                             </div>
+
                             <div class="mb-3">
                                 <label for="phoneNumber" class="form-label">電話號碼</label>
                                 <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="輸入電話號碼">
+                                <span th:if="${formErrors != null and formErrors.containsKey('phoneNumber')}" th:text="${formErrors['phoneNumber']}" class="error"></span>
                             </div>
+
                             <div class="mb-3">
                                 <label for="address" class="form-label">地址</label>
-                                <input type="text" class="form-control" id="address" name="address"  placeholder="輸入地址">
+                                <input type="text" class="form-control" id="address" name="address" placeholder="輸入地址">
+                                <span th:if="${formErrors != null and formErrors.containsKey('address')}" th:text="${formErrors['address']}" class="error"></span>
                             </div>
+
                             <button type="submit" class="btn btn-primary w-100">註冊</button>
                         </form>
                     </div>
