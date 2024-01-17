@@ -18,22 +18,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Optional;
 
 @Controller
 public class SecureCallbackOauth2Controller {
-    private static final Logger logger = LoggerFactory.getLogger(SecureCallbackOauth2Controller.class);
-
     @Autowired
     private OAuthService oauthService;
     @Autowired
     private UserService userService;
     @GetMapping("/secure/oidc/login/google")
     public String googleLogin() {
-        logger.info("Starting Google login process");
         // 向 Google 驗證授權
         String responseType = "code";
         String scope = "email openid profile address phone";
@@ -43,7 +37,6 @@ public class SecureCallbackOauth2Controller {
 
     @RequestMapping("/secure/oidc/callback/google")
     public String callbackGoogle(@RequestParam("code") String code, HttpSession session, Model model) throws Exception {
-        logger.info("Received callback from Google with code: {}", code);
         // 已有授權碼(code)之後，可以跟 Google 來得到 token (訪問令牌)
         // 有了 token 就可以得到客戶的公開資訊例如: userInfo
         // 1. 使用 code 獲取 token
@@ -75,11 +68,9 @@ public class SecureCallbackOauth2Controller {
 
         UserRegisterRequest userRegisterRequest = null;
         if(userOpt.isEmpty()) {
-            logger.info("Registering new user with email: {}", userEmail);
             userRegisterRequest = new UserRegisterRequest(userEmail,"None",userName,"None","None","None","google",authId);
             userService.register(userRegisterRequest);
         }
-        logger.info("User already registered: {}", userEmail);
         User user = null;
         user = userService.getUserByEmail(userEmail);
 
@@ -95,7 +86,6 @@ public class SecureCallbackOauth2Controller {
         session.setAttribute("user", user);
 
         // 5. 重導到登入成功頁面(前台首頁)
-        logger.info("User logged in: {}", userEmail);
         return "redirect:/enjoyLearning/courses"; // 重定向到主頁面
     }
 }

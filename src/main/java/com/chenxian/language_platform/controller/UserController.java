@@ -15,13 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.validation.FieldError;
-
-
 
 import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
@@ -34,13 +32,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Controller
 public class UserController {
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-
     @Autowired
     private UserService userService;
     @Autowired
@@ -50,7 +43,6 @@ public class UserController {
 
     @GetMapping("/getCode")
     private void getCodeImage(HttpSession session, HttpServletResponse response) throws IOException {
-        logger.info("Generating code image");
         // 產生一個驗證碼 code
         Random random = new Random();
         StringBuilder codeBuilder = new StringBuilder();
@@ -113,7 +105,6 @@ public class UserController {
                         BindingResult bindingResult,
                         @RequestParam String code,
                         HttpSession session, Model model) throws Exception {
-        logger.info("Processing login for email: {}", userLoginRequest.getEmail());
         if (bindingResult.hasErrors()) {
             Map<String, String> formErrors = bindingResult.getFieldErrors().stream()
                     .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (msg1, msg2) -> String.join(", ", msg1, msg2)));
@@ -231,7 +222,6 @@ public class UserController {
                 }
             });
 
-            logger.error("Registration failed for user: {}, Errors: {}", userRegisterRequest.getEmail(), errors);
             model.addAttribute("formErrors", errors);
             return "user/login/register";
         }
@@ -250,7 +240,6 @@ public class UserController {
         userRegisterRequest.setAuthType("local");
         // 使用 register 方法將會員資料存到資料庫
         userService.register(userRegisterRequest);
-        logger.info("Registration successful for user: {}", userRegisterRequest.getEmail());
         // 導向登入成功頁面
         return "user/login/registerResult";
     }
