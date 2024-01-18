@@ -131,8 +131,8 @@
                     <td class="align-middle text-center" th:text="${order.getOrderId}"></td>
                     <td class="align-middle text-center" th:text="${order.getUserId}"></td>
                     <td class="align-middle text-center" th:text="${order.getUserName}"></td>
-                    <td class="align-middle text-center" th:text="${order.getTotalAmount}"></td>
-                    <td class="align-middle text-center" th:text="${order.getCreatedDate}"></td>
+                    <td class="align-middle text-center" th:text="'NT$' + ${order.formattedTotalAmount}">總金額</td>
+                    <td class="align-middle text-center" th:text="${#dates.format(order.createdDate, 'yyyy-MM-dd HH:mm:ss')}">結帳時間</td>
                     <td class="align-middle text-center">
                         <button type="button" class="btn btn-outline-secondary showOrderDetails" th:data-order-id="${order.getOrderId}">
                             查看詳情

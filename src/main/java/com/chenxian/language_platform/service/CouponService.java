@@ -1,6 +1,5 @@
 package com.chenxian.language_platform.service;
 
-import com.chenxian.language_platform.model.Cart;
 import com.chenxian.language_platform.model.Coupon;
 
 import java.util.List;
@@ -20,4 +19,6 @@ public interface CouponService {
     void applyCouponToCart(Integer userId ,Integer couponId);
     boolean checkCouponExists(Integer userId, Integer couponId);
     boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId);
+    List<Coupon> getCouponsByUserId(Integer userId);
+    void deleteUserCoupon(Integer userId, Integer couponId);
 }

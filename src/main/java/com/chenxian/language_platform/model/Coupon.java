@@ -23,4 +23,16 @@ public class Coupon {
         FIXED,PERCENTAGE
     }
 
+    // 返回優惠券狀態
+    public String getStatus() {
+        Date now = new Date();
+        if (endDate != null && endDate.before(now)) {
+            return "expired";
+        } else if (startDate != null && startDate.after(now)) {
+            return "notStarted";
+        } else {
+            return "active";
+        }
+    }
+
 }

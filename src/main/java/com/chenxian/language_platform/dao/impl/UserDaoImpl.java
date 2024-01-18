@@ -18,6 +18,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Component
@@ -206,7 +207,7 @@ public class UserDaoImpl implements UserDao {
     // 結帳
     @Transactional
     @Override
-    public CheckoutResponse checkoutCartByUserId(Integer userId,Integer cartId) {
+    public CheckoutResponse checkoutCartByUserId(Integer userId,Integer cartId, Integer discount) {
         // 1. 檢索購物車項目
         List<CartItem> cartItems = findCartItemsById(cartId);
 
@@ -214,7 +215,7 @@ public class UserDaoImpl implements UserDao {
             return new CheckoutResponse(false, null);
         }
         // 2. 創建新訂單
-        Order order = createOrder(userId, cartItems);
+        Order order = createOrder(userId, cartItems, discount);
 
         // 3. 創建新訂單明細
         createOrderItems(userId,order.getOrderId(),cartItems);
@@ -233,7 +234,7 @@ public class UserDaoImpl implements UserDao {
 
     // 創建訂單方法
     @Override
-    public Order createOrder(Integer userId, List<CartItem> cartItems) {
+    public Order createOrder(Integer userId, List<CartItem> cartItems, Integer discount) {
         int totalAmount = 0;
         for (CartItem cartItem : cartItems){
             int amount =  courseDao.getCourseById(cartItem.getCourseId()).getPrice();
@@ -243,11 +244,13 @@ public class UserDaoImpl implements UserDao {
         Order order = new Order();
         order.setUserId(userId);
         order.setTotalAmount(totalAmount);
+        order.setDiscount(discount); // 設置折扣金額
 
-        String sql = "INSERT INTO `order` (user_id, total_amount) VALUES (:userId, :totalAmount)";
+        String sql = "INSERT INTO `order` (user_id, total_amount,discount) VALUES (:userId, :totalAmount, :discount)";
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
         map.put("totalAmount",totalAmount);
+        map.put("discount",discount);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(sql,new MapSqlParameterSource(map),keyHolder);
         Integer newOrderId = keyHolder.getKey().intValue();

@@ -66,4 +66,14 @@ public class CouponServiceImpl implements CouponService {
         return couponDao.checkCouponExistsByIsUsed(userId,couponId);
     }
 
+    @Override
+    public List<Coupon> getCouponsByUserId(Integer userId) {
+        return couponDao.getCouponsByUserId(userId);
+    }
+
+    @Override
+    public void deleteUserCoupon(Integer userId, Integer couponId) {
+        couponDao.deleteUserCoupon(userId,couponId);
+    }
+
 }

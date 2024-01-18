@@ -1,7 +1,6 @@
 package com.chenxian.language_platform.service;
 
 import com.chenxian.language_platform.customize.CheckoutResponse;
-import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 
@@ -21,8 +20,8 @@ public interface UserService {
     List<CartItem> findCartItemsById(Integer cartId);
     Boolean removeCartItemById(Integer itemId);
     Cart findCartById(Integer cartId);
-    CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId);
-    Order createOrder(Integer userId, List<CartItem> cartItems);
+    CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId, Integer discountInteger);
+    Order createOrder(Integer userId, List<CartItem> cartItems, Integer discount);
     void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems);
     void addCart(Cart cart);
     void addCartItem(CartItem cartItem);
@@ -40,4 +39,5 @@ public interface UserService {
     String generateResetToken(String email);
     boolean resetPasswordWithToken(String token,String newPassword) throws Exception;
     boolean checkTokenValidity(String token);
+    User updateUser(User user);
 }

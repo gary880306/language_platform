@@ -4,6 +4,7 @@ import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface UserDao {
@@ -21,8 +22,8 @@ public interface UserDao {
     List<CartItem> findCartItemsById(Integer cartId);
     Boolean removeCartItemById(Integer itemId);
     Cart findCartById(Integer cartId);
-    CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId);
-    Order createOrder(Integer userId,List<CartItem> cartItems);
+    CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId, Integer discount);
+    Order createOrder(Integer userId,List<CartItem> cartItems, Integer discount);
     void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems);
     void createUserCourse(Integer userId,List<CartItem> cartItems );
 

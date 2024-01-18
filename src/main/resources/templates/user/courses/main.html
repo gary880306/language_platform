@@ -8,6 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <style>
+        .logo {
+            height: 40px;
+            /* 圖標高度 */
+            width: auto;
+            /* 圖標寬度自動調整 */
+        }
         /* 導航欄樣式 */
         .navbar {
             background-color: #d1fdff;
@@ -191,6 +197,8 @@
             background-color: #333;
             color: #fff;
             text-align: center;
+            position: fixed;
+            bottom: 0;
             padding: 10px;
             width: 100%;
         }
@@ -205,7 +213,8 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/enjoyLearning/courses">响學</a>
+        <img src="/icons/享學.png" alt="logo" class="logo">
+        <a class="navbar-brand" href="/enjoyLearning/courses">享學</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -228,7 +237,7 @@
                         [[${cartCourseCount}]] <!-- 使用 Thymeleaf 表達式動態顯示商品數 -->
                     </span>
                 </a>
-                <a href=".././userInfo.jsp" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
+                <a href="/enjoyLearning/user" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
                 <a href="/user/logout" class="text-dark logout-link me-3" style="width: auto">登出</a>
             </div>
         </div>
@@ -270,7 +279,7 @@
 
     <!-- 检查是否有课程 -->
     <div th:if="${!hasCourses}" class="no-results">
-        查無任何結果 😥
+        <h5>查無任何結果 😥</h5>
     </div>
 
 
@@ -296,7 +305,7 @@
 </section>
 
 <!-- 分頁 -->
-<div class="d-flex justify-content-center mt-4" th:if="${hasCourses}">
+<div class="d-flex justify-content-center mt-0" style="margin-bottom: 150px" th:if="${hasCourses}">
     <nav aria-label="Page navigation">
         <ul class="pagination">
             <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
@@ -321,7 +330,7 @@
 
 
 <footer th:classappend="${!hasCourses} ? 'fixed-footer' : ''">
-    <p class="mb-0">&copy; 2023 响學</p>
+    <p class="mb-0">&copy; 2024 享學</p>
 </footer>
 
 <script>

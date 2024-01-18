@@ -2,7 +2,6 @@ package com.chenxian.language_platform.service.impl;
 
 import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.dao.UserDao;
-import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.repository.UserRepository;
@@ -10,7 +9,6 @@ import com.chenxian.language_platform.service.UserService;
 import com.chenxian.language_platform.util.MyEncryptionComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.Model;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -92,13 +90,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId) {
-        return userDao.checkoutCartByUserId(userId,cartId);
+    public CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId, Integer discount) {
+        return userDao.checkoutCartByUserId(userId,cartId,discount);
     }
 
     @Override
-    public Order createOrder(Integer userId, List<CartItem> cartItems) {
-        return userDao.createOrder(userId,cartItems);
+    public Order createOrder(Integer userId, List<CartItem> cartItems, Integer discount) {
+        return userDao.createOrder(userId,cartItems,discount);
     }
 
     @Override
@@ -231,6 +229,21 @@ public class UserServiceImpl implements UserService {
         boolean isValid = currentTime.isBefore(tokenExpirationTime);
 
         return isValid;
+    }
+
+    @Override
+    public User updateUser(User user) {
+        // 假設 userId 是唯一且存在的。您需要根據實際情況進行適當的錯誤處理。
+        User existingUser = userRepository.findById(user.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+        // 更新現有用戶的資訊。這裡您可能需要添加更多的檢查和邏輯，以確保數據的一致性和安全性。
+        existingUser.setUserName(user.getUserName());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setPhoneNumber(user.getPhoneNumber());
+        existingUser.setAddress(user.getAddress());
+        existingUser.setBirth(user.getBirth());
+        // 繼續更新其他需要的字段...
+
+        return userRepository.save(existingUser);
     }
 
 

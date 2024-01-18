@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ch" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>我的優惠券</title>
+    <!-- 引入 Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+</head>
+<style>
+    /* 已過期優惠券樣式 */
+    .expired-coupon {
+        color: #666;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        text-decoration: line-through;
+        opacity: 0.6;
+    }
+
+    /* 未開始優惠券樣式 */
+    .not-started-coupon {
+        color: #333;
+        background-color: #ffeb3b;
+        border: 1px solid #ffd600;
+        opacity: 0.6;
+    }
+</style>
+<body>
+<div class="container mt-4">
+    <h2>我的優惠券</h2>
+    <div th:if="${coupons.empty}" class="text-center">
+        <h5 class="mt-5">無任何優惠券 🥱</h5>
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div th:each="coupon : ${coupons}" class="col">
+            <div class="card h-100 position-relative" th:classappend="${coupon.status == 'expired' ? 'expired-coupon' : coupon.status == 'notStarted' ? 'not-started-coupon' : 'bg-primary'}">
+                <!-- 刪除按鈕 -->
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-2" aria-label="Close"
+                        th:data-coupon-id="${coupon.couponId}"
+                        th:onclick="'deleteCoupon(this,' + ${user.userId} + ')'"></button>
+
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${coupon.code}">優惠券代碼</h5>
+                    <p class="card-text mb-1" th:text="${coupon.description}">描述</p>
+                    <small class="text" th:text="${coupon.discountType}">描述</small>
+                </div>
+                <div class="card-footer">
+                    <small class="text" th:text="${coupon.startDate} + ' ~ ' + ${coupon.endDate}">截止日期</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- 可選：引入 Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function deleteCoupon(button, userId) {
+        var couponId = button.getAttribute('data-coupon-id');
+
+        // 显示确认对话框
+        Swal.fire({
+            title: '確定要刪除嗎?',
+            text: "您將無法恢復此操作！",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '是的，刪除它！',
+            cancelButtonText: '取消',
+            backdrop: false // 禁用背景遮罩
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 用户确认删除
+                fetch('/deleteCoupon/' + couponId + '/' + userId, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if(response.ok) {
+                            Swal.fire({
+                                title: '刪除!',
+                                text: '您的優惠券已被刪除。',
+                                icon: 'success',
+                                backdrop: false // 禁用背景遮罩
+                            })
+                                .then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.reload(); // 在这里重新加载页面
+                                    }
+                                });
+                        } else {
+                            throw new Error('Something went wrong');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error!', '無法刪除優惠券。', 'error');
+                    });
+            }
+        });
+    }
+</script>
+
+
+</body>
+</html>

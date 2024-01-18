@@ -87,50 +87,19 @@
             background-color: red; /* 背景顏色 */
         }
 
-        /* 卡片容器樣式 */
-        .card-container {
+        /* iframe 容器樣式，用於使 iframe 在容器內居中 */
+        .iframe-container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start; /* 从左侧开始排列卡片 */
-            margin: auto;
-            padding: 50px 150px; /* 增加左右邊距 */
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            height: 600px; /* 指定一個高度 */
         }
 
-        /* 卡片樣式 */
-        .card {
-            overflow: hidden;
-            border: 1px solid transparent;
-            margin-right: 15px; /* 添加右边距以分隔卡片 */
-            margin-bottom: 15px; /* 添加底部边距以在换行时有间距 */
-            flex-basis: calc(25% - 15px); /* 计算卡片宽度，减去间距 */
-            height: 320px; /* 固定卡片高度 */
-            border-radius: 10px; /* 設置卡片邊框圓角 */
-            transition: transform 0.3s ease-in-out;
-        }
-
-
-        .card img {
-            height: 150px;
-            width: auto;
-            border-radius: 10px;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .card img:hover {
-            transform: scale(1.1);
-            transform-origin: center center;
-        }
-        .card:hover img {
-            transform: scale(1.1);
-            transform-origin: center center;
-        }
-        /* 標籤樣式 */
-        .tag {
-            background-color: aquamarine;
-            border: 2px;
-            padding: 4px;
-            font-size: 14px;
-            color: #00A9B0;
+        .iframe-container iframe {
+            width: 100%; /* iframe 的寬度為 100% */
+            max-width: 960px; /* 最大寬度，可根據需要調整 */
+            height: 100%; /* 高度為容器的高度 */
+            border: none; /* 移除 iframe 預設邊框 */
         }
 
         footer {
@@ -174,43 +143,49 @@
     </div>
 </nav>
 
-
-<div class="container">
-    <h1 class="my-4">歡迎回來，<span th:text="${user.userName}">使用者名稱</span>!</h1>
-    <!-- 檢查課程列表是否為空 -->
-    <div th:if="${courses.isEmpty()}">
-        <h4>沒有任何課程 😪</h4>
-    </div>
-    <div th:unless="${courses.isEmpty()}">
-        <!-- 卡片容器區塊 -->
-        <section class="card-container d-flex flex-wrap">
-            <!-- 迭代顯示課程卡片 -->
-            <div class="card rounded-2 mx-3" style="width: 250px; height: 320px;" th:each="course : ${courses}">
-                <img th:src="@{/images/{filename}(filename=${course.imageUrl})}" class="card-img-top" alt="课程图片">
-                <div class="card-body" th:attr="data-course-id=${course.courseId}">
-                    <p class="cardword mb-1">
-                        <span class="tag rounded-2 me-1"><strong th:text="${course.getCategoryName}"></strong></span>
-                        <span th:text="${course.getCourseName}"></span>
-                    </p>
-                    <p class="card-title mb-2 fs-6 text-muted">
-                        <span th:text="'by ' + ${course.teacher}"></span>
-                        <span>&nbsp|&nbsp</span>
-                        <i class="bi bi-clock"></i>
-                        <span th:text="${course.time} + ' 小時'"></span>
-                    </p>
-
-                    <p class="card-title mb-2 fs-6 text-muted">點擊快去上課吧!</p>
-                </div>
-                <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
-            </div>
-        </section>
+<!-- 按鈕區域 -->
+<div class="container my-4">
+    <div class="d-flex justify-content-center">
+        <input type="hidden" id="userId" th:value="${user.userId}">
+        <button class="btn btn-outline-secondary mx-2 active" onclick="loadIframe('/info', this)">個人資訊</button>
+        <button class="btn btn-outline-secondary mx-2" onclick="loadIframe('/orders', this)">訂單紀錄</button>
+        <button class="btn btn-outline-secondary mx-2" onclick="loadIframe('/coupons', this)">我的優惠券</button>
     </div>
 </div>
 
+<!-- iframe 容器 -->
+<div class="container my-4">
+    <div class="iframe-container">
+        <iframe id="iframeArea" th:src="@{/info(userId=${user.userId})}"></iframe>
+    </div>
+</div>
 
 <footer>
-    <p class="mb-0">&copy; 2024 享學</p>
+    <p class="mb-0">&copy; 2023 响學</p>
 </footer>
+
+<!-- JavaScript 來控制 iframe 的 src -->
+<script>
+    function loadIframe(url, buttonElement) {
+        var userId = document.getElementById('userId').value;
+
+        // 获取所有按钮元素
+        var buttons = document.querySelectorAll(".btn");
+
+        // 移除所有按钮的 "active secondary" 类型样式
+        buttons.forEach(function(btn) {
+            btn.classList.remove("active", "secondary");
+        });
+
+        // 在当前点击的按钮上添加 "active secondary" 类型样式
+        buttonElement.classList.add("active", "secondary");
+
+        // 加载iframe
+        document.getElementById('iframeArea').src = url + '?userId=' + userId;
+    }
+
+</script>
+
 </body>
 </html>
 

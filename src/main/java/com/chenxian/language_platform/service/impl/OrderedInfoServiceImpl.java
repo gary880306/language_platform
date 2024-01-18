@@ -22,4 +22,19 @@ public class OrderedInfoServiceImpl implements OrderedInfoService {
     public List<OrderItem> findOrderItemByOrderId(Integer orderId) {
         return orderedInfoDao.findOrderItemByOrderId(orderId);
     }
+
+    @Override
+    public List<Order> getOrdersByUserId(Integer userId) {
+        return orderedInfoDao.getOrdersByUserId(userId);
+    }
+
+    @Override
+    public void saveOrder(Order order) {
+        orderedInfoDao.saveOrder(order);
+    }
+
+    @Override
+    public Order findOrderById(Integer orderId) {
+        return orderedInfoDao.findOrderById(orderId);
+    }
 }

@@ -4,6 +4,7 @@ import com.chenxian.language_platform.dao.CouponDao;
 import com.chenxian.language_platform.model.Coupon;
 import com.chenxian.language_platform.rowmapper.CouponRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -114,6 +115,44 @@ public class CouponDaoImpl implements CouponDao {
 
         Integer count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
         return count != null && count > 0;
+    }
+
+    @Override
+    public List<Coupon> getCouponsByUserId(Integer userId) {
+        String sql = "SELECT c.coupon_id, c.code, c.description, c.discount_type, c.discount_value, c.start_date, c.end_date, c.is_active, c.quantity " +
+                "FROM user_coupon uc " +
+                "INNER JOIN coupon c ON uc.coupon_id = c.coupon_id " +
+                "WHERE uc.user_id = :userId AND uc.is_used = false";
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+
+        return namedParameterJdbcTemplate.query(
+                sql,
+                map,
+                (rs, rowNum) -> {
+                    Coupon coupon = new Coupon();
+                    coupon.setCouponId(rs.getInt("coupon_id"));
+                    coupon.setCode(rs.getString("code"));
+                    coupon.setDescription(rs.getString("description"));
+                    coupon.setDiscountType(Coupon.DiscountType.valueOf(rs.getString("discount_type")));
+                    coupon.setDiscountValue(rs.getBigDecimal("discount_value"));
+                    coupon.setStartDate(rs.getDate("start_date"));
+                    coupon.setEndDate(rs.getDate("end_date"));
+                    coupon.setActive(rs.getBoolean("is_active"));
+                    coupon.setQuantity(rs.getInt("quantity"));
+                    return coupon;
+                }
+        );
+    }
+
+    @Override
+    public void deleteUserCoupon(Integer userId, Integer couponId) {
+        String sql = "DELETE FROM user_coupon WHERE user_id = :userId AND coupon_id = :couponId";
+        Map<String, Object> map= new HashMap<>();
+        map.put("userId", userId);
+        map.put("couponId", couponId);
+
+        namedParameterJdbcTemplate.update(sql, map);
     }
 
 }

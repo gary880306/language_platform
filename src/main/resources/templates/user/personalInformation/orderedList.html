@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ch" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>訂單列表</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h2 class="text-center">訂單列表</h2>
+
+    <!-- 當沒有訂單時顯示的信息 -->
+    <div th:if="${orders.empty}" class="text-center">
+        <h5 class="mt-5">無任何訂單紀錄 🥱</h5>
+    </div>
+
+    <!-- 當有訂單時顯示的表格 -->
+    <table th:unless="${orders.empty}" class="table table-striped table-hover table-bordered text-center">
+        <thead class="table-dark">
+        <tr>
+            <th>訂單編號</th>
+            <th>總金額</th>
+            <th>結帳時間</th>
+            <th>課程</th>
+            <!-- 根據需要添加更多列 -->
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}" class="align-middle">
+            <td th:text="${order.orderId}">訂單編號</td>
+            <td th:text="'NT$' + ${order.formattedTotalAmount}">總金額</td>
+            <td th:text="${#dates.format(order.createdDate, 'yyyy-MM-dd HH:mm:ss')}">結帳時間</td>
+            <td>
+                <div th:each="item : ${order.orderItems}" class="d-flex align-items-center justify-content-center">
+                    <img th:if="${item.imageUrl != null}"
+                         th:src="@{/images/{filename}(filename=${item.imageUrl})}"
+                         class="img-fluid rounded mx-2"
+                         alt="課程圖片"
+                         style="height: 50px; width: 70px;">
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

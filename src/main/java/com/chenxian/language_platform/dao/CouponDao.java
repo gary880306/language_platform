@@ -17,5 +17,7 @@ public interface CouponDao {
     List<Coupon> getAllCoupons();
     boolean checkCouponExists(Integer userId, Integer couponId);
     boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId);
+    List<Coupon> getCouponsByUserId(Integer userId);
+    void deleteUserCoupon(Integer userId, Integer couponId);
 
 }

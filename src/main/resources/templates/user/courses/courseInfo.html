@@ -10,6 +10,12 @@
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
+        .logo {
+            height: 40px;
+            /* 圖標高度 */
+            width: auto;
+            /* 圖標寬度自動調整 */
+        }
         /* 導航欄樣式 */
         .navbar {
             background-color: #d1fdff;
@@ -108,7 +114,8 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/enjoyLearning/courses">响學</a>
+        <img src="/icons/享學.png" alt="logo" class="logo">
+        <a class="navbar-brand" href="/enjoyLearning/courses">享學</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -127,7 +134,7 @@
                         [[${cartCourseCount}]] <!-- 使用 Thymeleaf 表達式動態顯示商品數 -->
                     </span>
                 </a>
-                <a href=".././userInfo.jsp" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
+                <a href="/enjoyLearning/user" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
                 <a href="/user/logout" class="text-dark logout-link me-3" style="width: auto">登出</a>
             </div>
         </div>
@@ -155,7 +162,7 @@
 </section>
 
 <footer>
-    <p class="mb-0">&copy; 2023 响學</p>
+    <p class="mb-0">&copy; 2024 享學</p>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
