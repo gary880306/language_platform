@@ -77,8 +77,8 @@ public class FrontendController {
                 frontendService.getAllCoursesWithUserCount(courseQueryParams) :
                 frontendService.getAllCourses(courseQueryParams);
 
-        // 格式化價格並過濾掉被標記為已刪除的課程
-        List<Course> activeCourses = courses.stream()
+        // 過濾掉被標記為已刪除的課程並格式化價格
+        courses = courses.stream()
                 .filter(course -> !course.getIsDeleted())
                 .peek(course -> {
                     String formattedPrice = formatCoursePrice(course.getPrice());
@@ -86,7 +86,7 @@ public class FrontendController {
                 })
                 .collect(Collectors.toList());
 
-        boolean hasCourses = !activeCourses.isEmpty();
+        boolean hasCourses = !courses.isEmpty();
         Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
         Integer totalCourses = frontendService.getCoursesCount(courseQueryParams);
         Integer totalPages = (int) Math.ceil((double) totalCourses / size);
@@ -95,7 +95,7 @@ public class FrontendController {
         model.addAttribute("search", search);
         model.addAttribute("size", size);
         model.addAttribute("cartCourseCount", userService.getCartCourseCount(user.getUserId()));
-        model.addAttribute("courses", activeCourses);
+        model.addAttribute("courses", courses);
         model.addAttribute("courseUserCounts", courseUserCounts);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("sort", sort);

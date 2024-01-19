@@ -33,7 +33,7 @@ public class FrontendDaoImpl implements FrontendDao {
             sql += "LEFT JOIN user_course ON course.course_id = user_course.course_id ";
         }
 
-        sql += "WHERE 1=1";
+        sql += "WHERE 1=1 AND course.is_deleted = false"; // 加入過濾已刪除課程的條件
 
         if (courseQueryParams.getSearch() != null && !courseQueryParams.getSearch().isEmpty()) {
             sql += " AND (course_name LIKE :search OR category_name LIKE :search)";
@@ -62,7 +62,8 @@ public class FrontendDaoImpl implements FrontendDao {
     public List<Course> getAllCoursesWithUserCount(CourseQueryParams courseQueryParams) {
         String sql = "SELECT course.course_id, course.course_name, category.category_name, course.image_url, course.`time`, course.price, course.teacher, course.description, course.created_date, course.last_modified_date, course.video_url, course.is_deleted, COUNT(user_course.user_id) as user_count " +
                 "FROM course LEFT JOIN category ON course.category_id = category.category_id " +
-                "LEFT JOIN user_course ON course.course_id = user_course.course_id WHERE 1=1";
+                "LEFT JOIN user_course ON course.course_id = user_course.course_id " +
+                "WHERE 1=1 AND course.is_deleted = false"; // 加入過濾已刪除課程的條件
 
         Map<String, Object> params = new HashMap<>();
         params.put("limit", courseQueryParams.getSize());
