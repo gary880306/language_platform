@@ -25,7 +25,10 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public CourseRequest getCourseById(Integer courseId) {
-        String sql = "SELECT course_id , course_name, category_id, category_name, image_url,`time`,price, teacher, description, created_date, last_modified_date,video_url FROM course WHERE course_id=:courseId";
+        String sql = "SELECT c.course_id, c.course_name, c.category_id, cat.category_name, c.image_url, c.time, c.price, c.teacher, c.description, c.created_date, c.last_modified_date, c.video_url " +
+                "FROM course c " +
+                "JOIN category cat ON c.category_id = cat.category_id " +
+                "WHERE c.course_id = :courseId ";
         Map<String, Object> map = new HashMap<>();
         map.put("courseId", courseId);
 

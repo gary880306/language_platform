@@ -73,53 +73,39 @@ public class FrontendController {
         courseQueryParams.setPage(page);
         courseQueryParams.setSize(size);
 
-        List<Course> courses = frontendService.getAllCourses(courseQueryParams);
-        // 過濾掉被標記為已刪除的課程
-        List<Course> activeCourses = courses.stream()
-                .filter(course -> !course.getIsDeleted())
-                .toList();
-
-        Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
-
-
-        // 仅当需要根据用户数量排序时使用 getAllCoursesWithUserCount 方法
-        if ("userCount".equals(orderBy)) {
-            courses = frontendService.getAllCoursesWithUserCount(courseQueryParams);
-            courses.forEach(course -> {
-                String formattedPrice = formatCoursePrice(course.getPrice());
-                course.setFormattedPrice(formattedPrice); // 假设Course类有一个方法来设置格式化后的价格
-            });
-        } else {
-            courses = frontendService.getAllCourses(courseQueryParams);
-            courses.forEach(course -> {
-                String formattedPrice = formatCoursePrice(course.getPrice());
-                course.setFormattedPrice(formattedPrice); // 假设Course类有一个方法来设置格式化后的价格
-            });
-        }
-        List<Course> searchCourses = "userCount".equals(orderBy) ?
+        List<Course> courses = "userCount".equals(orderBy) ?
                 frontendService.getAllCoursesWithUserCount(courseQueryParams) :
                 frontendService.getAllCourses(courseQueryParams);
-        boolean hasCourses = searchCourses != null && !searchCourses.isEmpty();
 
-        courses = courses.stream()
-                .peek(course -> course.setPrice((course.getPrice())))
+        // 格式化價格並過濾掉被標記為已刪除的課程
+        List<Course> activeCourses = courses.stream()
+                .filter(course -> !course.getIsDeleted())
+                .peek(course -> {
+                    String formattedPrice = formatCoursePrice(course.getPrice());
+                    course.setFormattedPrice(formattedPrice);
+                })
                 .collect(Collectors.toList());
+
+        boolean hasCourses = !activeCourses.isEmpty();
+        Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
+        Integer totalCourses = frontendService.getCoursesCount(courseQueryParams);
+        Integer totalPages = (int) Math.ceil((double) totalCourses / size);
+
         model.addAttribute("hasCourses", hasCourses);
         model.addAttribute("search", search);
         model.addAttribute("size", size);
         model.addAttribute("cartCourseCount", userService.getCartCourseCount(user.getUserId()));
         model.addAttribute("courses", activeCourses);
-        model.addAttribute("courseUserCounts", courseUserCounts); // 总是添加 courseUserCounts 到模型
+        model.addAttribute("courseUserCounts", courseUserCounts);
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("sort", sort);
         model.addAttribute("currentPage", page);
-        Integer totalCourses = frontendService.getCoursesCount(courseQueryParams);
-        Integer totalPages = (int) Math.ceil((double) totalCourses / size);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("categories", dataService.findAllCategoryData());
 
         return "user/courses/main";
     }
+
 
 
 
