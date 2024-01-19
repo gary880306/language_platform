@@ -39,7 +39,6 @@ public class CouponController {
         }
     }
 
-    // 根據 ID 讀取優惠券（RESTful API）
     @GetMapping("/{id}")
     @ResponseBody
     public ResponseEntity<?> getCouponById(@PathVariable int id) {
@@ -48,11 +47,16 @@ public class CouponController {
             if (coupon == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Coupon not found with ID: " + id);
             }
+            // 檢查優惠券是否已被標記為刪除
+            if (coupon.getIsDeleted()) {
+                return ResponseEntity.status(HttpStatus.GONE).body("Coupon with ID: " + id + " has been deleted.");
+            }
             return ResponseEntity.ok(coupon);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving coupon: " + e.getMessage());
         }
     }
+
 
     @PatchMapping("/{id}/activate")
     @ResponseBody
@@ -71,7 +75,7 @@ public class CouponController {
     }
 
 
-    // 刪除優惠券（RESTful API）
+    // 刪除優惠券（RESTFul API）
     @DeleteMapping("/{couponId}")
     @ResponseBody
     public ResponseEntity<?> deleteCoupon(@PathVariable Integer couponId) {
