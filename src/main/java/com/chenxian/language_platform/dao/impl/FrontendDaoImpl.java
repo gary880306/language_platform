@@ -21,7 +21,7 @@ public class FrontendDaoImpl implements FrontendDao {
     @Override
     public List<Course> getAllCourses(CourseQueryParams courseQueryParams) {
         Map<String, Object> map = new HashMap<>();
-        String sql = "SELECT course.course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url ";
+        String sql = "SELECT course.course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url, is_deleted ";
 
         if ("userCount".equals(courseQueryParams.getOrderBy())) {
             sql += ", COUNT(user_course.user_id) as user_count ";
@@ -60,7 +60,7 @@ public class FrontendDaoImpl implements FrontendDao {
 
     @Override
     public List<Course> getAllCoursesWithUserCount(CourseQueryParams courseQueryParams) {
-        String sql = "SELECT course.course_id, course.course_name, category.category_name, course.image_url, course.`time`, course.price, course.teacher, course.description, course.created_date, course.last_modified_date, course.video_url, COUNT(user_course.user_id) as user_count " +
+        String sql = "SELECT course.course_id, course.course_name, category.category_name, course.image_url, course.`time`, course.price, course.teacher, course.description, course.created_date, course.last_modified_date, course.video_url, course.is_deleted, COUNT(user_course.user_id) as user_count " +
                 "FROM course LEFT JOIN category ON course.category_id = category.category_id " +
                 "LEFT JOIN user_course ON course.course_id = user_course.course_id WHERE 1=1";
 

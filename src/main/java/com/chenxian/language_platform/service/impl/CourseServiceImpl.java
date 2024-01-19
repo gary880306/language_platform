@@ -22,6 +22,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Course getCourseByCourseId(Integer courseId) {
+        return courseDao.getCourseByCourseId(courseId);
+    }
+
+    @Override
     public Course getCoursesByIdForCart(Integer courseId) {
         return courseDao.getCoursesByIdForCart(courseId);
     }
@@ -29,6 +34,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Course> getAllCourses() {
         return courseDao.getAllCourses();
+    }
+
+    @Override
+    public List<Course> getAllActiveCourses() {
+        return courseDao.getAllActiveCourses();
     }
 
     @Override

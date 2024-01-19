@@ -8,7 +8,6 @@ import java.util.Date;
 @Data
 public class Course {
     private Integer courseId;
-
     private String courseName;
     private String categoryName;
     private String imageUrl;
@@ -21,5 +20,10 @@ public class Course {
     private String videoUrl;
     private Integer userCount;
     private String formattedPrice;
+    private Boolean isDeleted;
 
+    public String getEmbedVideoUrl() {
+        String videoId = this.videoUrl.substring(this.videoUrl.indexOf('=') + 1);
+        return "https://www.youtube.com/embed/" + videoId;
+    }
 }

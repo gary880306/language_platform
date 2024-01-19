@@ -31,7 +31,7 @@ public class CourseRowMapperIncludeUserCount implements RowMapper<Course> {
         }
 
         course.setVideoUrl(rs.getString("video_url"));
-
+        course.setIsDeleted(rs.getBoolean("is_deleted"));
         // 新增用戶數量字段
         // 請確保 'user_count' 列在 SQL 查詢中被選擇
         if (rs.getObject("user_count") != null) {

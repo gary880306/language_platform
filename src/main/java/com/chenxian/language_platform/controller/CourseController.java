@@ -40,7 +40,7 @@ public class CourseController {
     // 加載頁面時獲取所有課程資訊
     @GetMapping("/managementCourses")
     public String showCourses(Model model) {
-        List<Course> courses = courseService.getAllCourses(); // 獲取所有課程
+        List<Course> courses = courseService.getAllActiveCourses(); // 獲取所有課程
         List<CategoryData> categories = dataService.findAllCategoryData();
         model.addAttribute("courses", courses);
         model.addAttribute("categories",categories);

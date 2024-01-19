@@ -25,23 +25,41 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public CourseRequest getCourseById(Integer courseId) {
-        String sql = "SELECT course_id , course_name, category_id, image_url,`time`,price, teacher, description, created_date, last_modified_date,video_url FROM course WHERE course_id=:courseId";
+        String sql = "SELECT course_id , course_name, category_id, category_name, image_url,`time`,price, teacher, description, created_date, last_modified_date,video_url FROM course WHERE course_id=:courseId";
         Map<String, Object> map = new HashMap<>();
         map.put("courseId", courseId);
 
         List<CourseRequest> courseList = namedParameterJdbcTemplate.query(sql, map, new CourseRequestRowMapper());
 
-        if (courseList.size() > 0) {
+        if (!courseList.isEmpty()) {
             return courseList.get(0);
         } else {
             return null;
         }
+    }
 
+    @Override
+    public Course getCourseByCourseId(Integer courseId) {
+        String sql = "SELECT course.course_id, course.course_name, course.category_id, category.category_name, course.image_url, course.`time`, course.price, course.teacher, course.description, course.created_date, course.last_modified_date, course.video_url, course.is_deleted "
+                + "FROM course "
+                + "JOIN category ON course.category_id = category.category_id "
+                + "WHERE course.course_id = :courseId";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("courseId", courseId);
+
+        List<Course> courseList = namedParameterJdbcTemplate.query(sql, map, new CourseRowMapper());
+
+        if (!courseList.isEmpty()) {
+            return courseList.get(0);
+        } else {
+            return null;
+        }
     }
 
     @Override
     public Course getCoursesByIdForCart(Integer courseId) {
-        String sql = "SELECT course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url " +
+        String sql = "SELECT course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url ,is_deleted " +
                 "FROM course LEFT JOIN category on course.category_id = category.category_id " +
                 "WHERE course.course_id = :courseId";
         Map<String, Object> map = new HashMap<>();
@@ -59,12 +77,21 @@ public class CourseDaoImpl implements CourseDao {
     }
 
     @Override
+    public List<Course> getAllActiveCourses() {
+        String sql = "SELECT course_id, course_name, category_name, image_url, `time`, price, teacher, description, created_date, last_modified_date, video_url, is_deleted "
+                + "FROM course "
+                + "LEFT JOIN category ON course.category_id = category.category_id "
+                + "WHERE course.is_deleted = FALSE";
+        Map<String, Object> map = new HashMap<>();
+        return namedParameterJdbcTemplate.query(sql, map, new CourseRowMapper());
+    }
+
+    @Override
     public List<UserCourse> getPurchasedCourses(Integer userId) {
         String sql = "SELECT user_id,course_id,purchase_date FROM user_course WHERE user_id =:userId;";
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
-        List<UserCourse> userCourses = namedParameterJdbcTemplate.query(sql,map,new UserCourseRowMapper());
-        return userCourses;
+        return namedParameterJdbcTemplate.query(sql,map,new UserCourseRowMapper());
     }
 
     @Override
@@ -87,8 +114,7 @@ public class CourseDaoImpl implements CourseDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         namedParameterJdbcTemplate.update(sql,new MapSqlParameterSource(map),keyHolder);
-        int courseId = keyHolder.getKey().intValue();
-        return courseId;
+        return keyHolder.getKey().intValue();
     }
 
     @Override
@@ -110,10 +136,10 @@ public class CourseDaoImpl implements CourseDao {
 
     @Override
     public boolean deleteCourseById(Integer courseId) {
-        String sql = "DELETE FROM course WHERE course_id=:courseId";
-        Map<String,Object> map = new HashMap<>();
-        map.put("courseId",courseId);
-        namedParameterJdbcTemplate.update(sql,map);
+        String sql = "UPDATE course SET is_deleted = TRUE WHERE course_id = :courseId";
+        Map<String, Object> map = new HashMap<>();
+        map.put("courseId", courseId);
+        namedParameterJdbcTemplate.update(sql, map);
         return true;
     }
 

@@ -25,6 +25,7 @@ public class CourseRowMapper implements RowMapper<Course> {
         String lastModifiedDate =  sd.format(rs.getTimestamp("last_modified_date"));
         course.setVideoUrl(rs.getString("video_url"));
         course.setLastModifiedDate(lastModifiedDate);
+        course.setIsDeleted(rs.getBoolean("is_deleted"));
         return course;
     }
 }

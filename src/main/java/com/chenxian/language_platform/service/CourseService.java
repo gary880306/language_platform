@@ -10,8 +10,10 @@ import java.util.List;
 
 public interface CourseService {
     CourseRequest getCourseById(Integer courseId);
+    Course getCourseByCourseId(Integer courseId);
     Course getCoursesByIdForCart(Integer courseId);
     List<Course> getAllCourses();
+    List<Course> getAllActiveCourses();
     List<UserCourse> getPurchasedCourses(Integer userId);
     Integer creatCourse(CourseRequest courseRequest);
     void updateCourse(Integer courseId, CourseRequest courseRequest);

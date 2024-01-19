@@ -24,7 +24,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -74,7 +73,12 @@ public class FrontendController {
         courseQueryParams.setPage(page);
         courseQueryParams.setSize(size);
 
-        List<Course> courses;
+        List<Course> courses = frontendService.getAllCourses(courseQueryParams);
+        // 過濾掉被標記為已刪除的課程
+        List<Course> activeCourses = courses.stream()
+                .filter(course -> !course.getIsDeleted())
+                .toList();
+
         Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
 
 
@@ -104,7 +108,7 @@ public class FrontendController {
         model.addAttribute("search", search);
         model.addAttribute("size", size);
         model.addAttribute("cartCourseCount", userService.getCartCourseCount(user.getUserId()));
-        model.addAttribute("courses", courses);
+        model.addAttribute("courses", activeCourses);
         model.addAttribute("courseUserCounts", courseUserCounts); // 总是添加 courseUserCounts 到模型
         model.addAttribute("orderBy", orderBy);
         model.addAttribute("sort", sort);
@@ -122,27 +126,35 @@ public class FrontendController {
 
     // 顯示商品資訊 courseInfo 頁面
     @GetMapping("/enjoyLearning/courses/courseInfo/{courseId}")
-    public String getCourseInfo(@PathVariable("courseId") Integer courseId, HttpSession session, Model model){
+    public String getCourseInfo(@PathVariable("courseId") Integer courseId, HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
-        if (user != null) {
-            boolean hasPurchased = courseService.hasUserPurchasedCourse(user.getUserId(), courseId);
-            if (hasPurchased) {
-                CourseRequest course = courseService.getCourseById(courseId);
-                model.addAttribute("formattedPrice", formatCoursePrice(course.getPrice()));
-                model.addAttribute("course", course);
-                model.addAttribute("cartCourseCount", cartCourseCount);
-                return "/user/courses/courseMain";
-            }
+        boolean hasPurchased = courseService.hasUserPurchasedCourse(user.getUserId(), courseId);
+
+        Course course = courseService.getCourseByCourseId(courseId);
+
+        if (course == null || (course.getIsDeleted() && !hasPurchased)) {
+            // 如果該課程不存在或已被刪除且用戶未購買，則顯示課程已刪除的信息
+            model.addAttribute("cartCourseCount", cartCourseCount);
+            model.addAttribute("courseDeleted", true);
+            return "/user/courses/courseDeleted";
         }
-        CourseRequest course = courseService.getCourseById(courseId);
-        Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
-        model.addAttribute("courseUserCounts", courseUserCounts);
-        model.addAttribute("cartCourseCount", cartCourseCount);
+
         model.addAttribute("formattedPrice", formatCoursePrice(course.getPrice()));
         model.addAttribute("course", course);
-        return "/user/courses/courseInfo";
+        model.addAttribute("cartCourseCount", cartCourseCount);
+
+        if (hasPurchased) {
+            // 如果用戶已購買該課程，即使該課程已被刪除，也允許訪問
+            return "/user/courses/courseMain";
+        } else {
+            // 顯示課程資訊頁面
+            Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
+            model.addAttribute("courseUserCounts", courseUserCounts);
+            return "/user/courses/courseInfo";
+        }
     }
+
 
 
     // 檢查購物車是否有此課程 (courseInfo 加入購物車按鈕顯示已存在購物車)
@@ -180,7 +192,7 @@ public class FrontendController {
             // 新增之後馬上又要查詢, 建議可以下達一個 delay
             try {
                 Thread.sleep(10);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
 
             }
 

@@ -10,11 +10,14 @@ import java.util.List;
 
 public interface CourseDao {
     CourseRequest getCourseById(Integer courseId);
+    Course getCourseByCourseId(Integer courseId);
     Course getCoursesByIdForCart(Integer courseId);
     List<Course> getAllCourses();
+    List<Course> getAllActiveCourses();
     List<UserCourse> getPurchasedCourses(Integer userId);
     Integer creatCourse(CourseRequest courseRequest);
     void updateCourse(Integer courseId,CourseRequest courseRequest);
+    // 課程軟刪除
     boolean deleteCourseById(Integer courseId);
     boolean hasUserPurchasedCourse(Integer userId,Integer courseId);
     List<CourseSalesData> findCourseSalesData();

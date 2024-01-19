@@ -26,8 +26,4 @@ public class CourseRequest {
 
     private String videoUrl;
 
-    public String getEmbedVideoUrl() {
-        String videoId = this.videoUrl.substring(this.videoUrl.indexOf('=') + 1);
-        return "https://www.youtube.com/embed/" + videoId;
-    }
 }
