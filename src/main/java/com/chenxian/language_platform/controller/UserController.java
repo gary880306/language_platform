@@ -286,7 +286,7 @@ public class UserController {
             return "user/login/changePassword";
         } else {
             // 令牌無效，顯示錯誤頁面或提示
-            return "user/login/timeInvalid";
+            return "user/login/login";
         }
 
     }
