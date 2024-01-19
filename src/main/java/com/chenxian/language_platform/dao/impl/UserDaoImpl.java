@@ -368,9 +368,9 @@ public class UserDaoImpl implements UserDao {
     @Override
     public List<UserCoupon> findUserCouponsByUserId(Integer userId) {
         String sql = "SELECT uc.user_id, uc.coupon_id, uc.is_used, c.code, c.description, c.discount_type, c.discount_value," +
-                " c.start_date, c.end_date, c.is_active" +
+                " c.start_date, c.end_date, c.is_active, c.is_deleted " +
                 " FROM user_coupon uc" +
-                " LEFT JOIN coupon c ON uc.coupon_id = c.coupon_id" +
+                " LEFT JOIN coupon c ON uc.coupon_id = c.coupon_id " +
                 " WHERE uc.user_id =:userId;";
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
@@ -420,7 +420,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId) {
         String sql = "SELECT uc.user_id, uc.coupon_id, uc.is_used, c.code, c.description, c.discount_type, c.discount_value, " +
-                "c.start_date, c.end_date, c.is_active " +
+                "c.start_date, c.end_date, c.is_active, c.is_deleted " +
                 "FROM user_coupon uc " +
                 "LEFT JOIN coupon c ON uc.coupon_id = c.coupon_id " +
                 "WHERE uc.user_id = :userId AND uc.is_used = false";

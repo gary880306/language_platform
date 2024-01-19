@@ -21,6 +21,7 @@ public class CouponRowMapper implements RowMapper<Coupon> {
         coupon.setEndDate(rs.getTimestamp("end_date"));
         coupon.setActive(rs.getBoolean("is_active"));
         coupon.setQuantity(rs.getInt("quantity"));
+        coupon.setIsDeleted(rs.getBoolean("is_deleted"));
         return coupon;
     }
 }

@@ -381,22 +381,22 @@ public class FrontendController {
     }
 
     // 優惠券  -------------------------------------------------------------------------------------
-    // 獲取所有優惠劵頁面
     @GetMapping("/enjoyLearning/coupons")
     public String showCoupons(Model model, HttpSession session) {
         User user = (User) session.getAttribute("user");
         Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         List<Coupon> allCoupons = couponService.getAllCoupons();
 
-        // 過濾出 is_active 為 true 的優惠券
+        // 過濾出 is_active 為 true 且未被刪除 (is_deleted 為 false) 的優惠券
         List<Coupon> activeCoupons = allCoupons.stream()
-                .filter(Coupon::isActive)
+                .filter(coupon -> coupon.isActive() && !coupon.getIsDeleted())
                 .collect(Collectors.toList());
 
         model.addAttribute("cartCourseCount", cartCourseCount);
         model.addAttribute("coupons", activeCoupons); // 使用過濾後的優惠券列表
         return "user/coupons/couponInfo";
     }
+
 
 
     // 用戶獲取優惠券

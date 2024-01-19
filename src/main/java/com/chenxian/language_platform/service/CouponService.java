@@ -13,8 +13,11 @@ public interface CouponService {
     Coupon updateCoupon(Integer couponId, Coupon coupon);
     // 刪除優惠券
     void deleteCoupon(Integer couponId);
+    // 軟刪除優惠券
+    void markCouponAsDeleted(Integer couponId);
     // 取得所有優惠券
     List<Coupon> getAllCoupons();
+    List<Coupon> getAllActiveCoupons();
     // 當用戶選擇一個優惠券時，更新購物車實例的 couponId 屬性
     void applyCouponToCart(Integer userId ,Integer couponId);
     boolean checkCouponExists(Integer userId, Integer couponId);

@@ -18,6 +18,7 @@ public class Coupon {
     private Date endDate;
     private boolean isActive;
     private Integer quantity;
+    private Boolean isDeleted;
     // 枚舉類型，用於表示折扣類型
     public enum DiscountType {
         FIXED,PERCENTAGE

@@ -13,8 +13,11 @@ public interface CouponDao {
     Coupon updateCoupon(Integer couponId, Coupon coupon);
     // 刪除優惠券
     void deleteCoupon(Integer couponId);
+    // 軟刪除優惠券
+    void markCouponAsDeleted(Integer couponId);
     // 取得所有優惠券
     List<Coupon> getAllCoupons();
+    List<Coupon> getAllActiveCoupons();
     boolean checkCouponExists(Integer userId, Integer couponId);
     boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId);
     List<Coupon> getCouponsByUserId(Integer userId);

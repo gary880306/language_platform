@@ -72,11 +72,12 @@ public class CouponController {
 
 
     // 刪除優惠券（RESTful API）
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{couponId}")
     @ResponseBody
-    public ResponseEntity<?> deleteCoupon(@PathVariable int id) {
+    public ResponseEntity<?> deleteCoupon(@PathVariable Integer couponId) {
         try {
-            couponService.deleteCoupon(id);
+            // 更新優惠券記錄為 '已刪除' 狀態，而不是從資料庫中完全移除
+            couponService.markCouponAsDeleted(couponId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting coupon: " + e.getMessage());
@@ -88,7 +89,7 @@ public class CouponController {
     @ResponseBody
     public ResponseEntity<?> getAllCoupons() {
         try {
-            List<Coupon> coupons = couponService.getAllCoupons();
+            List<Coupon> coupons = couponService.getAllActiveCoupons();
             return ResponseEntity.ok(coupons);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving coupons: " + e.getMessage());

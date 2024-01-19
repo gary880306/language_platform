@@ -4,7 +4,6 @@ import com.chenxian.language_platform.dao.CouponDao;
 import com.chenxian.language_platform.model.Coupon;
 import com.chenxian.language_platform.rowmapper.CouponRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -42,7 +41,7 @@ public class CouponDaoImpl implements CouponDao {
 
     @Override
     public Coupon getCouponById(Integer couponId) {
-        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity FROM coupon WHERE coupon_id = :couponId";
+        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity, is_deleted FROM coupon WHERE coupon_id = :couponId";
         Map<String, Object> map = new HashMap<>();
         map.put("couponId", couponId);
 
@@ -86,14 +85,36 @@ public class CouponDaoImpl implements CouponDao {
     }
 
     @Override
+    public void markCouponAsDeleted(Integer couponId) {
+        String sql = "UPDATE coupon SET is_deleted = :isDeleted WHERE coupon_id = :couponId";
+        Map<String, Object> map = new HashMap<>();
+        map.put("isDeleted", true);
+        map.put("couponId", couponId);
+
+        namedParameterJdbcTemplate.update(sql, map);
+    }
+
+    @Override
     public List<Coupon> getAllCoupons() {
-        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity FROM coupon";
+        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity, is_deleted FROM coupon";
         Map<String, Object> map = new HashMap<>();
         List<Coupon> coupons = namedParameterJdbcTemplate.query(sql, map, new CouponRowMapper());
         if(!coupons.isEmpty()){
             return coupons;
         }
         return null;
+    }
+
+    @Override
+    public List<Coupon> getAllActiveCoupons() {
+        // 在 SQL 查詢中加入條件以過濾掉標記為已刪除的優惠券
+        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity, is_deleted FROM coupon WHERE is_deleted = false";
+
+        Map<String, Object> map = new HashMap<>();
+        List<Coupon> coupons = namedParameterJdbcTemplate.query(sql, map, new CouponRowMapper());
+
+        // 檢查返回的列表是否為空
+        return coupons.isEmpty() ? null : coupons;
     }
 
     @Override

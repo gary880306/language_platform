@@ -45,8 +45,18 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
+    public void markCouponAsDeleted(Integer couponId) {
+        couponDao.markCouponAsDeleted(couponId);
+    }
+
+    @Override
     public List<Coupon> getAllCoupons() {
         return couponDao.getAllCoupons();
+    }
+
+    @Override
+    public List<Coupon> getAllActiveCoupons() {
+        return couponDao.getAllActiveCoupons();
     }
 
     @Override

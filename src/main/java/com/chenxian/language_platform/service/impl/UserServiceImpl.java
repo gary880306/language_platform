@@ -223,7 +223,7 @@ public class UserServiceImpl implements UserService {
         Instant tokenCreationTime = user.getTokenCreationTime();
 
         // 计算令牌的有效期为30秒
-        Instant tokenExpirationTime = tokenCreationTime.plus(30, ChronoUnit.SECONDS);
+        Instant tokenExpirationTime = tokenCreationTime.plus(60, ChronoUnit.SECONDS);
 
         // 检查当前时间是否在有效期内
         boolean isValid = currentTime.isBefore(tokenExpirationTime);

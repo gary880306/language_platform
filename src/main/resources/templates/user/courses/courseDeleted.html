@@ -61,21 +61,6 @@
             color: #0056b3; /* 滑鼠懸停時的顏色 */
         }
 
-        /* 搜索欄位樣式 */
-        .search-form {
-            display: flex;
-            align-items: center;
-        }
-        .search-input {
-            height: 32px;
-            margin-right: 5px;
-        }
-        .search-button {
-            height: 32px;
-            padding: 0 10px;
-            white-space: nowrap;
-        }
-
         .custom-badge {
             position: absolute;
             top: auto;
@@ -92,6 +77,23 @@
             border-radius: 50%; /* 圓形 */
             background-color: red; /* 背景顏色 */
         }
+
+        /* 新增全局樣式 */
+        .container-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh; /* 設定一個最小高度 */
+        }
+
+        /* 保留原有的 .container 樣式 */
+        .container {
+            padding-right: var(--bs-gutter-x,.75rem);
+            padding-left: var(--bs-gutter-x,.75rem);
+            margin-right: auto;
+            margin-left: auto;
+        }
+
 
         footer {
             background-color: #333;
@@ -134,10 +136,14 @@
     </div>
 </nav>
 
-<div class="container text-center justify-contain-center align-items-center mt-4">
-    <h1 class="mt-5">該課程已被刪除 😭</h1>
-    <a href="/enjoyLearning/courses" class="btn btn-secondary">快去看看有什麼課程吧!</a>
+<!-- 修改的 HTML 區塊 -->
+<div class="container container-center text-center justify-contain-center align-items-center mt-4">
+    <div>
+        <h1 class="mt-5">該課程已被刪除 😭</h1>
+        <a href="/enjoyLearning/courses" class="btn btn-secondary">忍痛去看其他課程</a>
+    </div>
 </div>
+
 
 <footer>
     <p class="mb-0">&copy; 2024 享學</p>
