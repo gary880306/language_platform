@@ -42,7 +42,7 @@
         }
 
         /* 設定圖標和登出鏈接的樣式 */
-        .navbar .bi, .navbar .logout-link {
+        .navbar .bi, .navbar .logout-link .login-link {
             display: inline-block;
             vertical-align: middle;
             width: 24px;   /* 圖標寬度 */
@@ -52,13 +52,13 @@
         }
 
         /* 美化登出鏈接 */
-        .navbar .logout-link {
+        .navbar .logout-link .login-link {
             color: #000000; /* 文字顏色 */
             text-decoration: none; /* 移除底線 */
             transition: color 0.2s; /* 過渡效果 */
         }
 
-        .navbar .logout-link:hover {
+        .navbar .logout-link .login-link:hover {
             color: #0056b3; /* 滑鼠懸停時的顏色 */
         }
 
@@ -197,8 +197,6 @@
             background-color: #333;
             color: #fff;
             text-align: center;
-            position: fixed;
-            bottom: 0;
             padding: 10px;
             width: 100%;
         }
@@ -231,14 +229,20 @@
                 </form>
             </ul>
             <div class="ms-auto">
+                <!-- 條件渲染購物車和用戶圖標 -->
+                <span th:if="${user != null}">
                 <a href="/enjoyLearning/cart" class="text-dark position-relative me-3">
                     <i class="bi bi-cart3"></i>
                     <span class="position-absolute badge rounded-circle bg-danger custom-badge">
-                        [[${cartCourseCount}]] <!-- 使用 Thymeleaf 表達式動態顯示商品數 -->
+                        [[${cartCourseCount}]]
                     </span>
                 </a>
                 <a href="/enjoyLearning/user" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
-                <a href="/user/logout" class="text-dark logout-link me-3" style="width: auto">登出</a>
+                <a href="/user/logout" class="btn btn-outline-dark btn-sm me-3" style="width: auto;">登出</a>
+            </span>
+
+                <!-- 未登入時顯示登入連結 -->
+                <a th:if="${user == null}" href="/user/login" class="btn btn-outline-dark btn-sm me-3">登入</a>
             </div>
         </div>
     </div>
@@ -330,8 +334,15 @@
 
 
 <footer th:classappend="${!hasCourses} ? 'fixed-footer' : ''">
-    <p class="mb-0">&copy; 2024 享學</p>
+    <p>&copy; 2024 享學</p>
+    <p>客服信箱: ch66971542@gmail.com</p>
+    <p>客服電話: 0962031858</p>
+    <p>客服時間: 周一 ~ 週日 24小時</p>
+    <p>地址: 台北市文山區仙岩路13號</p>
+    <p>此網站為期末專題測試用</p>
 </footer>
+
+
 
 <script>
     function toggleSort(orderBy) {

@@ -54,13 +54,13 @@
         }
 
         /* 美化登出鏈接 */
-        .navbar .logout-link {
+        .navbar {
             color: #000000; /* 文字顏色 */
             text-decoration: none; /* 移除底線 */
             transition: color 0.2s; /* 過渡效果 */
         }
 
-        .navbar .logout-link:hover {
+        .navbar :hover {
             color: #0056b3; /* 滑鼠懸停時的顏色 */
         }
 
@@ -128,14 +128,20 @@
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/coupons">優惠券</a></li>
             </ul>
             <div class="ms-auto">
+                <!-- 條件渲染購物車和用戶圖標 -->
+                <span th:if="${user != null}">
                 <a href="/enjoyLearning/cart" class="text-dark position-relative me-3">
                     <i class="bi bi-cart3"></i>
                     <span class="position-absolute badge rounded-circle bg-danger custom-badge">
-                        [[${cartCourseCount}]] <!-- 使用 Thymeleaf 表達式動態顯示商品數 -->
+                        [[${cartCourseCount}]]
                     </span>
                 </a>
                 <a href="/enjoyLearning/user" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
-                <a href="/user/logout" class="text-dark logout-link me-3" style="width: auto">登出</a>
+                <a href="/user/logout" class="btn btn-outline-dark btn-sm me-3" style="width: auto;">登出</a>
+            </span>
+
+                <!-- 未登入時顯示登入連結 -->
+                <a th:if="${user == null}" href="/user/login" class="btn btn-outline-dark btn-sm me-3">登入</a>
             </div>
         </div>
     </div>
@@ -216,8 +222,25 @@
 
                         setupGoToCartButton();
                     },
-                    error: function(error) {
-                        Swal.fire('錯誤!', '無法加入購物車.', 'error');
+                    error: function(xhr, textStatus, errorThrown) {
+                        if (xhr.status === 401) {
+                            // 用户未登录，显示带有前往登录和取消按钮的提示
+                            Swal.fire({
+                                title: '未登入',
+                                text: '請先登入才能加入購物車!',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: '前往登入',
+                                cancelButtonText: '取消',
+                            }).then((result) => {
+                                if (result.value) {
+                                    window.location.href = '/user/loginPage';
+                                }
+                            });
+                        } else {
+                            // 其他错误处理
+                            Swal.fire('錯誤!', '無法加入購物車.', 'error');
+                        }
                     }
                 });
             });

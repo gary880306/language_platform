@@ -132,7 +132,7 @@
             <td class="align-middle text-center" th:text="${user.birth}"></td>
             <td class="align-middle text-center" th:text="${user.phoneNumber}"></td>
             <td class="align-middle text-center" th:text="${user.address}"></td>
-            <td class="align-middle text-center" th:text="${user.createdDate}"></td>
+            <td class="align-middle text-center" th:text="${#dates.format(user.createdDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td class="align-middle text-center" th:text="${user.authType}"></td>
             <td class="align-middle text-center">
                 <button class="btn status-btn" th:data-user-id="${user.userId}" th:data-active="${user.isActive}" th:onclick="'toggleUserActiveStatus(' + ${user.userId} + ')'" th:class="${user.isActive} ? 'btn btn-success' : 'btn btn-danger'" th:text="${user.isActive} ? '啟用' : '停用'"></button>

@@ -23,8 +23,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -40,11 +42,18 @@ public class CourseController {
     // 加載頁面時獲取所有課程資訊
     @GetMapping("/managementCourses")
     public String showCourses(Model model) {
-        List<Course> courses = courseService.getAllActiveCourses(); // 獲取所有課程
+        List<Course> courses = courseService.getAllActiveCourses(); // 获取所有课程
         List<CategoryData> categories = dataService.findAllCategoryData();
+
+        for (Course course : courses) {
+            // 課程價格格式化
+            String formattedPrice = formatCoursePrice(course.getPrice());
+            course.setFormattedPrice(formattedPrice);
+        }
+
         model.addAttribute("courses", courses);
-        model.addAttribute("categories",categories);
-        return "admin/managementCourses"; // 返回您的 Thymeleaf 模板名稱
+        model.addAttribute("categories", categories);
+        return "admin/managementCourses"; // 返回您的 Thymeleaf 模板名称
     }
 
     @DeleteMapping("/courses/{courseId}")
@@ -144,5 +153,9 @@ public class CourseController {
         return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
     }
 
+    private String formatCoursePrice(Integer price) {
+        NumberFormat formatter = NumberFormat.getIntegerInstance(Locale.US);
+        return formatter.format(price);
+    }
 
 }

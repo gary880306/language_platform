@@ -176,4 +176,30 @@ public class CouponDaoImpl implements CouponDao {
         namedParameterJdbcTemplate.update(sql, map);
     }
 
+    @Override
+    public void assignCouponsToUsers(List<Integer> userIds, List<Integer> couponIds) {
+        String insertSql = "INSERT INTO user_coupon (user_id, coupon_id, is_used) VALUES (:userId, :couponId, FALSE) " +
+                "ON DUPLICATE KEY UPDATE is_used = VALUES(is_used)";
+
+        String checkSql = "SELECT COUNT(*) FROM user_coupon WHERE user_id = :userId AND coupon_id = :couponId";
+
+        for (Integer userId : userIds) {
+            for (Integer couponId : couponIds) {
+                Map<String, Object> params = new HashMap<>();
+                params.put("userId", userId);
+                params.put("couponId", couponId);
+
+                // 检查记录是否存在
+                Integer count = namedParameterJdbcTemplate.queryForObject(checkSql, params, Integer.class);
+
+                // 如果记录已存在且is_used为TRUE，则更新，否则插入
+                if (count != null && count > 0) {
+                    namedParameterJdbcTemplate.update(insertSql, params);
+                } else {
+                    namedParameterJdbcTemplate.update("INSERT INTO user_coupon (user_id, coupon_id, is_used) VALUES (:userId, :couponId, FALSE)", params);
+                }
+            }
+        }
+    }
+
 }

@@ -196,7 +196,7 @@ public class UserController {
     @GetMapping("/user/logout")
     public String logout(HttpSession session) {
         session.invalidate(); // session 過期失效
-        return "redirect:/user/loginPage"; // 重導到登入頁面
+        return "redirect:/enjoyLearning/courses"; // 重導到首頁
     }
 
     // 註冊頁面

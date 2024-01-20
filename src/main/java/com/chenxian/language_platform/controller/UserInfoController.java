@@ -88,8 +88,6 @@ public class UserInfoController {
         }
     }
 
-
-
     @GetMapping("/admin/userInfo")
     public String showAllReport(Model model){
         List<User> users = userService.findAllNonAdminUsers();

@@ -37,28 +37,54 @@
 <body>
 <div id="productTable" class="table-responsive">
     <h2 class="mb-4">發送優惠劵</h2>
-    <button onclick="parent.location.href='/admin/coupons';">返回管理優惠劵</button>
 
+    <!-- 按鈕 -->
+    <button onclick="parent.location.href='/admin/coupons';" class="btn btn-secondary me-2">返回管理優惠劵</button>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendCouponsModal" id="sendCouponsButton">發送優惠券</button>
 
+    <!-- 模態框 -->
+    <div class="modal fade" id="sendCouponsModal" tabindex="-1" aria-labelledby="sendCouponsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sendCouponsModalLabel">優惠劵列表</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="couponsList">
+                    <!-- 優惠劵信息 -->
+                    <ul>
+                        <li th:each="coupon : ${coupons}" th:text="${coupon.code}"></li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" id="confirmSendButton">發送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用戶列表表格 -->
     <table class="table table-bordered table-striped table-hover" id="couponTable">
         <thead>
         <tr>
-            <th>編號</th>
-            <th>優惠劵代碼</th>
-            <th>描述</th>
-            <th>折扣類型</th>
-            <th>折扣值</th>
-            <th>起始日</th>
-            <th>截止日</th>
-            <th>數量</th>
-            <th>狀態</th>
-            <th>刪除</th>
+            <th>選擇</th>
+            <th>用戶編號</th>
+            <th>用戶名</th>
         </tr>
         </thead>
         <tbody id="couponTableBody">
+        <tr th:each="user : ${users}">
+            <td class="align-middle text-center">
+                <input type="checkbox" name="selectedUsers" th:value="${user.userId}">
+            </td>
+            <td class="align-middle text-center" th:text="${user.userId}"></td>
+            <td class="align-middle text-center" th:text="${user.userName}"></td>
+        </tr>
         </tbody>
     </table>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -83,11 +109,69 @@
             }
         });
     });
-
-    parent.loadOriginalContent();
-
 </script>
 
+<script>
+    document.getElementById('sendCouponsButton').addEventListener('click', function() {
+        $.ajax({
+            url: '/admin/coupons/all',
+            type: 'GET',
+            success: function(coupons) {
+                var couponsHtml = '<ol>';
+                for (var i = 0; i < coupons.length; i++) {
+                    couponsHtml += '<li><input type="checkbox" name="selectedCoupons" value="' + coupons[i].couponId + '"> ' + coupons[i].code + ' - ' + coupons[i].description + '</li>';
+                }
+                couponsHtml += '</ol>';
+                document.getElementById('couponsList').innerHTML = couponsHtml;
+            },
+            error: function() {
+                document.getElementById('couponsList').innerHTML = '<p>无法加载优惠券信息。</p>';
+            }
+        });
+    });
+</script>
+
+<script>
+    document.getElementById('confirmSendButton').addEventListener('click', function() {
+        // 收集选中的优惠券 ID
+        var selectedCoupons = [];
+        $('input[name="selectedCoupons"]:checked').each(function() {
+            selectedCoupons.push($(this).val());
+        });
+        console.log(selectedCoupons);
+
+        // 收集选中的用户 ID
+        var selectedUsers = [];
+        $('input[name="selectedUsers"]:checked').each(function() {
+            selectedUsers.push($(this).val());
+        });
+        console.log(selectedUsers);
+        // 准备发送到服务器的数据
+        var dataToSend = {
+            couponIds: selectedCoupons,
+            userIds: selectedUsers
+        };
+
+        // 发送 AJAX 请求
+        $.ajax({
+            url: '/admin/coupons/send', // 假设这是您的后端接口
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dataToSend),
+            success: function(response) {
+                // 处理成功响应
+                alert('优惠券发送成功');
+            },
+            error: function() {
+                // 处理错误响应
+                alert('发送失败，请重试。');
+            }
+        });
+
+        // 关闭模态框
+        $('#sendCouponsModal').modal('hide');
+    });
+</script>
 
 </body>
 </html>

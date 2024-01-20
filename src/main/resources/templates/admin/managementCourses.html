@@ -136,7 +136,7 @@
                     <img th:src="@{/images/{filename}(filename=${course.imageUrl})}" class="card-img-top" alt="课程图片" style="max-width: 100px; max-height: 65px;">
                 </td>
                 <td class="align-middle text-center" th:text="${course.getTime}"></td>
-                <td class="align-middle text-center" th:text="${course.getPrice}"></td>
+                <td class="align-middle text-center" th:text="'NT$' + ${course.formattedPrice}"></td>
                 <td class="align-middle text-center" th:text="${course.getTeacher}"></td>
                 <td class="align-middle text-center" th:text="${course.getVideoUrl}"></td>
                 <td class="align-middle text-center" th:text="${course.getCreatDate}"></td>

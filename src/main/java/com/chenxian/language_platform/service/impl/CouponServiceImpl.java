@@ -1,14 +1,9 @@
 package com.chenxian.language_platform.service.impl;
 
 import com.chenxian.language_platform.dao.CouponDao;
-import com.chenxian.language_platform.dao.UserDao;
-import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.model.Cart;
 import com.chenxian.language_platform.model.Coupon;
-import com.chenxian.language_platform.model.Course;
-import com.chenxian.language_platform.model.UserCourse;
 import com.chenxian.language_platform.service.CouponService;
-import com.chenxian.language_platform.service.CourseService;
 import com.chenxian.language_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,8 +14,6 @@ import java.util.List;
 public class CouponServiceImpl implements CouponService {
     @Autowired
     private CouponDao couponDao;
-    @Autowired
-    private UserDao userDao;
     @Autowired
     private UserService userService;
 
@@ -84,6 +77,11 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public void deleteUserCoupon(Integer userId, Integer couponId) {
         couponDao.deleteUserCoupon(userId,couponId);
+    }
+
+    @Override
+    public void assignCouponsToUsers(List<Integer> userIds, List<Integer> couponIds) {
+        couponDao.assignCouponsToUsers(userIds,couponIds);
     }
 
 }

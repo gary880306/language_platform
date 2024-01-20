@@ -24,4 +24,5 @@ public interface CouponService {
     boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId);
     List<Coupon> getCouponsByUserId(Integer userId);
     void deleteUserCoupon(Integer userId, Integer couponId);
+    void assignCouponsToUsers(List<Integer> userIds, List<Integer> couponIds);
 }

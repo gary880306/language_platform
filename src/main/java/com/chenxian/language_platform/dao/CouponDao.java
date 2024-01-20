@@ -22,5 +22,7 @@ public interface CouponDao {
     boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId);
     List<Coupon> getCouponsByUserId(Integer userId);
     void deleteUserCoupon(Integer userId, Integer couponId);
+    // 發送優惠券
+    void assignCouponsToUsers(List<Integer> userIds, List<Integer> couponIds);
 
 }

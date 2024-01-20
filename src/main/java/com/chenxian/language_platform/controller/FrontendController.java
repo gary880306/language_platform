@@ -77,7 +77,6 @@ public class FrontendController {
                 frontendService.getAllCoursesWithUserCount(courseQueryParams) :
                 frontendService.getAllCourses(courseQueryParams);
 
-        // 過濾掉被標記為已刪除的課程並格式化價格
         courses = courses.stream()
                 .filter(course -> !course.getIsDeleted())
                 .peek(course -> {
@@ -94,7 +93,13 @@ public class FrontendController {
         model.addAttribute("hasCourses", hasCourses);
         model.addAttribute("search", search);
         model.addAttribute("size", size);
-        model.addAttribute("cartCourseCount", userService.getCartCourseCount(user.getUserId()));
+        // 檢查 user 是否為 null
+        if (user != null) {
+            model.addAttribute("cartCourseCount", userService.getCartCourseCount(user.getUserId()));
+        } else {
+            model.addAttribute("cartCourseCount", 0); // 或者使用一個合適的默認值
+        }
+        model.addAttribute("user", user);
         model.addAttribute("courses", courses);
         model.addAttribute("courseUserCounts", courseUserCounts);
         model.addAttribute("orderBy", orderBy);
@@ -107,39 +112,42 @@ public class FrontendController {
     }
 
 
-
-
-
     // 顯示商品資訊 courseInfo 頁面
     @GetMapping("/enjoyLearning/courses/courseInfo/{courseId}")
     public String getCourseInfo(@PathVariable("courseId") Integer courseId, HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
-        boolean hasPurchased = courseService.hasUserPurchasedCourse(user.getUserId(), courseId);
+        Integer cartCourseCount = 0;
+        boolean hasPurchased = false;
+
+        if (user != null) {
+            cartCourseCount = userService.getCartCourseCount(user.getUserId());
+            hasPurchased = courseService.hasUserPurchasedCourse(user.getUserId(), courseId);
+        }
 
         Course course = courseService.getCourseByCourseId(courseId);
-
         if (course == null || (course.getIsDeleted() && !hasPurchased)) {
             // 如果該課程不存在或已被刪除且用戶未購買，則顯示課程已刪除的信息
-            model.addAttribute("cartCourseCount", cartCourseCount);
             model.addAttribute("courseDeleted", true);
             return "/user/courses/courseDeleted";
         }
 
+        if (hasPurchased) {
+            // 如果用戶已購買該課程，跳轉到上課頁面
+            model.addAttribute("course", course);
+            model.addAttribute("cartCourseCount", cartCourseCount);
+            return "/user/courses/courseMain"; // 替換為實際的上課頁面路徑
+        }
+
+        Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
+        model.addAttribute("user", user);
         model.addAttribute("formattedPrice", formatCoursePrice(course.getPrice()));
         model.addAttribute("course", course);
         model.addAttribute("cartCourseCount", cartCourseCount);
+        model.addAttribute("courseUserCounts", courseUserCounts);
 
-        if (hasPurchased) {
-            // 如果用戶已購買該課程，即使該課程已被刪除，也允許訪問
-            return "/user/courses/courseMain";
-        } else {
-            // 顯示課程資訊頁面
-            Map<Integer, Integer> courseUserCounts = frontendService.getCourseUserCounts();
-            model.addAttribute("courseUserCounts", courseUserCounts);
-            return "/user/courses/courseInfo";
-        }
+        return "/user/courses/courseInfo";
     }
+
 
 
 
@@ -163,28 +171,26 @@ public class FrontendController {
     @ResponseBody
     public ResponseEntity<?> addToCart(@RequestParam("courseId") Integer courseId,
                                        HttpSession session) {
-        // 1. 先找到 user 登入者
         User user = (User)session.getAttribute("user");
 
-        // 2. 找到 user 的尚未結帳的購物車
-        Cart cart = null;
-        cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+        // 檢查是否有用戶登入
+        if (user == null) {
+            // 如果用戶未登入，返回一個特定的響應，例如狀態碼 401 Unauthorized
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        }
 
-        if(cart == null){
-            cart = new Cart(); // 建立新的購物車
+        Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
+        if (cart == null) {
+            cart = new Cart();
             cart.setUserId(user.getUserId());
-            userService.addCart(cart); // 將購物車存放到資料表
+            userService.addCart(cart);
 
-            // 新增之後馬上又要查詢, 建議可以下達一個 delay
             try {
                 Thread.sleep(10);
             } catch (Exception ignored) {
-
             }
 
-            // 再抓一次該使用者的購物車(目的是要得到剛才新增 cart 的 cartId)
             cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
-
         }
 
         CartItem cartItem = new CartItem();
@@ -195,6 +201,7 @@ public class FrontendController {
         Integer updatedCartCount = userService.getCartCourseCount(user.getUserId());
         return ResponseEntity.ok().body(updatedCartCount);
     }
+
 
     // 購物車頁面
     @GetMapping("/enjoyLearning/cart")
