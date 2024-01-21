@@ -298,6 +298,18 @@
 </script>
 
 <script>
+    // 新增課程模態框關閉時的事件處理
+    $('#addProductModal').on('hidden.bs.modal', function () {
+        // 重置表單
+        $('#courseFormAdd')[0].reset();
+
+        // 清除圖片預覽
+        $('#imagePreview').css('display', 'none').attr('src', '');
+    });
+
+</script>
+
+<script>
     document.getElementById('imageUrl').addEventListener('change', function(event) {
         var output = document.getElementById('imagePreview');
         if (event.target.files && event.target.files[0]) {
@@ -329,6 +341,16 @@
 
 
 <script>
+    // 初始化一个标记，用来记录是否有文件被选中
+    let fileSelected = false;
+
+    // 文件选择框的 change 事件处理器
+    document.getElementById('editImageUrl').addEventListener('change', function(event) {
+        if (event.target.files.length > 0) {
+            // 如果有文件被选中，设置标记为 true
+            fileSelected = true;
+        }
+    });
     // 將更新表單的邏輯封裝到一個函數中
     function updateEditForm(courseData) {
         document.getElementById('editCourseName').value = courseData.courseName;
@@ -435,7 +457,13 @@
     });
 
     $('#editProductModal').on('hidden.bs.modal', function () {
-        window.history.replaceState({}, '', '/admin/managementCourses');
+        if (fileSelected) {
+            // 如果文件被选中，重新加载页面
+            window.location.reload();
+        }
+
+        // 重置文件选中标记
+        fileSelected = false;
     });
 
 
