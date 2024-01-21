@@ -53,6 +53,11 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
+    public List<Coupon> getAvailableActiveCoupons() {
+        return couponDao.getAvailableActiveCoupons();
+    }
+
+    @Override
     public void applyCouponToCart(Integer userId , Integer couponId) {
         Cart cart = userService.findNoneCheckoutCartByUserId(userId);
         cart.setCouponId(couponId);

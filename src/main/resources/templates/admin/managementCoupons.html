@@ -157,6 +157,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const menuLinks = document.querySelectorAll('#menu a');
     menuLinks.forEach(link => {
@@ -259,11 +260,17 @@
                 success: function(response) {
                     console.log('Response:', response);
                     $('#addCouponModal').modal('hide');
-                    // 刷新當前頁面
                     window.location.reload();
                 },
-                error: function(error) {
-                    console.error('Error:', error);
+                error: function(xhr) {
+                    console.error('錯誤:', xhr.responseText);
+                    // 使用 SweetAlert2 显示错误信息
+                    Swal.fire({
+                        icon: 'error',
+                        title: '錯誤',
+                        text: xhr.responseText,
+                        confirmButtonText: '确定'
+                    });
                 }
             });
         });

@@ -51,6 +51,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="couponsList">
+                    <button id="toggleAllCoupons" class="btn btn-sm btn-secondary">全選</button>
                     <!-- 優惠劵信息 -->
                     <ul>
                         <li th:each="coupon : ${coupons}" th:text="${coupon.code}"></li>
@@ -68,7 +69,7 @@
     <table class="table table-bordered table-striped table-hover" id="couponTable">
         <thead>
         <tr>
-            <th>選擇</th>
+            <th><button id="toggleAllUsers" class="btn btn-sm btn-secondary">全選</button></th>
             <th>用戶編號</th>
             <th>用戶名</th>
         </tr>
@@ -88,6 +89,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('backToCoupons').addEventListener('click', function(event) {
         event.preventDefault(); // 阻止链接的默认行为
@@ -112,20 +114,53 @@
 </script>
 
 <script>
+    // 用來記錄當前選擇狀態
+    var allUsersSelected = false;
+    var isAllCouponsSelected = false;
+
+    // 全選用戶的處理邏輯
+    document.getElementById('toggleAllUsers').addEventListener('click', function() {
+        var allUserCheckboxes = document.querySelectorAll('input[name="selectedUsers"]');
+        allUsersSelected = !allUsersSelected; // 切换状态
+        allUserCheckboxes.forEach(function(checkbox) {
+            checkbox.checked = allUsersSelected;
+        });
+
+        // 更新全选按钮的文本
+        this.textContent = allUsersSelected ? '取消' : '全選';
+    });
+
+    // 发送优惠券按钮点击事件
     document.getElementById('sendCouponsButton').addEventListener('click', function() {
         $.ajax({
-            url: '/admin/coupons/all',
+            url: '/admin/coupons/available',
             type: 'GET',
             success: function(coupons) {
-                var couponsHtml = '<ol>';
-                for (var i = 0; i < coupons.length; i++) {
-                    couponsHtml += '<li><input type="checkbox" name="selectedCoupons" value="' + coupons[i].couponId + '"> ' + coupons[i].code + ' - ' + coupons[i].description + '</li>';
+                var couponsHtml = '';
+                if (coupons.length > 0) {
+                    couponsHtml = '<button id="toggleAllCoupons" class="btn btn-sm btn-secondary">全選</button><ol>';
+                    for (var i = 0; i < coupons.length; i++) {
+                        couponsHtml += '<li><input type="checkbox" name="selectedCoupons" value="' + coupons[i].couponId + '"> ' + coupons[i].code + ' - ' + coupons[i].description + '</li>';
+                    }
+                    couponsHtml += '</ol>';
+                } else {
+                    couponsHtml = '<p>當前無任何有效優惠券</p>';
+                    document.getElementById('confirmSendButton').style.display = 'none'; // 隱藏發送按鈕
                 }
-                couponsHtml += '</ol>';
                 document.getElementById('couponsList').innerHTML = couponsHtml;
+
+                if (coupons.length > 0) {
+                    // 仅当有优惠券时添加全选按钮的逻辑
+                    var toggleAllCouponsBtn = document.getElementById('toggleAllCoupons');
+                    toggleAllCouponsBtn.addEventListener('click', function() {
+                        var isAllCouponsSelected = $('input[name="selectedCoupons"]:not(:checked)').length > 0;
+                        $('input[name="selectedCoupons"]').prop('checked', isAllCouponsSelected);
+                        this.textContent = isAllCouponsSelected ? '取消' : '全選'; // 更新按钮文本
+                    });
+                }
             },
             error: function() {
-                document.getElementById('couponsList').innerHTML = '<p>无法加载优惠券信息。</p>';
+                document.getElementById('couponsList').innerHTML = '<p>加载优惠券列表失败。</p>';
             }
         });
     });
@@ -147,24 +182,39 @@
         });
         console.log(selectedUsers);
         // 准备发送到服务器的数据
-        var dataToSend = {
+        const dataToSend = {
             couponIds: selectedCoupons,
             userIds: selectedUsers
         };
 
-        // 发送 AJAX 请求
         $.ajax({
             url: '/admin/coupons/send', // 假设这是您的后端接口
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(dataToSend),
             success: function(response) {
-                // 处理成功响应
-                alert('优惠券发送成功');
+                // 使用 SweetAlert2 處理成功資訊
+                Swal.fire({
+                    title: '成功',
+                    text: '優惠券發送成功',
+                    icon: 'success',
+                    confirmButtonText: '確認'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // 確認後重新整理該頁面
+                        location.reload();
+                    }
+                });
             },
-            error: function() {
-                // 处理错误响应
-                alert('发送失败，请重试。');
+            error: function(xhr, status, error) {
+                // 使用 SweetAlert2 處理錯誤資訊
+                const errorMessage = xhr.responseText;
+                Swal.fire({
+                    title: '失敗',
+                    text: errorMessage,
+                    icon: 'error',
+                    confirmButtonText: '確定'
+                });
             }
         });
 

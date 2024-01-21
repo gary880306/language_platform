@@ -118,6 +118,18 @@ public class CouponDaoImpl implements CouponDao {
     }
 
     @Override
+    public List<Coupon> getAvailableActiveCoupons() {
+        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity, is_deleted " +
+                "FROM coupon " +
+                "WHERE is_deleted = false AND is_active = true AND end_date > CURRENT_DATE";
+
+        Map<String, Object> map = new HashMap<>();
+        List<Coupon> coupons = namedParameterJdbcTemplate.query(sql, map, new CouponRowMapper());
+
+        return coupons.isEmpty() ? null : coupons;
+    }
+
+    @Override
     public boolean checkCouponExists(Integer userId, Integer couponId) {
         String sql = "SELECT COUNT(*) FROM user_coupon WHERE user_id = :userId AND coupon_id = :couponId";
         Map<String,Object> map = new HashMap<>();

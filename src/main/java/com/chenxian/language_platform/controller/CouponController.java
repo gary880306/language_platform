@@ -7,6 +7,7 @@ import com.chenxian.language_platform.service.CouponService;
 import com.chenxian.language_platform.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,10 +37,15 @@ public class CouponController {
         try {
             Coupon createdCoupon = couponService.createCoupon(coupon);
             return new ResponseEntity<>(createdCoupon, HttpStatus.CREATED);
+        } catch (DataIntegrityViolationException e) {
+            // 特定于重复条目的异常
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("優惠券代碼 : " + coupon.getCode() + "已被使用，請換一個");
         } catch (Exception e) {
+            // 其他异常
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating coupon: " + e.getMessage());
         }
     }
+
 
     @GetMapping("/{id}")
     @ResponseBody
@@ -102,6 +108,19 @@ public class CouponController {
         }
     }
 
+    // 發送優惠券 model 列出所有未過期/未刪除/上架中的優惠券
+    @GetMapping("/available")
+    @ResponseBody
+    public ResponseEntity<?> getAvailableActiveCoupons() {
+        try {
+            List<Coupon> coupons = couponService.getAvailableActiveCoupons();
+            return ResponseEntity.ok(coupons);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving available coupons: " + e.getMessage());
+        }
+    }
+
+
 
     @GetMapping("/sendCoupons")
     private String sendCouponsPage(HttpSession session, Model model){
@@ -113,18 +132,30 @@ public class CouponController {
     // 新增的 API 用于发送优惠券
     @PostMapping("/send")
     public ResponseEntity<?> sendCouponsToUsers(@RequestBody SendCouponsRequest sendCouponsRequest) {
-        try {
-            // 从请求体中获取用户 ID 和优惠券 ID
-            List<Integer> userIds = sendCouponsRequest.getUserIds();
-            List<Integer> couponIds = sendCouponsRequest.getCouponIds();
+        if (sendCouponsRequest == null) {
+            return ResponseEntity.badRequest().body("用戶和優惠券不可為空");
+        }
 
-            // 在这里添加逻辑以将优惠券发送给用户
-            // 可以调用 service 层的方法来处理发送逻辑
-            // 例如：couponService.sendCouponsToUsers(userIds, couponIds);
-            couponService.assignCouponsToUsers(userIds,couponIds);
-            return ResponseEntity.ok("Coupons sent successfully");
+        List<Integer> userIds = sendCouponsRequest.getUserIds();
+        List<Integer> couponIds = sendCouponsRequest.getCouponIds();
+
+        if (userIds == null || userIds.isEmpty()) {
+            if (couponIds == null || couponIds.isEmpty()) {
+                return ResponseEntity.badRequest().body("用戶和優惠券不可為空");
+            }
+            return ResponseEntity.badRequest().body("用戶不可為空");
+        }
+
+        if (couponIds == null || couponIds.isEmpty()) {
+            return ResponseEntity.badRequest().body("優惠券不可為空");
+        }
+
+        try {
+            // 添加逻辑以将优惠券发送给用户
+            couponService.assignCouponsToUsers(userIds, couponIds);
+            return ResponseEntity.ok("優惠券發送成功");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error sending coupons: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("錯誤資訊: " + e.getMessage());
         }
     }
 

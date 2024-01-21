@@ -18,6 +18,8 @@ public interface CouponService {
     // 取得所有優惠券
     List<Coupon> getAllCoupons();
     List<Coupon> getAllActiveCoupons();
+    // 取得所有上架且未過期的優惠券
+    List<Coupon> getAvailableActiveCoupons();
     // 當用戶選擇一個優惠券時，更新購物車實例的 couponId 屬性
     void applyCouponToCart(Integer userId ,Integer couponId);
     boolean checkCouponExists(Integer userId, Integer couponId);

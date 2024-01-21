@@ -18,6 +18,8 @@ public interface CouponDao {
     // 取得所有優惠券
     List<Coupon> getAllCoupons();
     List<Coupon> getAllActiveCoupons();
+    // 取得所有上架且未過期的優惠券
+    List<Coupon> getAvailableActiveCoupons();
     boolean checkCouponExists(Integer userId, Integer couponId);
     boolean checkCouponExistsByIsUsed(Integer userId, Integer couponId);
     List<Coupon> getCouponsByUserId(Integer userId);
