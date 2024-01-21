@@ -10,6 +10,7 @@ import com.chenxian.language_platform.rowmapper.CourseRequestRowMapper;
 import com.chenxian.language_platform.rowmapper.CourseRowMapper;
 import com.chenxian.language_platform.rowmapper.UserCourseRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -182,5 +183,19 @@ public class CourseDaoImpl implements CourseDao {
                         rs.getInt("user_count")
                 )
         );
+    }
+
+    @Override
+    public boolean existsCourseName(String name) {
+        String sql = "SELECT COUNT(*) FROM course WHERE course_name = :courseName";
+        Map<String, Object> params = new HashMap<>();
+        params.put("courseName", name);
+
+        try {
+            Integer count = namedParameterJdbcTemplate.queryForObject(sql, params, Integer.class);
+            return count != null && count > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 }

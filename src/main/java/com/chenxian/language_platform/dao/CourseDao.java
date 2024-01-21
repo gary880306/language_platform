@@ -7,6 +7,7 @@ import com.chenxian.language_platform.model.Course;
 import com.chenxian.language_platform.model.UserCourse;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CourseDao {
     CourseRequest getCourseById(Integer courseId);
@@ -22,4 +23,5 @@ public interface CourseDao {
     boolean hasUserPurchasedCourse(Integer userId,Integer courseId);
     List<CourseSalesData> findCourseSalesData();
     List<CategoryUserCount> findCategoryUserCounts();
+    boolean existsCourseName(String name);
 }

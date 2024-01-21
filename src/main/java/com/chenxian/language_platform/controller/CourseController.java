@@ -128,31 +128,56 @@ public class CourseController {
         return null; // 如果沒有文件，返回null或者預設值
     }
 
-
+    // 新增課程表單驗證
     @PostMapping("/validateCourseData")
     public ResponseEntity<?> validateCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {
+        if (courseService.existsCourseName(courseRequest.getCourseName())) {
+            bindingResult.rejectValue("courseName", "error.courseName", "課程名稱已存在");
+        }
+
+        // 检查图片是否已上传
+        if (courseRequest.getImageUrl() == null || courseRequest.getImageUrl().isEmpty()) {
+            bindingResult.rejectValue("imageUrl", "error.imageUrl", "課程圖片不可為空");
+        }
+
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = bindingResult.getFieldErrors().stream()
-                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+                    .collect(Collectors.toMap(
+                            FieldError::getField,
+                            FieldError::getDefaultMessage,
+                            (existingValue, newValue) -> existingValue + " & " + newValue // 合并值
+                    ));
             return ResponseEntity.badRequest().body(errors);
         }
 
-        // 驗證通過的處理邏輯
-       return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
-    }
-
-    @PostMapping("/validateRevisedCourseData")
-    public ResponseEntity<?> validateRevisedCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = bindingResult.getFieldErrors().stream()
-                    .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        // 驗證通過的處理邏輯
+        // 验证通过的处理逻辑
         return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
     }
 
+
+    // 修改課程表單驗證
+    @PostMapping("/validateRevisedCourseData")
+    public ResponseEntity<?> validateRevisedCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {
+        // 检查图片是否已上传
+        if (courseRequest.getImageUrl() == null || courseRequest.getImageUrl().isEmpty()) {
+            bindingResult.rejectValue("imageUrl", "error.imageUrl", "課程圖片不可為空");
+        }
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = bindingResult.getFieldErrors().stream()
+                    .collect(Collectors.toMap(
+                            FieldError::getField,
+                            FieldError::getDefaultMessage,
+                            (existingValue, newValue) -> existingValue + " & " + newValue // 合并值
+                    ));
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        // 验证通过的处理逻辑
+        return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
+    }
+
+    // 格式化價格 (千分位)
     private String formatCoursePrice(Integer price) {
         NumberFormat formatter = NumberFormat.getIntegerInstance(Locale.US);
         return formatter.format(price);

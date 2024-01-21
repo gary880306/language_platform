@@ -175,27 +175,43 @@
                 <!-- 表單內容可以根據需要調整 -->
                 <form id="courseFormAdd" method="post" enctype="multipart/form-data">
                     <label for="courseName">課程名稱:</label>
-                    <input type="text" id="courseName" name="courseName" class="form-control" required><br>
+                    <input type="text" id="courseName" name="courseName" class="form-control">
                     <div id="courseNameError" class="error-message"></div>
+                    <br>
+
                     <label for="categoryId">語言:</label>
                     <select id="categoryId" name="categoryId" class="form-select">
                         <option th:each="category : ${categories}" th:value="${category.id}"
                                 th:text="${category.name}"></option>
-                    </select><br>
+                    </select>
+                    <div id="courseCategoryIdError" class="error-message"></div>
+                    <br>
+
                     <label for="imageUrl">上傳課程封面圖片:</label>
-                    <input type="file" id="imageUrl" name="imageUrl" class="form-control" accept="image/*" required ><br>
-                    <label for="video">課程影片:</label>
-                    <input type="text" id="video" name="videoUrl" class="form-control" required><br>
+                    <input type="file" id="imageUrl" name="imageUrl" class="form-control" accept="image/*">
+                    <div id="courseImageUrlError" class="error-message"></div>
+                    <br>
+                    <img id="imagePreview" style="max-width: 200px; max-height: 200px; display: none;"/>
+                    <br>
+                    <label for="videoUrl">課程影片:</label>
+                    <input type="text" id="videoUrl" name="videoUrl" class="form-control">
+                    <div id="courseVideoUrlError" class="error-message"></div>
+                    <br>
+
                     <label for="time">時數:</label>
-                    <input type="number" id="time" name="time" class="form-control" required step="any"><br>
+                    <input type="number" id="time" name="time" class="form-control" step="any">
                     <div id="courseTimeError" class="error-message"></div>
+                    <br>
 
                     <label for="price">價格:</label>
-                    <input type="number" id="price" name="price" class="form-control" required><br>
+                    <input type="number" id="price" name="price" class="form-control">
                     <div id="coursePriceError" class="error-message"></div>
+                    <br>
 
                     <label for="teacher">老師名:</label>
-                    <input type="text" id="teacher" name="teacher" class="form-control" required><br>
+                    <input type="text" id="teacher" name="teacher" class="form-control">
+                    <div id="courseTeacherError" class="error-message"></div>
+                    <br>
                     課程介紹:
                     <textarea class="form-control" placeholder="隨意填寫" id="description" name="description" style="height: 100px"></textarea>
                     <button type="submit" class="btn btn-success mt-2" name="submitForm">確認新增</button>
@@ -217,29 +233,44 @@
                 <!-- 表單內容可以根據需要調整 -->
                 <form id="courseFormRevise" enctype="multipart/form-data">
                     <label for="courseName">課程名稱:</label>
-                    <input type="text" id="editCourseName" name="courseName" class="form-control" required><br>
+                    <input type="text" id="editCourseName" name="courseName" class="form-control">
+                    <div id="editCourseNameError" class="error-message"></div><br>
 
                     <label for="editCategoryId">語言:</label>
                     <select id="editCategoryId" name="categoryId" class="form-select">
                         <option th:each="category : ${categories}" th:value="${category.id}"
                                 th:text="${category.name}"></option>
                     </select><br>
+
                     <label for="editImageUrl">上傳課程封面圖片:</label>
-                    <input type="file" id="editImageUrl" name="imageUrl" class="form-control" accept="image/*" required><br>
-                    <div id="currentImageDisplay"></div>
+                    <input type="file" id="editImageUrl" name="imageUrl" class="form-control" accept="image/*">
+                    <div id="editImageUrlError" class="error-message"></div><br>
+                    <img id="editImagePreview" style="max-width: 200px; max-height: 200px; display: none;"/>
+                    <br>
+
                     <label for="editVideo">課程影片:</label>
-                    <input type="text" id="editVideo" name="videoUrl" class="form-control" required><br>
+                    <input type="text" id="editVideo" name="videoUrl" class="form-control">
+                    <div id="editVideoUrlError" class="error-message"></div><br>
 
                     <label for="editTime">時數:</label>
-                    <input type="number" id="editTime" name="time" class="form-control" required step="any"><br>
+                    <input type="number" id="editTime" name="time" class="form-control" step="any">
+                    <div id="editTimeError" class="error-message"></div><br>
+
                     <label for="editPrice">價格:</label>
-                    <input type="number" id="editPrice" name="price" class="form-control" required><br>
+                    <input type="number" id="editPrice" name="price" class="form-control">
+                    <div id="editPriceError" class="error-message"></div><br>
+
                     <label for="editTeacher">老師名:</label>
-                    <input type="text" id="editTeacher" name="teacher" class="form-control" required><br>
+                    <input type="text" id="editTeacher" name="teacher" class="form-control">
+                    <div id="editTeacherError" class="error-message"></div><br>
+
                     課程介紹:
                     <textarea class="form-control" placeholder="隨意填寫" id="editDescription" name="description" style="height: 100px"></textarea>
+                    <div id="editDescriptionError" class="error-message"></div><br>
+
                     <button type="submit" class="btn btn-success mt-2" name="submitForm">修改課程</button>
                 </form>
+
             </div>
         </div>
     </div>
@@ -266,11 +297,37 @@
 </script>
 
 <script>
+    document.getElementById('imageUrl').addEventListener('change', function(event) {
+        var output = document.getElementById('imagePreview');
+        if (event.target.files && event.target.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                output.src = e.target.result;
+                output.style.display = 'block'; // 显示图片
+            };
+            reader.readAsDataURL(event.target.files[0]); // 读取文件并转换成 Data URL
+        }
+    });
+
+    document.getElementById('editImageUrl').addEventListener('change', function(event) {
+        var output = document.getElementById('editImagePreview');
+        if (event.target.files && event.target.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                output.src = e.target.result;
+                output.style.display = 'block'; // 显示图片
+            };
+            reader.readAsDataURL(event.target.files[0]); // 读取文件并转换成 Data URL
+        }
+    });
+</script>
+
+
+<script>
     // 將更新表單的邏輯封裝到一個函數中
     function updateEditForm(courseData) {
         document.getElementById('editCourseName').value = courseData.courseName;
         document.getElementById('editCategoryId').value = courseData.categoryId;
-        let imageUrl = encodeURIComponent(courseData.imageUrl);
         document.getElementById('editVideo').value = courseData.videoUrl;
         document.getElementById('editTime').value = courseData.time;
         document.getElementById('editPrice').value = courseData.price;
@@ -330,16 +387,19 @@
                         });
                     },
                     error: function(response) {
-                        // 清除現有錯誤信息
+                        // 清除现有错误信息
                         $('.error-message').text('').hide();
 
                         var errors = response.responseJSON;
 
+                        // 循环遍历每个错误字段
                         for (var key in errors) {
                             var errorMessage = errors[key];
-                            var errorElementId = 'course' + key.charAt(0).toUpperCase() + key.slice(1) + 'Error';
 
-                            // 只有當錯誤消息非空時才顯示
+                            // 构建错误消息元素的 ID
+                            var errorElementId = 'edit' + key.charAt(0).toUpperCase() + key.slice(1) + 'Error';
+
+                            // 显示错误消息
                             if (errorMessage) {
                                 $('#' + errorElementId).text(errorMessage).show();
                             }
@@ -444,11 +504,14 @@
 
                 for (var key in errors) {
                     var errorMessage = errors[key];
-                    var errorElementId = 'course' + key.charAt(0).toUpperCase() + key.slice(1) + 'Error';
+                    // 检查是否已经有 'course' 前缀
+                    var errorElementId = key.startsWith('course') ? key + 'Error' : 'course' + key.charAt(0).toUpperCase() + key.slice(1) + 'Error';
 
-                    // 只有当错误消息非空时才显示
-                    if (errorMessage) {
+                    // 确保错误消息的元素存在
+                    if ($('#' + errorElementId).length) {
                         $('#' + errorElementId).text(errorMessage).show();
+                    } else {
+                        console.warn('Error element not found for ' + errorElementId);
                     }
                 }
             }

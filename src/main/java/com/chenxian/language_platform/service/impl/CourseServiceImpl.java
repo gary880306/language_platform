@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class CourseServiceImpl implements CourseService {
@@ -74,5 +75,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<CategoryUserCount> findCategoryUserCounts() {
         return courseDao.findCategoryUserCounts();
+    }
+
+    @Override
+    public boolean existsCourseName(String name) {
+        return courseDao.existsCourseName(name);
     }
 }
