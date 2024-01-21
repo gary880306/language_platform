@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>享學後臺管理</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -110,25 +112,25 @@
     <div id="productTable">
         <h2 class="mb-4">課程管理</h2>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">新增課程</button>
-        <table class="table table-bordered table-striped">
+        <table class="table table-bordered table-striped table-hover">
             <thead>
             <tr>
-                <th>編號</th>
-                <th>名稱</th>
-                <th>語言</th>
-                <th>圖片</th>
-                <th>時數</th>
-                <th>價格</th>
-                <th>老師名稱</th>
-                <th>課程影片</th>
-                <th>創建時間</th>
-                <th>最後修改時間</th>
-                <th>修改</th>
-                <th>刪除</th>
+                <th class="align-middle text-center">編號</th>
+                <th class="align-middle text-center">名稱</th>
+                <th class="align-middle text-center">語言</th>
+                <th class="align-middle text-center">圖片</th>
+                <th class="align-middle text-center">時數</th>
+                <th class="align-middle text-center">價格</th>
+                <th class="align-middle text-center">老師名稱</th>
+                <th class="align-middle text-center">課程影片</th>
+                <th class="align-middle text-center">創建時間</th>
+                <th class="align-middle text-center">修改時間</th>
+                <th class="align-middle text-center">修改</th>
+                <th class="align-middle text-center">刪除</th>
             </tr>
             </thead>
-            <tbody th:each="course : ${courses}">
-            <tr>
+            <tbody>
+            <tr th:each="course : ${courses}">
                 <td class="align-middle text-center" th:text="${course.getCourseId}"></td>
                 <td class="align-middle text-center" th:text="${course.getCourseName}"></td>
                 <td class="align-middle text-center" th:text="${course.getCategoryName}"></td>
@@ -155,7 +157,6 @@
                 </td>
             </tr>
             </tbody>
-
         </table>
     </div>
 </div>
@@ -244,9 +245,16 @@
     </div>
 </div>
 
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
 <script>
     const menuLinks = document.querySelectorAll('#menu a');
     menuLinks.forEach(link => {
@@ -349,33 +357,50 @@
 
     document.querySelectorAll('.delete-button').forEach(button => {
         button.addEventListener('click', function () {
-            // 從點擊的按鈕上獲取 data-course-id 屬性的值
             const courseId = this.getAttribute('data-course-id');
 
-            // 確認刪除操作
-            if (confirm('確定要刪除這門課程嗎？')) {
-                // 發送 AJAX 請求進行刪除
-                fetch(`/admin/managementCourses/delete?courseId=${courseId}`, { method: 'DELETE' })
-                    .then(response => {
-                        if (response.ok) {
-                            alert('課程已刪除');
-                            // 可以在這裡重新加載頁面或更新 DOM
-                            location.reload(); // 例如，重新加載頁面
-                        } else {
-                            alert('刪除失敗');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('刪除過程中出現錯誤:', error);
-                    });
-            } else {
-                // 用戶選擇了「取消」
-                window.history.replaceState({}, '', '/admin/managementCourses');
-            }
+            Swal.fire({
+                title: '確定要刪除這門課程嗎？',
+                text: '此操作無法撤銷',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '是的，刪除它！',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/managementCourses/delete?courseId=${courseId}`, { method: 'DELETE' })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire({
+                                    title: '已刪除！',
+                                    text: '課程已被成功刪除。',
+                                    icon: 'success',
+                                    confirmButtonText: '關閉'
+                                }).then(() => {
+                                    location.reload(); // 或者执行其他更新 DOM 的操作
+                                });
+                            } else {
+                                Swal.fire(
+                                    '出錯了！',
+                                    '無法刪除課程。',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('刪除過程中出現錯誤:', error);
+                            Swal.fire(
+                                '出錯了！',
+                                '刪除過程中出現錯誤。',
+                                'error'
+                            );
+                        });
+                }
+            });
         });
     });
-
-
 
 </script>
 
@@ -431,7 +456,31 @@
     });
 
 </script>
+<script>
+    $(document).ready(function() {
+        $('.table').DataTable({
 
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    text: '匯出檔案',
+                    extend: 'collection',
+                    buttons: [
+                        'copy',
+                        'excel',
+                        'csv',
+                        'pdf',
+                        'print'
+                    ]
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/zh-HANT.json'
+            },
+            pageLength: 4 // 设置每页显示6条记录
+        });
+    });
+</script>
 </body>
 
 </html>

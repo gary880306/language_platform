@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>享學後臺管理</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -112,16 +114,16 @@
             <h2 class="mb-4">用戶資訊</h2>
     <table class="table table-bordered table-striped">
         <thead>
-        <tr>
-            <th>會員編號</th>
-            <th>郵箱</th>
-            <th>用戶名</th>
-            <th>生日</th>
-            <th>手機號碼</th>
-            <th>地址</th>
-            <th>加入時間</th>
-            <th>來源</th>
-            <th>狀態</th>
+        <tr style="width: auto">
+            <th class="align-middle text-center">會員編號</th>
+            <th class="align-middle text-center">郵箱</th>
+            <th class="align-middle text-center">用戶名</th>
+            <th class="align-middle text-center">生日</th>
+            <th class="align-middle text-center">手機號碼</th>
+            <th class="align-middle text-center">地址</th>
+            <th class="align-middle text-center">加入時間</th>
+            <th class="align-middle text-center">來源</th>
+            <th class="align-middle text-center">狀態</th>
         </tr>
         </thead>
         <tbody>
@@ -148,6 +150,13 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
 <script>
     const menuLinks = document.querySelectorAll('#menu a');
     menuLinks.forEach(link => {
@@ -190,6 +199,31 @@
             // 處理錯誤
         });
     }
+
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('.table').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    text: '匯出檔案',
+                    extend: 'collection',
+                    buttons: [
+                        'copy',
+                        'excel',
+                        'csv',
+                        'pdf',
+                        'print'
+                    ]
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/zh-HANT.json'
+            }
+        });
+    });
 
 </script>
 </body>

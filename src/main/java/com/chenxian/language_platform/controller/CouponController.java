@@ -14,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/coupons")
@@ -75,12 +77,16 @@ public class CouponController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("優惠券未找到，ID: " + id);
             }
             coupon.setActive(isActive);
-            Coupon updatedCoupon = couponService.updateCoupon(coupon.getCouponId(),coupon);
-            return ResponseEntity.ok(updatedCoupon);
+            Coupon updatedCoupon = couponService.updateCoupon(coupon.getCouponId(), coupon);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("newActiveStatus", updatedCoupon.isActive());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("更新優惠券狀態時出錯：" + e.getMessage());
         }
     }
+
 
 
     // 刪除優惠券（RESTFul API）
