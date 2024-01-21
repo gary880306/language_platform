@@ -246,6 +246,7 @@
                     <input type="file" id="editImageUrl" name="imageUrl" class="form-control" accept="image/*">
                     <div id="editImageUrlError" class="error-message"></div><br>
                     <img id="editImagePreview" style="max-width: 200px; max-height: 200px; display: none;"/>
+                    <div id="imageContainer"></div>
                     <br>
 
                     <label for="editVideo">課程影片:</label>
@@ -311,15 +312,19 @@
 
     document.getElementById('editImageUrl').addEventListener('change', function(event) {
         var output = document.getElementById('editImagePreview');
+        var imageContainer = document.getElementById('imageContainer'); // 获取 imageContainer 元素
+
         if (event.target.files && event.target.files[0]) {
             var reader = new FileReader();
             reader.onload = function(e) {
                 output.src = e.target.result;
                 output.style.display = 'block'; // 显示图片
+                imageContainer.style.display = 'none'; // 隐藏 imageContainer
             };
             reader.readAsDataURL(event.target.files[0]); // 读取文件并转换成 Data URL
         }
     });
+
 </script>
 
 
@@ -333,6 +338,25 @@
         document.getElementById('editPrice').value = courseData.price;
         document.getElementById('editTeacher').value = courseData.teacher;
         document.getElementById('editDescription').value = courseData.description;
+
+        // 獲取圖片容器元素
+        var imageContainer = document.getElementById('imageContainer');
+
+        // 移除現有的圖片（如果存在）
+        while (imageContainer.firstChild) {
+            imageContainer.removeChild(imageContainer.firstChild);
+        }
+
+        // 動態生成新的圖片元素
+        var imgElement = document.createElement('img');
+        imgElement.src = '/images/' + courseData.imageUrlString;
+        imgElement.className = 'card-img-top';
+        imgElement.alt = '課程圖片';
+        imgElement.style = 'max-width: 200px; max-height: 200px;'; // 設定圖片的樣式
+
+        // 將新圖片添加到容器中
+        imageContainer.appendChild(imgElement);
+
         // 其他相關邏輯
     }
 
