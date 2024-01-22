@@ -56,6 +56,18 @@ public class FrontendController {
     @Autowired
     private OrderedInfoService orderedInfoService;
 
+    @GetMapping("/enjoyLearning")
+    public String index(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        Integer cartCourseCount = 0;
+        if (user != null) {
+            cartCourseCount = userService.getCartCourseCount(user.getUserId());
+        }
+        model.addAttribute("cartCourseCount", cartCourseCount);
+        model.addAttribute("user", user);
+        model.addAttribute("categories", dataService.findAllCategoryData());
+        return "user/index";
+    }
 
     @GetMapping("/enjoyLearning/courses")
     public String showCourses(Model model, HttpSession session,
@@ -127,6 +139,8 @@ public class FrontendController {
         Course course = courseService.getCourseByCourseId(courseId);
         if (course == null || (course.getIsDeleted() && !hasPurchased)) {
             // 如果該課程不存在或已被刪除且用戶未購買，則顯示課程已刪除的信息
+            model.addAttribute("user", user);
+            model.addAttribute("cartCourseCount", cartCourseCount);
             model.addAttribute("courseDeleted", true);
             return "/user/courses/courseDeleted";
         }
@@ -212,9 +226,14 @@ public class FrontendController {
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
         Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         if(cart != null) {
-            cartCourseCount = userService.getCartCourseCount(user.getUserId());
-            Integer total = cart.getCartItems().stream()
+            // 新增的過濾條件，移除被標記為已刪除的課程
+            List<CartItem> validCartItems = cart.getCartItems().stream()
+                    .filter(item -> !item.getCourse().getIsDeleted())
+                    .toList();
+            Integer total = validCartItems.stream()
                     .mapToInt(item -> item.getCourse().getPrice()).sum();
+
+            cartCourseCount = userService.getCartCourseCount(user.getUserId());
             // 检查是否应用了优惠券
             if (cart.getCouponId() != null) {
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
@@ -264,9 +283,7 @@ public class FrontendController {
     // 結帳頁面
     @GetMapping("/enjoyLearning/checkout")
     public String checkout(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        // 1. 先找到 user 登入者
         User user = (User) session.getAttribute("user");
-        // 2. 找到 user 的尚未結帳的購物車
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
         BigDecimal discount = BigDecimal.ZERO; // 初始化折扣金额为0
 
@@ -276,24 +293,25 @@ public class FrontendController {
                     .sum();
             BigDecimal total = new BigDecimal(totalInteger);
 
-            // 檢查 couponId 是否為0
+            // 检查 couponId 是否为0，如果不为0，则计算折扣
             if (cart.getCouponId() != 0) {
-                // 獲取當前購物車的 coupon
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
-                // 根據優惠券計算折扣金額
                 discount = calculateDiscountAmount(cart, coupon);
                 total = total.subtract(discount);
-                // 將優惠券設置為已使用
-                userService.markCouponAsUsed(user.getUserId(), cart.getCouponId());
             }
 
-            // 轉換折扣金额为 Integer
+            // 转换折扣金额为 Integer
             Integer discountInteger = discount.intValue();
 
             // 結帳
             CheckoutResponse checkoutResponse = userService.checkoutCartByUserId(cart.getUserId(), cart.getCartId(), discountInteger);
             if (checkoutResponse != null && checkoutResponse.getSuccess()) {
-                // 添加訂單相關資訊到重定向屬性
+                // 結帳成功後，标记优惠券为已使用
+                if (cart.getCouponId() != 0) {
+                    userService.markCouponAsUsed(user.getUserId(), cart.getCouponId());
+                }
+
+                // 添加订单相关信息到重定向属性
                 String formattedTotalAmount = formatCoursePrice(totalInteger);
                 Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
                 String formattedDiscount = formatCoursePrice(discountInteger);
@@ -306,7 +324,19 @@ public class FrontendController {
                 return "redirect:/enjoyLearning/orderResult";
             }
         }
-        return "redirect:/enjoyLearning/checkoutError"; // 假設有錯誤處理頁面
+
+        // 如果购物车为空或结帳失败，重定向到错误页面
+        Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
+        model.addAttribute("user", user);
+        model.addAttribute("cartCourseCount", cartCourseCount);
+        model.addAttribute("courseDeleted", true);
+        return "/user/courses/courseDeleted"; // 假设有错误处理页面
+    }
+
+
+    @GetMapping("/enjoyLearning/orderError")
+    public String orderError() {
+        return "/user/courses/orderError";
     }
 
     @GetMapping("/enjoyLearning/orderResult")
@@ -520,7 +550,6 @@ public class FrontendController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用户未登录");
             }
             userService.cancelCoupon(user.getUserId());
-            System.out.println("123");
             return ResponseEntity.ok().body("優惠券已取消");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("取消優惠券失敗: " + e.getMessage());

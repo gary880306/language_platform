@@ -41,7 +41,7 @@
         }
 
         /* 設定圖標和登出鏈接的樣式 */
-        .navbar .bi, .navbar {
+        .navbar .bi, .navbar .logout-link {
             display: inline-block;
             vertical-align: middle;
             width: 24px;   /* 圖標寬度 */
@@ -57,8 +57,27 @@
             transition: color 0.2s; /* 過渡效果 */
         }
 
-        .navbar .logout-link:hover {
+        .navbar :hover {
             color: #0056b3; /* 滑鼠懸停時的顏色 */
+        }
+
+        .imageSize {
+            height: 400px;
+            border-radius: 20px;
+        }
+
+        .currency {
+            font-size: larger; /* 或者具體的像素大小，如 20px */
+        }
+
+        .row.m-5.p-5 {
+            position: relative; /* 為 row 設置相對定位 */
+        }
+
+        #submit-button {
+            position: absolute; /* 絕對定位 */
+            right: 48px; /* 距離右側的距離 */
+            bottom: 46px; /* 距離底部的距離 */
         }
 
         .custom-badge {
@@ -78,29 +97,13 @@
             background-color: red; /* 背景顏色 */
         }
 
-        /* 新增全局樣式 */
-        .container-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 80vh; /* 設定一個最小高度 */
-        }
-
-        /* 保留原有的 .container 樣式 */
-        .container {
-            padding-right: var(--bs-gutter-x,.75rem);
-            padding-left: var(--bs-gutter-x,.75rem);
-            margin-right: auto;
-            margin-left: auto;
-        }
-
-
+        /* 頁腳樣式 */
         footer {
             background-color: #333;
             color: #fff;
+            text-align: center;
             position: fixed;
             bottom: 0;
-            text-align: center;
             padding: 10px;
             width: 100%;
         }
@@ -110,7 +113,7 @@
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
         <img src="/icons/享學.png" alt="logo" class="logo">
-        <a class="navbar-brand" href="/enjoyLearning/courses">享學</a>
+        <a class="navbar-brand" href="/enjoyLearning">享學</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -123,23 +126,28 @@
                 <li class="nav-item"><a class="nav-link" href="/enjoyLearning/coupons">優惠券</a></li>
             </ul>
             <div class="ms-auto">
+                <!-- 條件渲染購物車和用戶圖標 -->
+                <span th:if="${user != null}">
                 <a href="/enjoyLearning/cart" class="text-dark position-relative me-3">
                     <i class="bi bi-cart3"></i>
                     <span class="position-absolute badge rounded-circle bg-danger custom-badge">
-                            [[${cartCourseCount}]] <!-- 使用 Thymeleaf 表達式動態顯示商品數 -->
-                        </span>
+                        [[${cartCourseCount}]]
+                    </span>
                 </a>
                 <a href="/enjoyLearning/user" class="text-dark me-3"><i class="bi bi-person-circle"></i></a>
                 <a href="/user/logout" class="btn btn-outline-dark btn-sm me-3" style="width: auto;">登出</a>
+            </span>
+
+                <!-- 未登入時顯示登入連結 -->
+                <a th:if="${user == null}" href="/user/login" class="btn btn-outline-dark btn-sm me-3">登入</a>
             </div>
         </div>
     </div>
 </nav>
 
-<!-- 修改的 HTML 區塊 -->
-<div class="container container-center text-center justify-contain-center align-items-center mt-4">
-    <div>
-        <h1 class="mt-5">該課程已被刪除 😭</h1>
+<div class="d-flex justify-content-center align-items-center" style="height: 80vh;">
+    <div class="text-center">
+        <h1 class="mt-5">該課程不存在 😭</h1>
         <a href="/enjoyLearning/courses" class="btn btn-secondary">忍痛去看其他課程</a>
     </div>
 </div>

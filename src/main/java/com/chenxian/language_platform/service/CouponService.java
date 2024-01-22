@@ -28,4 +28,5 @@ public interface CouponService {
     List<Coupon> getCouponsByUserId(Integer userId);
     void deleteUserCoupon(Integer userId, Integer couponId);
     void assignCouponsToUsers(List<Integer> userIds, List<Integer> couponIds);
+    boolean isCodeExists(String code);
 }

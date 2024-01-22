@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>享學後臺管理</title>
+    <title>享學後台管理</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
 </head>
 <body>
@@ -35,7 +35,7 @@
     <p><strong>折扣：</strong><span th:text="'-NT$' + ${formattedDiscount} "></span></p>
     <p><strong>總價：</strong><span th:text="'NT$' + ${finalTotal} "></span></p>
     <p><strong>訂單編號：</strong><span th:text="${orderItems[0].orderId}"></span></p>
-    <p th:text="${#dates.format(orderItems.get(0).getCreated_date(), 'yyyy-MM-dd HH:mm:ss')}">訂單時間</p>
+    <p><strong>訂單時間：</strong><span th:text="${#dates.format(orderItems.get(0).getCreated_date(), 'yyyy-MM-dd HH:mm:ss')}">訂單時間</span></p>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -6,7 +6,7 @@ import com.chenxian.language_platform.model.CategoryData;
 import com.chenxian.language_platform.model.Course;
 import com.chenxian.language_platform.service.CourseService;
 import com.chenxian.language_platform.service.DataService;
-import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,16 +18,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.NumberFormat;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -130,23 +128,48 @@ public class CourseController {
 
     // 新增課程表單驗證
     @PostMapping("/validateCourseData")
-    public ResponseEntity<?> validateCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {
-        if (courseService.existsCourseName(courseRequest.getCourseName())) {
-            bindingResult.rejectValue("courseName", "error.courseName", "課程名稱已存在");
+    public ResponseEntity<?> validateCourseData(@ModelAttribute CourseRequest courseRequest) {
+        Map<String, String> errors = new HashMap<>();
+
+        // 手动验证每个字段
+        if (courseRequest.getCourseName() == null || courseRequest.getCourseName().trim().isEmpty()) {
+            errors.put("courseName", "課程名稱不可為空");
+        } else if (courseService.existsCourseName(courseRequest.getCourseName())) {
+            errors.put("courseName", "課程名稱已存在");
         }
 
-        // 检查图片是否已上传
-        if (courseRequest.getImageUrl() == null || courseRequest.getImageUrl().isEmpty()) {
-            bindingResult.rejectValue("imageUrl", "error.imageUrl", "課程圖片不可為空");
+        if (courseRequest.getCategoryId() == null) {
+            errors.put("categoryId", "類別不可為空");
         }
 
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = bindingResult.getFieldErrors().stream()
-                    .collect(Collectors.toMap(
-                            FieldError::getField,
-                            FieldError::getDefaultMessage,
-                            (existingValue, newValue) -> existingValue + " & " + newValue // 合并值
-                    ));
+        if ((courseRequest.getImageUrl() == null || courseRequest.getImageUrl().isEmpty()) &&
+                (courseRequest.getImageUrlString() == null || courseRequest.getImageUrlString().trim().isEmpty())) {
+            errors.put("imageUrl", "課程圖片不可為空");
+        }
+
+        if (courseRequest.getTime() == null) {
+            errors.put("time", "時數不可為空");
+        } else if (courseRequest.getTime() < 0.5) {
+            errors.put("time", "時數必須大於0.5小時");
+        }
+
+        if (courseRequest.getPrice() == null) {
+            errors.put("price", "價格不可為空");
+        } else if (courseRequest.getPrice() < 1) {
+            errors.put("price", "價格需大於0");
+        }
+
+
+        if (courseRequest.getTeacher() == null || courseRequest.getTeacher().trim().isEmpty()) {
+            errors.put("teacher", "老師名稱不可為空");
+        }
+
+        if (courseRequest.getVideoUrl() == null || courseRequest.getVideoUrl().trim().isEmpty()) {
+            errors.put("videoUrl", "課程影片不可為空");
+        }
+
+        // 检查是否有验证错误
+        if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
 
@@ -155,21 +178,49 @@ public class CourseController {
     }
 
 
+
     // 修改課程表單驗證
     @PostMapping("/validateRevisedCourseData")
-    public ResponseEntity<?> validateRevisedCourseData(@ModelAttribute @Valid CourseRequest courseRequest, BindingResult bindingResult) {
-        // 检查图片是否已上传
-        if (courseRequest.getImageUrl() == null || courseRequest.getImageUrl().isEmpty()) {
-            bindingResult.rejectValue("imageUrl", "error.imageUrl", "課程圖片不可為空");
+    public ResponseEntity<?> validateRevisedCourseData(@ModelAttribute CourseRequest courseRequest) {
+        Map<String, String> errors = new HashMap<>();
+
+        // 手动验证课程名称是否为空
+        if (courseRequest.getCourseName() == null || courseRequest.getCourseName().trim().isEmpty()) {
+            errors.put("courseName", "課程名稱不可為空");
         }
 
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errors = bindingResult.getFieldErrors().stream()
-                    .collect(Collectors.toMap(
-                            FieldError::getField,
-                            FieldError::getDefaultMessage,
-                            (existingValue, newValue) -> existingValue + " & " + newValue // 合并值
-                    ));
+        // 手动验证图片是否已上传
+        if (courseRequest.getImageUrl() == null || courseRequest.getImageUrl().isEmpty()) {
+            errors.put("imageUrl", "課程圖片不可為空");
+        }
+
+        // 手动验证其他字段
+        if (courseRequest.getCategoryId() == null) {
+            errors.put("categoryId", "類別不可為空");
+        }
+
+        if (courseRequest.getTime() == null) {
+            errors.put("time", "時數不可為空");
+        } else if (courseRequest.getTime() < 0.5) {
+            errors.put("time", "時數必須大於0.5小時");
+        }
+
+        if (courseRequest.getPrice() == null) {
+            errors.put("price", "價格不可為空");
+        } else if (courseRequest.getPrice() < 1) {
+            errors.put("price", "價格需大於0");
+        }
+
+        if (courseRequest.getTeacher() == null || courseRequest.getTeacher().trim().isEmpty()) {
+            errors.put("teacher", "老師名稱不可為空");
+        }
+
+        if (courseRequest.getVideoUrl() == null || courseRequest.getVideoUrl().trim().isEmpty()) {
+            errors.put("videoUrl", "課程影片不可為空");
+        }
+
+        // 检查是否有验证错误
+        if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
 

@@ -89,4 +89,9 @@ public class CouponServiceImpl implements CouponService {
         couponDao.assignCouponsToUsers(userIds,couponIds);
     }
 
+    @Override
+    public boolean isCodeExists(String code) {
+        return couponDao.isCodeExists(code);
+    }
+
 }

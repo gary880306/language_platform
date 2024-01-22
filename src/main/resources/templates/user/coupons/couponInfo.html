@@ -152,7 +152,7 @@
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
         <img src="/icons/享學.png" alt="logo" class="logo">
-        <a class="navbar-brand" href="/enjoyLearning/courses">享學</a>
+        <a class="navbar-brand" href="/enjoyLearning">享學</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -186,7 +186,7 @@
                 <h5 class="card-title">專屬優惠</h5>
                 <h6 th:text="'代碼: ' + ${coupon.code}">代碼: COUPON123</h6>
                 <p class="card-text" th:text="${coupon.description}">享受購物時的專屬折扣，讓您的購物更加划算。</p>
-                <div>Discount Type: <span th:text="${coupon.discountType}"></span></div>
+                <div>類型 : <span th:text="${coupon.discountType}"></span></div>
                 <div class="coupon-value" th:text="${coupon.discountType.name() == 'FIXED' ? '折扣: ' + #numbers.formatDecimal(coupon.discountValue, 1, 0) + '元' : '折扣: ' + coupon.discountValue + '%'}"></div>
                 <div>
                     <small th:text="'有效期：' + ${#dates.format(coupon.startDate, 'yyyy-MM-dd')} + ' 至 ' + ${#dates.format(coupon.endDate, 'yyyy-MM-dd')}">有效期：2023-01-01 至 2023-12-31</small>

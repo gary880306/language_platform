@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>享學後臺管理</title>
+    <title>享學後台管理</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
     <style>
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -15,10 +16,26 @@
         }
 
         #navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: #000;
             color: white;
             padding: 10px;
+        }
+
+        .center-section {
+            flex: 1; /* 自動填滿剩餘空間 */
             text-align: center;
+        }
+
+        .right-section {
+            display: flex; /* 启用 Flexbox 布局 */
+            align-items: center; /* 垂直居中对齐 */
+        }
+
+        .user-info, .logout-button {
+            margin-left: 10px; /* 间隔一定距离 */
         }
 
         #container {
@@ -99,8 +116,20 @@
 </head>
 <body>
 <div id="navbar">
-    <h4>後台管理系統</h4>
+    <div class="center-section">
+        <h4>享學後台管理系統</h4>
+    </div>
+    <div class="right-section">
+        <div class="user-info">
+            <h5 id="user-name-element"></h5>
+        </div>
+        <div class="logout-button">
+            <a href="/admin/logout" class="btn btn-danger">登出</a>
+        </div>
+    </div>
 </div>
+
+
 <div id="container">
     <div id="menu">
         <a href="/admin/userInfo" id="userInfoLink"  class="active">用戶資訊</a>
@@ -224,6 +253,28 @@
             }
         });
     });
+
+</script>
+
+<script>
+    // 从 cookie 中获取 userName
+    function getUserNameFromCookie() {
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'userName') {
+                return value;
+            }
+        }
+        return null;}// 如果找不到 userName，就回傳 null
+
+    // 在需要顯示用戶名的地方獲取並顯示 userName
+    const userName = getUserNameFromCookie();
+    if (userName) {
+        // 將 userName 插入到頁面中的元素中
+        document.getElementById('user-name-element').textContent = '您好 , ' + userName;
+    }
+    console.log(userName);
 
 </script>
 </body>

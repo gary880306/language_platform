@@ -14,7 +14,7 @@
             <div class="card">
                 <div class="card-body">
                     <h3 class="card-title text-center">後台登入</h3>
-                    <form method="post" action="/admin/loginBackend">
+                    <form method="post" action="/admin/loginBackend" id="loginForm">
                         <div class="mb-3">
                             <label for="email" class="form-label">電子郵件</label>
                             <input type="email" class="form-control" id="email" name="email" placeholder="輸入電子郵件">
@@ -23,7 +23,7 @@
                             <label for="password" class="form-label">密碼</label>
                             <input type="password" class="form-control" id="password" name="password" placeholder="輸入密碼">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">登入</button>
+                        <button type="button" class="btn btn-primary w-100" onclick="handleLogin()">登入</button>
                     </form>
                     <div style="color: red" th:text="${loginMessage}">Default Login Message</div>
                 </div>
@@ -34,6 +34,35 @@
 
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 用户点击登录按钮后的处理函数
+    function handleLogin() {
+        // 假设从登录表单中获取了用户名
+        const userName = '管理員';
+
+        // 手动触发表单的提交事件
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.submit();
+        }
+        loginUser(userName);
+    }
+
+    // 在用户登录成功后调用这个函数，传递用户名作为参数
+    function loginUser(userName) {
+        // 创建一个过期时间
+        const expirationDate = new Date();
+        expirationDate.setFullYear(expirationDate.getFullYear() + 1); // 设置为一年后过期
+
+        // 构建 cookie 字符串，包括用户名和过期时间
+        const cookieString = `userName=${userName}; expires=${expirationDate.toUTCString()}; path=/`;
+
+        // 设置 cookie
+        document.cookie = cookieString;
+    }
+
+
+</script>
 </body>
 
 </html>

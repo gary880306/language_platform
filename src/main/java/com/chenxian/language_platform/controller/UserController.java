@@ -170,33 +170,41 @@ public class UserController {
         // 有此用戶邏輯
         if (user != null) {
             // 比對密碼成功邏輯
-            if (user.getPassword().equals(password)) {
+            String encryptedPassword = myEncryptionComponent.encrypt(userLoginRequest.getPassword());
+            if (user.getPassword().equals(encryptedPassword)) {
                 if (user.getLevelId() == 2) {
                     session.setAttribute("user", user); // 將 user 物件放入到 session 變數中
-                    return "redirect:/admin/managementCourses"; // OK, 導向後台首頁
+                    return "redirect:/admin/userInfo"; // OK, 導向後台首頁
+                }else {
+                    session.invalidate(); // session 過期失效
+                    model.addAttribute("loginMessage", "無權限登入後台");
+                    return "/user/login/loginBackend";
                 }
+            }else {
                 session.invalidate(); // session 過期失效
-                model.addAttribute("loginMessage", "無權限登入後台");
+                model.addAttribute("loginMessage", "帳號密碼錯誤");
                 return "/user/login/loginBackend";
-                // 比對密碼失敗邏輯
-            } else {
-                session.invalidate(); // session 過期失效
-                model.addAttribute("loginMessage", "帳號或密碼錯誤");
-                return "/user/login/loginBackend"; // 將失敗訊息渲染到登入頁面
             }
-            // 資料庫無此用戶邏輯
         } else {
             session.invalidate(); // session 過期失效
             model.addAttribute("loginMessage", "無此使用者");
-            return "/user/login/loginBackend"; // 將失敗訊息渲染到登入頁面
+            return "/user/login/loginBackend"; // 将失败消息渲染到登录页面
         }
     }
 
-    // 登出功能實作
+
+    // 用戶登出功能實作
     @GetMapping("/user/logout")
-    public String logout(HttpSession session) {
+    public String userLogout(HttpSession session) {
         session.invalidate(); // session 過期失效
-        return "redirect:/enjoyLearning/courses"; // 重導到首頁
+        return "redirect:/enjoyLearning"; // 重導到首頁
+    }
+
+    // 管理員登出功能實作
+    @GetMapping("/admin/logout")
+    public String adminLogout(HttpSession session) {
+        session.invalidate(); // session 過期失效
+        return "redirect:/admin/login"; // 重導到首頁
     }
 
     // 註冊頁面

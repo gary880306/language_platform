@@ -41,7 +41,7 @@
                 <div class="card-body">
                     <h5 class="card-title" th:text="${coupon.code}">優惠券代碼</h5>
                     <p class="card-text mb-1" th:text="${coupon.description}">描述</p>
-                    <small class="text" th:text="${coupon.discountType}">描述</small>
+                    <small th:text="${coupon.discountType.name() == 'FIXED' ? '折扣: ' + #numbers.formatDecimal(coupon.discountValue, 1, 0) + '元' : '折扣: ' + coupon.discountValue + '%'}"></small>
                 </div>
                 <div class="card-footer">
                     <small class="text" th:text="${coupon.startDate} + ' ~ ' + ${coupon.endDate}">截止日期</small>

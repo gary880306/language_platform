@@ -25,11 +25,10 @@ public class OrderedInfoDaoImpl implements OrderedInfoDao {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Override
     public List<Order> findAllOrder() {
-        String sql = "SELECT o.order_id, o.user_id,u.user_name, o.total_amount, o.created_date FROM `order` o LEFT JOIN user u ON o.user_id = u.user_id";
+        String sql = "SELECT o.order_id, o.user_id,u.user_name, o.total_amount, o.created_date ,o.discount FROM `order` o LEFT JOIN user u ON o.user_id = u.user_id";
         Map<String,Object> map = new HashMap<>();
         List<Order> orders = namedParameterJdbcTemplate.query(sql,map,new OrderIncludeUserRowMapper());
         if(!orders.isEmpty()){
-
             return orders;
         }
         return null;

@@ -214,4 +214,14 @@ public class CouponDaoImpl implements CouponDao {
         }
     }
 
+    @Override
+    public boolean isCodeExists(String code) {
+        String sql = "SELECT COUNT(*) FROM coupon WHERE code = :code";
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", code);
+
+        int count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+        return count > 0;
+    }
+
 }

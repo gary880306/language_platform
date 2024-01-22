@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>享學後臺管理</title>
+    <title>享學後台管理</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
@@ -77,11 +77,15 @@
         .btn {
             margin-bottom: 10px;
         }
+
+        .error-message {
+            color: red;
+        }
     </style>
 </head>
 <body>
 <div id="navbar">
-    <h4>後台管理系統</h4>
+    <h4>享學後台管理系統</h4>
 </div>
 <div id="container">
     <div id="menu">
@@ -127,28 +131,35 @@
             <div class="modal-body">
                 <!-- 優惠券新增表單 -->
                 <form id="couponFormAdd" method="post">
-                    <label for="couponCode">優惠券代碼:</label>
-                    <input type="text" id="couponCode" name="couponCode" class="form-control" required><br>
+                    <label for="code">優惠券代碼:</label>
+                    <input type="text" id="code" name="code" class="form-control">
+                    <span class="error-message" id="error-code"></span><br>
 
-                    <label for="couponDescription">描述:</label>
-                    <textarea id="couponDescription" name="couponDescription" class="form-control" required></textarea><br>
+                    <label for="description">描述:</label>
+                    <textarea id="description" name="description" class="form-control"></textarea>
+                    <span class="error-message" id="error-description"></span><br>
 
                     <label for="discountType">折扣類型:</label>
                     <select id="discountType" name="discountType" class="form-select">
                         <option th:each="type : ${discountTypes}" th:value="${type}" th:text="${type}"></option>
-                    </select><br>
+                    </select>
+                    <span class="error-message" id="error-discountType"></span><br>
 
                     <label for="discountValue">折扣值:</label>
-                    <input type="number" id="discountValue" name="discountValue" class="form-control" required><br>
+                    <input type="number" id="discountValue" name="discountValue" class="form-control">
+                    <span class="error-message" id="error-discountValue"></span><br>
 
                     <label for="startDate">起始日:</label>
-                    <input type="date" id="startDate" name="startDate" class="form-control" required><br>
+                    <input type="date" id="startDate" name="startDate" class="form-control">
+                    <span class="error-message" id="error-startDate"></span><br>
 
                     <label for="endDate">截止日:</label>
-                    <input type="date" id="endDate" name="endDate" class="form-control" required><br>
+                    <input type="date" id="endDate" name="endDate" class="form-control">
+                    <span class="error-message" id="error-endDate"></span><br>
 
                     <label for="quantity">數量:</label>
-                    <input type="number" id="quantity" name="quantity" class="form-control" required><br>
+                    <input type="number" id="quantity" name="quantity" class="form-control">
+                    <span class="error-message" id="error-quantity"></span><br>
 
                     <button type="submit" class="btn btn-success">新增優惠券</button>
                 </form>
@@ -174,6 +185,20 @@
             menuLinks.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
         });
+    });
+</script>
+
+<script>
+    // 新增課程模態框關閉時的事件處理
+    $('#addCouponModal').on('hidden.bs.modal', function () {
+        // 重置表單
+        $('#couponFormAdd')[0].reset();
+
+        // 清除所有錯誤訊息
+        $('.error-message').each(function() {
+            $(this).text('');
+        });
+
     });
 </script>
 
@@ -313,43 +338,78 @@
 
 <!-- 新增優惠券 -->
 <script>
-    $(document).ready(function() {
-        $('#couponFormAdd').submit(function(event) {
-            event.preventDefault(); // 阻止表單的默認提交行為
+    $('#couponFormAdd').submit(function(event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
 
-            var formData = {
-                code: $('#couponCode').val(),
-                description: $('#couponDescription').val(),
-                discountType: $('#discountType').val(),
-                discountValue: $('#discountValue').val(),
-                startDate: $('#startDate').val(),
-                endDate: $('#endDate').val(),
-                quantity: $('#quantity').val()
-            };
+        var formData = {
+            code: $('#code').val(),
+            description: $('#description').val(),
+            discountType: $('#discountType').val(),
+            discountValue: $('#discountValue').val(),
+            startDate: $('#startDate').val(),
+            endDate: $('#endDate').val(),
+            quantity: $('#quantity').val()
+        };
+        console.log(formData);
 
-            $.ajax({
-                type: 'POST',
-                url: '/admin/coupons',
-                contentType: 'application/json',
-                data: JSON.stringify(formData),
-                success: function(response) {
-                    console.log('Response:', response);
-                    $('#addCouponModal').modal('hide');
-                    window.location.reload();
-                },
-                error: function(xhr) {
-                    console.error('錯誤:', xhr.responseText);
-                    // 使用 SweetAlert2 显示错误信息
-                    Swal.fire({
-                        icon: 'error',
-                        title: '錯誤',
-                        text: xhr.responseText,
-                        confirmButtonText: '确定'
-                    });
-                }
-            });
+        // 先发送验证请求
+        $.ajax({
+            type: 'POST',
+            url: '/admin/coupons/validateCouponData', // 改为验证端点
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                // 验证通过，继续发送创建请求
+                createCoupon(formData);
+            },
+            error: function(xhr) {
+                // 显示验证错误信息
+                displayError(xhr.responseText);
+            }
         });
     });
+
+    function createCoupon(formData) {
+        // 发送创建优惠券的请求
+        $.ajax({
+            type: 'POST',
+            url: '/admin/coupons',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+                // 处理成功响应
+                $('#addCouponModal').modal('hide');
+                window.location.reload();
+            },
+            error: function(xhr) {
+                // 显示创建过程中的错误信息
+                displayError(xhr.responseText);
+            }
+        });
+    }
+
+    function displayError(errorMsg) {
+        // 清除之前的错误信息
+        $('.error-message').text('');
+
+        try {
+            var errorJson = JSON.parse(errorMsg);
+            if (typeof errorJson === 'object') {
+                // 遍历错误对象并显示错误信息
+                for (var key in errorJson) {
+                    $('#error-' + key).text(errorJson[key]);
+                }
+            } else {
+                // 如果错误信息不是对象，显示通用错误信息
+                $('#error-general').text(errorMsg);
+            }
+        } catch (e) {
+            // 如果解析失败，显示通用错误信息
+            $('#error-general').text('发生错误，请稍后重试。');
+        }
+    }
+
+
 </script>
 
 <script>

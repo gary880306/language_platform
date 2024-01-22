@@ -15,6 +15,7 @@ public class OrderIncludeUserRowMapper implements RowMapper<Order> {
         order.setTotalAmount(rs.getInt("total_amount"));
         order.setCreatedDate(rs.getTimestamp("created_date"));
         order.setUserName(rs.getString("user_name"));
+        order.setDiscount(rs.getInt("discount"));
         return order;
     }
 }

@@ -21,17 +21,22 @@ public class OrderedInfoController {
     @Autowired
     private OrderedInfoService orderedInfoService;
     @GetMapping("/admin/orderedInfo")
-    public String showAllOrderedInfo(Model model){
+    public String showAllOrderedInfo(Model model) {
         List<Order> orders = orderedInfoService.findAllOrder(); // 獲取所有訂單資訊
         if (orders != null) {
             for (Order order : orders) {
-                String formattedTotalAmount = formatCoursePrice(order.getTotalAmount());
+                Integer discount = order.getDiscount();
+                int discountValue = (discount != null) ? discount : 0; // 如果 discount 为 null，则使用 0
+                Integer discountedTotal = order.getTotalAmount() - discountValue;
+
+                String formattedTotalAmount = formatCoursePrice(discountedTotal);
                 order.setFormattedTotalAmount(formattedTotalAmount);
             }
         }
-        model.addAttribute("orders",orders);
+        model.addAttribute("orders", orders);
         return "/admin/orderedInfo";
     }
+
 
     @GetMapping("/admin/orderedItemInfo")
     public String getOrderDetails(@RequestParam Integer orderId, Model model) {

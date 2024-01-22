@@ -7,6 +7,7 @@ import com.chenxian.language_platform.dto.CourseRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.rowmapper.*;
+import com.chenxian.language_platform.service.CourseService;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class UserDaoImpl implements UserDao {
@@ -28,6 +30,9 @@ public class UserDaoImpl implements UserDao {
 
     @Autowired
     private CourseDao courseDao;
+
+    @Autowired
+    private CourseService courseService;
 
     @Override
     public List<User> findALlUsers() {
@@ -214,14 +219,27 @@ public class UserDaoImpl implements UserDao {
         if (cartItems.isEmpty()) {
             return new CheckoutResponse(false, null);
         }
+
+        // 過濾掉 course 為 null 或已被刪除的 CartItem
+        List<CartItem> validCartItems = cartItems.stream()
+                .filter(item -> {
+                    Course course = courseService.getCourseByCourseId(item.getCourseId());
+                    return course != null && !course.getIsDeleted();
+                })
+                .toList();
+
+        if (validCartItems.isEmpty()) {
+            return new CheckoutResponse(false, null); // 如果沒有有效的 CartItem，返回失敗響應
+        }
+
         // 2. 創建新訂單
-        Order order = createOrder(userId, cartItems, discount);
+        Order order = createOrder(userId, validCartItems, discount);
 
         // 3. 創建新訂單明細
-        createOrderItems(userId,order.getOrderId(),cartItems);
+        createOrderItems(userId,order.getOrderId(),validCartItems);
 
         // 4. 將訂單中的課程加入成員擁有的課程清單
-        createUserCourse(userId,cartItems);
+        createUserCourse(userId,validCartItems);
 
         String sql = "UPDATE cart SET isCheckout = true WHERE user_id = :userId AND (isCheckout = false or isCheckout is null)";
         Map<String,Object> map = new HashMap<>();
@@ -388,14 +406,17 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Integer getCartCourseCount(Integer userId) {
-        String sql = "SELECT COUNT(*) FROM cart_item WHERE cart_id IN " +
-                "(SELECT cart_id FROM cart WHERE user_id = :userId AND isCheckout = false)";
+        String sql = "SELECT COUNT(*) FROM cart_item ci " +
+                "INNER JOIN cart c ON ci.cart_id = c.cart_id " +
+                "INNER JOIN course co ON ci.course_id = co.course_id " +
+                "WHERE c.user_id = :userId AND c.isCheckout = false AND co.is_deleted = false";
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
 
         return namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
     }
+
 
     @Override
     public void updateCartCoupon(Integer couponId, Integer cartId) {
@@ -474,15 +495,19 @@ public class UserDaoImpl implements UserDao {
         map.put("cartId", cart.getCartId());
         List<CartItem> cartItems = namedParameterJdbcTemplate.query(sqlItems, map, new CartItemRowMapper());
 
-        // 根據 courseId 找到 course 並注入
+        List<CartItem> validCartItems = new ArrayList<>();
+
+        // 根據 courseId 找到 course 並注入，同時過濾掉已刪除的課程
         cartItems.forEach(cartItem -> {
             Course course = courseDao.getCoursesByIdForCart(cartItem.getCourseId()); // 假設這個方法返回相應的 Course 對象
-
-            cartItem.setCourse(course);
+            if (course != null && !course.getIsDeleted()) { // 假設 Course 對象有 getIsDeleted 方法
+                cartItem.setCourse(course);
+                validCartItems.add(cartItem);
+            }
         });
 
-        // 將注入了 course 的 cartItems 設置到 cart 中
-        cart.setCartItems(cartItems);
+        // 將注入了 course 的 validCartItems 設置到 cart 中
+        cart.setCartItems(validCartItems);
 
     }
 

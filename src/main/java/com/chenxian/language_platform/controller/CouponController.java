@@ -1,22 +1,28 @@
 package com.chenxian.language_platform.controller;
 
+import com.chenxian.language_platform.dto.CouponDTO;
 import com.chenxian.language_platform.dto.SendCouponsRequest;
 import com.chenxian.language_platform.model.Coupon;
 import com.chenxian.language_platform.model.User;
 import com.chenxian.language_platform.service.CouponService;
 import com.chenxian.language_platform.service.UserService;
 import jakarta.servlet.http.HttpSession;
+
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/coupons")
@@ -39,14 +45,29 @@ public class CouponController {
         try {
             Coupon createdCoupon = couponService.createCoupon(coupon);
             return new ResponseEntity<>(createdCoupon, HttpStatus.CREATED);
-        } catch (DataIntegrityViolationException e) {
-            // 特定于重复条目的异常
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("優惠券代碼 : " + coupon.getCode() + "已被使用，請換一個");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             // 其他异常
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating coupon: " + e.getMessage());
         }
     }
+
+
+
+    private Coupon convertToEntity(CouponDTO couponDTO) {
+        Coupon coupon = new Coupon();
+        coupon.setCode(couponDTO.getCode());
+        coupon.setDescription(couponDTO.getDescription());
+        coupon.setDiscountType(couponDTO.getDiscountType());
+        coupon.setDiscountValue(couponDTO.getDiscountValue());
+        coupon.setStartDate(couponDTO.getStartDate());
+        coupon.setEndDate(couponDTO.getEndDate());
+        coupon.setQuantity(couponDTO.getQuantity());
+        // 设置其他字段，如果有的话
+        return coupon;
+    }
+
+
 
 
     @GetMapping("/{id}")
@@ -170,5 +191,67 @@ public class CouponController {
     public Coupon.DiscountType[] discountTypes() {
         return Coupon.DiscountType.values();
     }
+
+    @PostMapping("/validateCouponData")
+    public ResponseEntity<?> validateCouponData(@RequestBody CouponDTO couponDTO) throws ParseException {
+        Map<String, String> errors = new HashMap<>();
+        System.out.println(couponDTO);
+        // 手动验证每个字段
+        if (couponDTO.getCode() == null || couponDTO.getCode().trim().isEmpty()) {
+            errors.put("code", "優惠券代碼不能為空");
+        } else if (couponService.isCodeExists(couponDTO.getCode())) {
+            errors.put("code", "優惠券代碼已存在");
+        }
+
+        System.out.println(couponDTO.getDescription());
+        if (couponDTO.getDescription().isEmpty()) {
+            errors.put("description", "描述不能為空");
+        }
+
+        if (couponDTO.getDiscountType() == null) {
+            errors.put("discountType", "折扣類型不能為空");
+        } else {
+            if (couponDTO.getDiscountValue() == null) {
+                errors.put("discountValue", "折扣值不能為空");
+            } else {
+                if (couponDTO.getDiscountType() == Coupon.DiscountType.FIXED && couponDTO.getDiscountValue().compareTo(BigDecimal.ZERO) <= 0) {
+                    errors.put("discountValue", "固定折扣值必須大於0");
+                } else if (couponDTO.getDiscountType() == Coupon.DiscountType.PERCENTAGE &&
+                        (couponDTO.getDiscountValue().compareTo(BigDecimal.ONE) < 0 ||
+                                couponDTO.getDiscountValue().compareTo(new BigDecimal("99")) > 0)) {
+                    errors.put("discountValue", "百分比折扣值必須在1到99之間");
+                }
+            }
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date today = sdf.parse(sdf.format(new Date()));
+
+        if (couponDTO.getStartDate() == null) {
+            errors.put("startDate", "開始日期不能為空");
+        } else if (!couponDTO.getStartDate().after(today) && !sdf.format(couponDTO.getStartDate()).equals(sdf.format(today))) {
+            errors.put("startDate", "開始日期必須是今天或以後的日期");
+        }
+
+
+        if (couponDTO.getEndDate() == null) {
+            errors.put("endDate", "截止日期不能為空");
+        }
+
+        if (couponDTO.getQuantity() == null) {
+            errors.put("quantity", "數量不能為空");
+        } else if (couponDTO.getQuantity() > 10) {
+            errors.put("quantity", "數量不能超過10");
+        }
+
+        // 检查是否有验证错误
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        // 验证通过的处理逻辑
+        return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
+    }
+
 
 }
