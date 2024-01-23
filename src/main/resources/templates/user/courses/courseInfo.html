@@ -160,7 +160,7 @@
                 <p class="mt-4">授課老師: <span th:text="${course.teacher}"></span>
                 <p><i class="bi bi-clock"></i> <span th:text="${course.time}"></span> (小時)</p>
                 <p><i class="bi bi-people"></i> <span th:text="${courseUserCounts[__${courseId}__] != null ? courseUserCounts[__${courseId}__] : 0}"></span>人參與課程</p>
-                <p>課程售價: <span class="currency">NT$</span><span class="price currency" th:text="${formattedPrice}"></span></p>
+                <p>課程售價: <span class="currency">NT$ </span><span class="price currency" th:text="${formattedPrice}"></span></p>
                 <button type="button" class="btn btn-primary mt-5 me-2" id="submit-button">加入購物車</button>
             </div>
         </div>

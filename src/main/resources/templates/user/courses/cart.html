@@ -306,7 +306,7 @@
             <tbody>
             <tr th:each="item : ${cart.cartItems}">
                 <td th:text="${item.course.courseName}"></td>
-                <td th:text="${item.course.price}"></td>
+                <td th:text="'NT$ ' + ${formattedPrices[item.course.courseId]}"></td>
                 <td>
                     <button type="button" class="btn btn-danger" th:onclick="'deleteItem(' + ${item.itemId} + ');'">刪除</button>
                 </td>
@@ -324,11 +324,11 @@
                 <!-- 显示优惠券折扣 -->
                 <!-- 只有当 discount 不为 null 且不为 0 时显示优惠券折扣 -->
                 <!-- 使用 Thymeleaf 條件來控制顯示 -->
-                <h5 id="discountSection" th:style="${discount != null and discount != 0} ? 'display: block;' : 'display: none;'">
-                    優惠券折扣: -$ <span id="discounted" th:text="${discount}"></span>
+                <h5 id="discountSection" th:style="${discount != null and discount != '0'} ? 'display: block;' : 'display: none;'">
+                    優惠券折扣: <span id="discounted" style="color: red" th:text="' -NT$ ' + ${discount}"></span>
                 </h5>
-                <!-- 显示总金额 -->
-                <h5>總金額: $ <span id="totalValue" th:text="${discountedTotal != null ? discountedTotal : total}"></span></h5>
+                <!-- 顯示總金額 -->
+                <h5>金額: <span id="totalValue" th:text="' NT$ ' + ${discountedTotal != null ? discountedTotal : formattedTotal}"></span></h5>
                 <form id="checkoutForm" method="get" action="/enjoyLearning/checkout">
                     <button id="checkoutButton" class="btn btn-success checkout-btn">結帳</button>
                 </form>
@@ -524,7 +524,7 @@
                         var discountSection = document.getElementById('discountSection');
                         var discountedElement = document.getElementById('discounted');
                         if (data.discounted && data.discounted != 0) {
-                            discountedElement.textContent = data.discounted;
+                            discountedElement.textContent = ' -NT$ ' + data.discounted;
                             discountSection.style.display = 'block'; // 顯示折扣部分
                         } else {
                             discountSection.style.display = 'none'; // 隱藏折扣部分
@@ -533,7 +533,7 @@
                         // 更新總金額
                         var totalValueElement = document.getElementById('totalValue');
                         if (totalValueElement) {
-                            totalValueElement.textContent = data.total;
+                            totalValueElement.textContent = ' NT$ ' + data.total;
                         }
 
                         // 關閉模態框

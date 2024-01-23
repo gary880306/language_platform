@@ -218,17 +218,25 @@
                     const activeButtonText = coupon.active ? '上架' : '下架';
                     const activeButtonAction = coupon.active ? `deactivateCoupon('${coupon.couponId}')` : `activateCoupon('${coupon.couponId}')`;
 
+                    // 格式化折扣值
+                    let formattedDiscountValue;
+                    if (coupon.discountType === 'FIXED') {
+                        formattedDiscountValue = 'NT$ ' + new Intl.NumberFormat('zh-Hant-TW').format(coupon.discountValue);
+                    } else {
+                        formattedDiscountValue = coupon.discountValue + '%';
+                    }
+
                     let row = `<tr>
-                <td>${coupon.couponId}</td>
-                <td>${coupon.code}</td>
-                <td>${coupon.description}</td>
-                <td>${coupon.discountType}</td>
-                <td>${coupon.discountValue}</td>
-                <td>${coupon.startDate}</td>
-                <td>${coupon.endDate}</td>
-                <td>${coupon.quantity}</td>
-                <td><button class="btn ${activeButtonClass}" data-coupon-id="${coupon.couponId}" onclick="toggleCouponActiveStatus(${coupon.couponId}, ${!coupon.active})">${activeButtonText}</button></td>
-                <td><button class="btn btn-danger" onclick="deleteCoupon('${coupon.couponId}')">刪除</button></td>
+                    <td>${coupon.couponId}</td>
+                    <td>${coupon.code}</td>
+                    <td>${coupon.description}</td>
+                    <td>${coupon.discountType}</td>
+                    <td>${formattedDiscountValue}</td>
+                    <td>${coupon.startDate}</td>
+                    <td>${coupon.endDate}</td>
+                    <td>${coupon.quantity}</td>
+                    <td><button class="btn ${activeButtonClass}" data-coupon-id="${coupon.couponId}" onclick="toggleCouponActiveStatus(${coupon.couponId}, ${!coupon.active})">${activeButtonText}</button></td>
+                    <td><button class="btn btn-danger" onclick="deleteCoupon('${coupon.couponId}')">刪除</button></td>
                 </tr>`;
                     tableBody.innerHTML += row;
                 });

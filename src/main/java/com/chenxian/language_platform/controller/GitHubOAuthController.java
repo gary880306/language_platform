@@ -37,10 +37,8 @@ public class GitHubOAuthController {
     public String callbackGithub(@RequestParam("code") String code, HttpSession session) throws IOException {
         // 已有授權碼(code)之後，可以跟 Github 來得到 token (訪問令牌)
         // 有了 token 就可以得到客戶的公開資訊例如: userInfo
-        System.out.println(code);
         // 1. 根據 code 得到 token
         String token = OAuth2Service.getGitHubAccessToken(code);
-        System.out.println(token);
 
         // 2. 透過 token 裡面的 access_token 來取的用戶資訊
         String accessToken = OAuth2Service.parseAccessToken(token);
@@ -50,7 +48,6 @@ public class GitHubOAuthController {
 
         // 4. 利用 Gson 來分析資料
         GithubUser githubUser = new Gson().fromJson(userInfo, GithubUser.class);
-        System.out.println(githubUser);
         // 5. 檢查會員資料表中是否有此人, 若無則將該會員資料自動新增到資料表
         Optional<User> userOpt = userService.findALlUsers().stream()
                 .filter(user -> user.getAuthType() != null && user.getAuthId() != null && user.getAuthType().equalsIgnoreCase("github") && user.getAuthId().equalsIgnoreCase(githubUser.id))

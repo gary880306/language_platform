@@ -302,7 +302,7 @@
                 <i class="bi bi-clock"></i> <span th:text="${course.getTime}"></span> (小時)
                 <i class="bi bi-people"></i> <span th:text="${courseUserCounts[__${course.courseId}__] != null ? courseUserCounts[__${course.courseId}__] : 0}"></span>
             </p>
-            <h4 th:text="'NT$' + ${course.formattedPrice}"></h4>
+            <h4 th:text="'NT$ ' + ${course.formattedPrice}"></h4>
         </div>
         <a th:href="@{/enjoyLearning/courses/courseInfo/{courseId}(courseId=${course.courseId})}" class="stretched-link"></a>
     </div>

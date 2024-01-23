@@ -195,7 +195,6 @@ public class CouponController {
     @PostMapping("/validateCouponData")
     public ResponseEntity<?> validateCouponData(@RequestBody CouponDTO couponDTO) throws ParseException {
         Map<String, String> errors = new HashMap<>();
-        System.out.println(couponDTO);
         // 手动验证每个字段
         if (couponDTO.getCode() == null || couponDTO.getCode().trim().isEmpty()) {
             errors.put("code", "優惠券代碼不能為空");
@@ -203,7 +202,6 @@ public class CouponController {
             errors.put("code", "優惠券代碼已存在");
         }
 
-        System.out.println(couponDTO.getDescription());
         if (couponDTO.getDescription().isEmpty()) {
             errors.put("description", "描述不能為空");
         }

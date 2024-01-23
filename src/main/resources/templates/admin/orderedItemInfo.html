@@ -22,7 +22,7 @@
             <img th:src="@{/images/{filename}(filename=${orderItem.getImageUrlString})}" class="card-img-top" alt="课程图片" style="max-width: 100px; max-height: 65px;"/>
         </td>
         <td class="align-middle text-center" th:text="${orderItem.getCourseName}"></td>
-        <td class="align-middle text-center" th:text="'NT$' + ${orderItem.formattedAmount}"></td>
+        <td class="align-middle text-center" th:text="'NT$ ' + ${orderItem.formattedAmount}"></td>
     </tr>
     </tbody>
 </table>
@@ -32,8 +32,8 @@
     <!-- 订单额外信息 -->
 <div style="text-align: right;">
     <p><strong>合計</strong> : <span th:text="${#lists.size(orderItems) + '件'}"></span></p>
-    <p><strong>折扣：</strong><span th:text="'-NT$' + ${formattedDiscount} "></span></p>
-    <p><strong>總價：</strong><span th:text="'NT$' + ${finalTotal} "></span></p>
+    <p><strong>優惠券折扣：</strong><span style="color: red" th:text="'-NT$ ' + ${formattedDiscount} "></span></p>
+    <p><strong>總金額：</strong><span th:text="'NT$ ' + ${finalTotal} "></span></p>
     <p><strong>訂單編號：</strong><span th:text="${orderItems[0].orderId}"></span></p>
     <p><strong>訂單時間：</strong><span th:text="${#dates.format(orderItems.get(0).getCreated_date(), 'yyyy-MM-dd HH:mm:ss')}">訂單時間</span></p>
 </div>

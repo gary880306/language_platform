@@ -28,7 +28,7 @@
         <tbody>
         <tr th:each="order : ${orders}" class="align-middle">
             <td th:text="${order.orderId}">訂單編號</td>
-            <td th:text="'NT$' + ${order.formattedTotalAmount}">總金額</td>
+            <td th:text="'NT$ ' + ${order.formattedTotalAmount}">總金額</td>
             <td th:text="${#dates.format(order.createdDate, 'yyyy-MM-dd HH:mm:ss')}">結帳時間</td>
             <td>
                 <div th:each="item : ${order.orderItems}" class="d-flex align-items-center justify-content-center">

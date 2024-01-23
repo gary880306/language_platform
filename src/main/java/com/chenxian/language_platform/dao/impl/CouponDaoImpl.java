@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class CouponDaoImpl implements CouponDao {
@@ -34,9 +35,8 @@ public class CouponDaoImpl implements CouponDao {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
-        Integer couponId = keyHolder.getKey().intValue();
-        Coupon newCoupon = getCouponById(couponId);
-        return newCoupon;
+        Integer couponId = Objects.requireNonNull(keyHolder.getKey()).intValue();
+        return getCouponById(couponId);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class CouponDaoImpl implements CouponDao {
     public List<Coupon> getAvailableActiveCoupons() {
         String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity, is_deleted " +
                 "FROM coupon " +
-                "WHERE is_deleted = false AND is_active = true AND end_date > CURRENT_DATE";
+                "WHERE is_deleted = false AND is_active = true ";
 
         Map<String, Object> map = new HashMap<>();
         List<Coupon> coupons = namedParameterJdbcTemplate.query(sql, map, new CouponRowMapper());

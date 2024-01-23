@@ -168,9 +168,9 @@
     <div th:if="${orderItems != null and not #lists.isEmpty(orderItems)}">
         <p><strong>合計</strong> : <span th:text="${#lists.size(orderItems) + '件'}"></span></p>
     <p id="discountSection" th:style="${formattedDiscount != null and formattedDiscount != '0' and formattedDiscount != '0.00'} ? 'display: block;' : 'display: none;'">
-        <strong>優惠券折扣:</strong> -NT$ <span id="discounted" th:text="${formattedDiscount}"></span>
+        <strong>優惠券折扣:</strong><span id="discounted" style="color: red" th:text="' -NT$ ' +${formattedDiscount}"></span>
     </p>
-    <p><strong>金額：</strong>NT$ <span th:text="${total} "></span></p>
+    <p><strong>總金額：</strong>NT$ <span th:text="${total} "></span></p>
     <p><strong>訂單編號：</strong><span th:text="${orderItems[0].orderId}"></span></p>
     <p><strong>訂單時間：</strong><span th:text="${orderItems[0].formattedCreatedDate}"></span></p>
 </div>

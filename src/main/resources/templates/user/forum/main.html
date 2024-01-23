@@ -562,11 +562,19 @@
 
     <script>
         function editComment(commentId) {
-            // 切換顯示狀態
             var commentContent = document.getElementById('comment-content-' + commentId);
             var commentInput = document.getElementById('comment-input-' + commentId);
-            commentContent.style.display = 'none';
-            commentInput.style.display = 'block';
+
+            // 检查评论内容是否可见
+            if (commentContent.style.display === 'block' || commentContent.style.display === '') {
+                // 如果评论内容可见，则隐藏它并显示评论输入框
+                commentContent.style.display = 'none';
+                commentInput.style.display = 'block';
+            } else {
+                // 否则，显示评论内容并隐藏评论输入框
+                commentContent.style.display = 'block';
+                commentInput.style.display = 'none';
+            }
         }
 
         function updateComment(commentId) {

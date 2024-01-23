@@ -230,25 +230,34 @@ public class FrontendController {
             List<CartItem> validCartItems = cart.getCartItems().stream()
                     .filter(item -> !item.getCourse().getIsDeleted())
                     .toList();
+            Map<Integer, String> formattedPrices = new HashMap<>();
+            for (CartItem item : validCartItems) {
+                String formattedPrice = formatCoursePrice(item.getCourse().getPrice());
+                formattedPrices.put(item.getCourse().getCourseId(), formattedPrice);
+            }
             Integer total = validCartItems.stream()
                     .mapToInt(item -> item.getCourse().getPrice()).sum();
+            // 格式化總金額
+            String formattedTotal = formatCoursePrice(total);
+
 
             cartCourseCount = userService.getCartCourseCount(user.getUserId());
             // 检查是否应用了优惠券
             if (cart.getCouponId() != null) {
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
                 if (coupon != null) {
-                    // 计算优惠后的总额
+                    // 計算折扣並格式化
                     BigDecimal discount = calculateDiscountAmount(cart, coupon);
+                    String formattedDiscount = formatCoursePrice(discount.intValue());
                     BigDecimal discountedTotal = new BigDecimal(total).subtract(discount);
-
-                    model.addAttribute("discount", discount);
-                    model.addAttribute("discountedTotal", discountedTotal);
+                    String formattedDiscountedTotal = formatCoursePrice(discountedTotal.intValue());
+                    model.addAttribute("discount", formattedDiscount);
+                    model.addAttribute("discountedTotal", formattedDiscountedTotal);
                 }
             }
-                model.addAttribute("cartCourseCount", cartCourseCount);
-                model.addAttribute("total", total);
-
+            model.addAttribute("formattedTotal", formattedTotal);
+            model.addAttribute("cartCourseCount", cartCourseCount);
+            model.addAttribute("formattedPrices", formattedPrices);
             model.addAttribute("cart", cart);
         }
         model.addAttribute("cartCourseCount", cartCourseCount);
@@ -378,11 +387,6 @@ public class FrontendController {
         return "/user/courses/orderResult";
     }
 
-
-
-
-
-
     // 我的課程頁面
     @GetMapping("/enjoyLearning/myCourse")
     public String myCourse(HttpSession session, Model model){
@@ -410,9 +414,10 @@ public class FrontendController {
         Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         List<Coupon> allCoupons = couponService.getAllCoupons();
 
-        // 過濾出 is_active 為 true 且未被刪除 (is_deleted 為 false) 的優惠券
+        // 過濾並調整優惠券日期
         List<Coupon> activeCoupons = allCoupons.stream()
                 .filter(coupon -> coupon.isActive() && !coupon.getIsDeleted())
+                .map(this::adjustCouponDates)
                 .collect(Collectors.toList());
 
         model.addAttribute("cartCourseCount", cartCourseCount);
@@ -420,6 +425,31 @@ public class FrontendController {
         return "user/coupons/couponInfo";
     }
 
+    private Coupon adjustCouponDates(Coupon coupon) {
+        // 調整開始日期為當天的開始時刻
+        if (coupon.getStartDate() != null) {
+            Calendar startCal = Calendar.getInstance();
+            startCal.setTime(coupon.getStartDate());
+            startCal.set(Calendar.HOUR_OF_DAY, 0);
+            startCal.set(Calendar.MINUTE, 0);
+            startCal.set(Calendar.SECOND, 0);
+            startCal.set(Calendar.MILLISECOND, 0);
+            coupon.setStartDate(startCal.getTime());
+        }
+
+        // 調整結束日期為當天的最後一刻
+        if (coupon.getEndDate() != null) {
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(coupon.getEndDate());
+            endCal.set(Calendar.HOUR_OF_DAY, 23);
+            endCal.set(Calendar.MINUTE, 59);
+            endCal.set(Calendar.SECOND, 59);
+            endCal.set(Calendar.MILLISECOND, 999);
+            coupon.setEndDate(endCal.getTime());
+        }
+
+        return coupon;
+    }
 
 
     // 用戶獲取優惠券
@@ -523,13 +553,41 @@ public class FrontendController {
             Integer userId = user.getUserId();
             List<UserCoupon> userCoupons = userService.findUnusedUserCouponsByUserId(userId);
 
-            // 利用時間設置優惠券狀態
             Date now = new Date();
+            Calendar current = Calendar.getInstance();
+            current.setTime(now);
+            // 將時、分、秒、毫秒都設為 0
+            current.set(Calendar.HOUR_OF_DAY, 0);
+            current.set(Calendar.MINUTE, 0);
+            current.set(Calendar.SECOND, 0);
+            current.set(Calendar.MILLISECOND, 0);
+
+            Date today = current.getTime();
+
             for (UserCoupon userCoupon : userCoupons) {
                 Coupon coupon = userCoupon.getCoupon();
-                if (now.before(coupon.getStartDate())) {
+
+                // 對優惠券的起始和結束日期也進行相同的處理
+                Calendar startCal = Calendar.getInstance();
+                startCal.setTime(coupon.getStartDate());
+                startCal.set(Calendar.HOUR_OF_DAY, 0);
+                startCal.set(Calendar.MINUTE, 0);
+                startCal.set(Calendar.SECOND, 0);
+                startCal.set(Calendar.MILLISECOND, 0);
+
+                Calendar endCal = Calendar.getInstance();
+                endCal.setTime(coupon.getEndDate());
+                endCal.set(Calendar.HOUR_OF_DAY, 23);
+                endCal.set(Calendar.MINUTE, 59);
+                endCal.set(Calendar.SECOND, 59);
+                endCal.set(Calendar.MILLISECOND, 999);
+
+                Date startDate = startCal.getTime();
+                Date endDate = endCal.getTime();
+
+                if (today.before(startDate)) {
                     userCoupon.setStatus("未開始");
-                } else if (now.after(coupon.getEndDate())) {
+                } else if (today.after(endDate)) {
                     userCoupon.setStatus("已過期");
                 } else {
                     userCoupon.setStatus("有效");
@@ -556,32 +614,30 @@ public class FrontendController {
         }
     }
 
-
-
-
     @PostMapping("/enjoyLearning/cart/myCoupons/applyCoupon")
     @ResponseBody
     public Map<String, Object> applyCoupon(@RequestParam("couponId") Integer couponId, HttpSession session) {
-        User user = (User)session.getAttribute("user");
+        User user = (User) session.getAttribute("user");
         Map<String, Object> response = new HashMap<>();
         Coupon coupon = couponService.getCouponById(couponId);
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
-        couponService.applyCouponToCart(user.getUserId(),couponId);
+        couponService.applyCouponToCart(user.getUserId(), couponId);
 
         // 驗證優惠券是否有效
+        // && coupon.isValid()
 
-                // && coupon.isValid()
+        // 計算折扣的金額
+        BigDecimal discounted = calculateDiscountAmount(cart, coupon);
+        // 計算折扣後的總金額
+        BigDecimal total = calculateDiscountedTotal(cart, coupon);
 
-                // 計算折扣的金額
-                BigDecimal discounted = calculateDiscountAmount(cart,coupon);
+        // 格式化金額
+        String formattedDiscounted = formatCoursePrice(discounted.intValue());
+        String formattedTotal = formatCoursePrice(total.intValue());
 
-                // 計算折扣後的總金額
-                BigDecimal total = calculateDiscountedTotal(cart, coupon);
-
-                response.put("discounted",discounted.toString());
-                response.put("total", total.toString());
-                return response;
-
+        response.put("discounted", formattedDiscounted);
+        response.put("total", formattedTotal);
+        return response;
     }
 
     // 計算折扣的金額方法

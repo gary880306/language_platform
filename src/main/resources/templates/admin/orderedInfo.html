@@ -123,7 +123,7 @@
                     <th class="align-middle text-center">訂單號</th>
                     <th class="align-middle text-center">會員號</th>
                     <th class="align-middle text-center">會員名</th>
-                    <th class="align-middle text-center">總價</th>
+                    <th class="align-middle text-center">總金額</th>
                     <th class="align-middle text-center">訂單時間</th>
                     <th class="align-middle text-center">詳情</th>
                 </tr>
@@ -133,7 +133,7 @@
                     <td class="align-middle text-center" th:text="${order.getOrderId}"></td>
                     <td class="align-middle text-center" th:text="${order.getUserId}"></td>
                     <td class="align-middle text-center" th:text="${order.getUserName}"></td>
-                    <td class="align-middle text-center" th:text="'NT$' + ${order.formattedTotalAmount}"></td>
+                    <td class="align-middle text-center" th:text="'NT$ ' + ${order.formattedTotalAmount}"></td>
                     <td class="align-middle text-center" th:text="${#dates.format(order.createdDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
                     <td class="align-middle text-center">
                         <button type="button" class="btn btn-outline-secondary showOrderDetails" th:data-order-id="${order.getOrderId}">
