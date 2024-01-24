@@ -17,7 +17,7 @@ SpringBoot -> Controller，Dao，Service 三層式架構
 資料庫 : MySQL 
 資料庫交互 : NamedParameterJdbcTemplate , JPA  
 
-伺服器佈署 ( 使用 AWS EC2 ) -> 第三方登入在 EC2 無法使用 ( 授權問題 ) 
+伺服器佈署 ( 使用 AWS EC2 ) -> 前台第三方登入在 EC2 無法使用 ( 授權問題 ) 
 請使用網站註冊登入 
 
 前台首頁 
