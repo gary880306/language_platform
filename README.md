@@ -7,15 +7,23 @@
 
 專案架構 
 SpringBoot -> Controller，Dao，Service 三層式架構 
+
 渲染模板 Thymeleaf 
+
 主要分為前台 ( 用戶 ) ，後台 ( 管理員 ) 
 
 使用技術 
+
 後端 : Java , SpringBoot , Thymeleaf 
+
 前端 : Html Css JavaScript , JQuery , AJAX , BootStrap 5  
+
 套件 : Lombok  , SweetAlert2  
+
 伺服器 : Tomcat 
+
 資料庫 : MySQL 
+
 資料庫交互 : NamedParameterJdbcTemplate , JPA  
 
 伺服器佈署 ( 使用 AWS EC2 ) -> 前台第三方登入在 EC2 無法使用 ( 授權問題 ) 
