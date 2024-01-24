@@ -38,7 +38,7 @@ public class CommentController {
         Comment comment = new Comment();
         comment.setContent(commentDTO.getContent());
 
-        // 假设 CommentDTO 包含 userId 和 postId
+        // 假設 CommentDTO 包含 userId 和 postId
         User user = userRepository.findById(commentDTO.getUserId()).orElse(null);
         Post post = postRepository.findById(commentDTO.getPostId()).orElse(null);
 

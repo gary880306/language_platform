@@ -35,39 +35,39 @@ public class ChatController {
     // 消息
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload ChatMessage chatMessage, @Header("roomId") Long roomId) {
-        // 构建目的地地址
+        // 建構目的地地址
         String destination = "/topic/chatroom/" + roomId;
 
-        // 处理消息发送逻辑
-        // 可以在这里保存消息到数据库
+        // 處理訊息傳送邏輯
+        // 可以在這裡保存訊息到資料庫
         chatMessage.setMessage(chatMessage.getMessage());
         messagingTemplate.convertAndSend(destination, chatMessage);
     }
 
-    // 修改后的 addUser 方法，使用 SimpMessageHeaderAccessor 管理会话
+    // 修改後的 addUser 方法，使用 SimpMessageHeaderAccessor 管理會話
     @MessageMapping("/chat/{roomId}/addUser")
     @SendTo("/topic/chatroom/{roomId}")
     public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor, @DestinationVariable Long roomId) {
         String username = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", username);
-        headerAccessor.getSessionAttributes().put("joinedRoomId", roomId); // 在 headerAccessor 中记录加入的房间 ID
+        headerAccessor.getSessionAttributes().put("joinedRoomId", roomId); // 在 headerAccessor 記錄加入的房間 ID
         chatMessage.setType(ChatMessage.MessageType.JOIN);
-        // 这里可以处理用户加入聊天室的逻辑
+        // 這裡可以處理使用者加入聊天室的邏輯
         return chatMessage;
     }
 
-    // 修改后的 leaveUser 方法，同样使用 SimpMessageHeaderAccessor
+    // 修改後的 leaveUser 方法，同樣使用 SimpMessageHeaderAccessor
     @MessageMapping("/chat/{roomId}/leaveUser")
     @SendTo("/topic/chatroom/{roomId}")
     public ChatMessage leaveUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor, @DestinationVariable Long roomId) {
         chatMessage.setType(ChatMessage.MessageType.LEAVE);
-        // 清理 headerAccessor 中的会话属性
+        // 清理 headerAccessor 中的會話屬性
         headerAccessor.getSessionAttributes().remove("username");
         headerAccessor.getSessionAttributes().remove("joinedRoomId");
         return chatMessage;
     }
 
-    // 检查用户是否已加入聊天室
+    // 檢查用戶是否已加入聊天室
     @GetMapping("/api/chat/checkStatus")
     public ResponseEntity<Boolean> checkUserStatus(HttpSession session) {
         Long roomId = (Long) session.getAttribute("joinedRoomId");

@@ -40,7 +40,7 @@ public class CourseController {
     // 加載頁面時獲取所有課程資訊
     @GetMapping("/managementCourses")
     public String showCourses(Model model) {
-        List<Course> courses = courseService.getAllActiveCourses(); // 获取所有课程
+        List<Course> courses = courseService.getAllActiveCourses(); // 獲取所有课程
         List<CategoryData> categories = dataService.findAllCategoryData();
 
         for (Course course : courses) {
@@ -51,7 +51,7 @@ public class CourseController {
 
         model.addAttribute("courses", courses);
         model.addAttribute("categories", categories);
-        return "admin/managementCourses"; // 返回您的 Thymeleaf 模板名称
+        return "admin/managementCourses"; // 返回 Thymeleaf 模板
     }
 
     @DeleteMapping("/courses/{courseId}")
@@ -131,7 +131,7 @@ public class CourseController {
     public ResponseEntity<?> validateCourseData(@ModelAttribute CourseRequest courseRequest) {
         Map<String, String> errors = new HashMap<>();
 
-        // 手动验证每个字段
+        // 手動驗證
         if (courseRequest.getCourseName() == null || courseRequest.getCourseName().trim().isEmpty()) {
             errors.put("courseName", "課程名稱不可為空");
         } else if (courseService.existsCourseName(courseRequest.getCourseName())) {
@@ -168,12 +168,12 @@ public class CourseController {
             errors.put("videoUrl", "課程影片不可為空");
         }
 
-        // 检查是否有验证错误
+        // 檢查是否有驗證錯誤
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
 
-        // 验证通过的处理逻辑
+        // 驗證通過的處理邏輯
         return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
     }
 
@@ -184,17 +184,17 @@ public class CourseController {
     public ResponseEntity<?> validateRevisedCourseData(@ModelAttribute CourseRequest courseRequest) {
         Map<String, String> errors = new HashMap<>();
 
-        // 手动验证课程名称是否为空
+        // 手動驗證課程名稱是否為空
         if (courseRequest.getCourseName() == null || courseRequest.getCourseName().trim().isEmpty()) {
             errors.put("courseName", "課程名稱不可為空");
         }
 
-        // 手动验证图片是否已上传
+        // 手動驗證圖片是否已上傳
         if (courseRequest.getImageUrl() == null || courseRequest.getImageUrl().isEmpty()) {
             errors.put("imageUrl", "課程圖片不可為空");
         }
 
-        // 手动验证其他字段
+        // 手動驗證類別是否為空
         if (courseRequest.getCategoryId() == null) {
             errors.put("categoryId", "類別不可為空");
         }
@@ -219,12 +219,12 @@ public class CourseController {
             errors.put("videoUrl", "課程影片不可為空");
         }
 
-        // 检查是否有验证错误
+        // 檢查是否有驗證錯誤
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
 
-        // 验证通过的处理逻辑
+        // 驗證通過的處理邏輯
         return ResponseEntity.ok(Collections.singletonMap("message", "Validation successful"));
     }
 

@@ -15,7 +15,7 @@ public class KeyConfig {
 
     @Bean
     public SecretKey secretKey() {
-        // 将配置文件中的密钥字符串转换为SecretKey对象
+        // 將設定檔中的金鑰字串轉換為SecretKey對象
         byte[] keyBytes = secretKeyString.getBytes();
         return new SecretKeySpec(keyBytes, "AES");
     }

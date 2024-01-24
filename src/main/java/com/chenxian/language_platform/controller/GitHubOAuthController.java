@@ -23,7 +23,7 @@ public class GitHubOAuthController {
     @Autowired
     private UserService userService;
 
-    // 跳转到 GitHub 授权页面
+    // 跳轉到 GitHub 授權頁面
     @RequestMapping("/login/github")
     public String loginGithub() {
         // 向 Github 驗證授權
@@ -31,7 +31,7 @@ public class GitHubOAuthController {
         return "redirect:" + auth;
     }
 
-    // GitHub 授权回调
+    // GitHub 授權成功後的回調頁面
     @RequestMapping("/secure/oauth2/callback/github")
     //@ResponseBody
     public String callbackGithub(@RequestParam("code") String code, HttpSession session) throws IOException {

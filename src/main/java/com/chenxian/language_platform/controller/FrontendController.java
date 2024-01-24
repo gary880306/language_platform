@@ -242,7 +242,7 @@ public class FrontendController {
 
 
             cartCourseCount = userService.getCartCourseCount(user.getUserId());
-            // 检查是否应用了优惠券
+            // 檢查購物車是否有套用優惠券
             if (cart.getCouponId() != null) {
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
                 if (coupon != null) {
@@ -265,7 +265,6 @@ public class FrontendController {
     }
 
     // 刪除購物車項目
-    // AJAX
     @DeleteMapping("/enjoyLearning/cart/delete")
     @ResponseBody
     public ResponseEntity<?> deleteCartItem(@RequestParam("itemId") Integer itemId, HttpSession session) {
@@ -275,10 +274,10 @@ public class FrontendController {
         if (cartItem != null && cartItem.getCart().getUserId().equals(user.getUserId())) {
             userService.removeCartItemById(itemId);
 
-            // 检查购物车是否为空
+            // 檢查購物車是否為空
             Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
             if (cart != null && cart.getCartItems().isEmpty()) {
-                // 如果购物车为空，设置 couponId 为 null
+                // 如果购物车为空，删除购物车关联的优惠券
                 userService.updateCartCoupon(null, cart.getCartId());
             }
 
@@ -294,7 +293,7 @@ public class FrontendController {
     public String checkout(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
         Cart cart = userService.findNoneCheckoutCartByUserId(user.getUserId());
-        BigDecimal discount = BigDecimal.ZERO; // 初始化折扣金额为0
+        BigDecimal discount = BigDecimal.ZERO; // 折扣金額
 
         if (cart != null) {
             Integer totalInteger = cart.getCartItems().stream()
@@ -302,25 +301,25 @@ public class FrontendController {
                     .sum();
             BigDecimal total = new BigDecimal(totalInteger);
 
-            // 检查 couponId 是否为0，如果不为0，则计算折扣
+            // 檢查購物車是否有套用優惠券
             if (cart.getCouponId() != 0) {
                 Coupon coupon = couponService.getCouponById(cart.getCouponId());
                 discount = calculateDiscountAmount(cart, coupon);
                 total = total.subtract(discount);
             }
 
-            // 转换折扣金额为 Integer
+            // 格式化總金額
             Integer discountInteger = discount.intValue();
 
             // 結帳
             CheckoutResponse checkoutResponse = userService.checkoutCartByUserId(cart.getUserId(), cart.getCartId(), discountInteger);
             if (checkoutResponse != null && checkoutResponse.getSuccess()) {
-                // 結帳成功後，标记优惠券为已使用
+                // 結帳成功，重定向到訂單結果頁面
                 if (cart.getCouponId() != 0) {
                     userService.markCouponAsUsed(user.getUserId(), cart.getCouponId());
                 }
 
-                // 添加订单相关信息到重定向属性
+                // 格式化總金額
                 String formattedTotalAmount = formatCoursePrice(totalInteger);
                 Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
                 String formattedDiscount = formatCoursePrice(discountInteger);
@@ -334,7 +333,7 @@ public class FrontendController {
             }
         }
 
-        // 如果购物车为空或结帳失败，重定向到错误页面
+        // 結帳失敗，重定向到錯誤頁面
         Integer cartCourseCount = userService.getCartCourseCount(user.getUserId());
         model.addAttribute("user", user);
         model.addAttribute("cartCourseCount", cartCourseCount);
@@ -466,25 +465,25 @@ public class FrontendController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("優惠券不存在"));
         }
 
-        // 检查用户是否曾经领取过这个优惠券
+        // 檢查優惠券是否已經過期
         boolean couponExists = couponService.checkCouponExists(user.getUserId(), couponId);
         if (!couponExists) {
-            // 用户完全没有领取过此优惠券，添加新的用户优惠券关联
+            // 用戶之前沒有獲取過此優惠券，檢查優惠券數量是否足夠
             userService.addUserCoupon(user.getUserId(), couponId);
             userService.decrementCouponQuantity(couponId);
             int updatedQuantity = getCurrentCouponQuantity(couponId);
             return ResponseEntity.ok(new CouponResponse("優惠券添加成功", updatedQuantity));
         } else {
-            // 用户之前已领取过此优惠券，检查是否已使用
+            // 用戶已經獲取過此優惠券，檢查優惠券是否已經被使用
             boolean isUsed = couponService.checkCouponExistsByIsUsed(user.getUserId(), couponId);
             if (!isUsed) {
-                // 优惠券已经被使用，可以重新激活
+                // 用戶已經獲取過此優惠券且尚未使用，無需重複添加
                 userService.updateUserCoupon(user.getUserId(), couponId);
                 userService.decrementCouponQuantity(couponId);
                 int updatedQuantity = getCurrentCouponQuantity(couponId);
                 return ResponseEntity.ok(new CouponResponse("重新獲取成功", updatedQuantity));
             } else {
-                // 用户已经拥有此优惠券且尚未使用，无需重复添加
+                // 用戶已經獲取過此優惠券且已經使用，無法再次獲取
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(new MessageResponse("用戶已擁有此優惠券"));
             }
         }

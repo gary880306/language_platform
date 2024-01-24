@@ -34,7 +34,7 @@ public class PostController {
     private UserRepository userRepository;
     @Autowired
     private LikeRepository likeRepository;
-    private Map<Integer, Integer> postLikes = new HashMap<>(); // 用於存儲帖子點讚數的映射
+    private Map<Integer, Integer> postLikes = new HashMap<>(); // 用於存儲討論點讚數的映射
 
     @GetMapping
     public List<Post> getAllPosts() {
@@ -102,7 +102,7 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("用戶未登錄");
         }
 
-        // 根據 postId 獲取相應的帖子對象
+        // 根據 postId 獲取相應的討論對象
         Post post = postRepository.findById(postId).orElse(null);
         if (post == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到指定的帖子");
@@ -110,10 +110,10 @@ public class PostController {
 
         Like likes = new Like();
         likes.setUser(user); // 設置用戶
-        likes.setPost(post); // 設置帖子
+        likes.setPost(post); // 設置討論
         likes.setLikedAt(LocalDateTime.now()); // 設置按讚時間
         likeRepository.save(likes); // 保存按讚信息到數據庫
-        // 更新帖子的按讚數
+        // 更新討論的按讚數
         Integer like = likeRepository.countByPost(post);
 
         return ResponseEntity.ok(like);
@@ -133,7 +133,7 @@ public class PostController {
             // 從數據庫中刪除點讚信息
             likeRepository.deleteByUserAndPost(user, postRepository.findById(postId).orElse(null));
             Post post = postRepository.getReferenceById(postId);
-            // 更新帖子的按讚數
+            // 更新討論的按讚數
             like = likeRepository.countByPost(post);
         }
 

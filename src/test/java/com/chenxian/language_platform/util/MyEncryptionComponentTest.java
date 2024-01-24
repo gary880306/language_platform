@@ -15,7 +15,7 @@ public class MyEncryptionComponentTest {
 
     @Test
     public void testEncryptionDecryption() throws Exception {
-        String originalMessage = "111";
+        String originalMessage = "zaq123456789";
         System.out.println("Original Message: " + originalMessage);
 
         String encryptedMessage = myEncryptionComponent.encrypt(originalMessage);
