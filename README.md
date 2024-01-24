@@ -26,7 +26,6 @@ http://13.208.186.216:8080/enjoyLearning
  
 後台首頁 
 http://13.208.186.216:8080/admin/login 
-管理員帳號密碼
 
 帳號 : 555@gmail.com  
 密碼 : 111 
