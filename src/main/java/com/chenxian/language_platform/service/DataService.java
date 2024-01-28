@@ -7,5 +7,5 @@ import java.util.List;
 public interface DataService {
     List<CategoryData> findAllCategoryData();
 
-    CategoryData getCategoryDataById(Integer id);
+    List<CategoryData> getCategories();
 }

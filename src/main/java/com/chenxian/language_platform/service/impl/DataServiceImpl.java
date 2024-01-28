@@ -18,7 +18,8 @@ public class DataServiceImpl implements DataService {
     }
 
     @Override
-    public CategoryData getCategoryDataById(Integer id) {
-        return dataDao.getCategoryDataById(id);
+    public List<CategoryData> getCategories() {
+        return findAllCategoryData();
     }
+
 }

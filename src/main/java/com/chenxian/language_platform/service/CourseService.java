@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CourseService {
+    List<Course> getFormattedCourses();
     CourseRequest getCourseById(Integer courseId);
     Course getCourseByCourseId(Integer courseId);
     Course getCoursesByIdForCart(Integer courseId);

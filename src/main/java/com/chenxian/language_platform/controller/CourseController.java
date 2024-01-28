@@ -37,29 +37,26 @@ public class CourseController {
     @Autowired
     private DataService dataService;
 
-    // 加載頁面時獲取所有課程資訊
+    // 管理課程頁面
     @GetMapping("/managementCourses")
     public String showCourses(Model model) {
-        List<Course> courses = courseService.getAllActiveCourses(); // 獲取所有课程
-        List<CategoryData> categories = dataService.findAllCategoryData();
+        List<Course> formattedCourses = courseService.getFormattedCourses(); // 獲取並格式化課程
+        List<CategoryData> categories = dataService.getCategories(); // 獲取分類資料
 
-        for (Course course : courses) {
-            // 課程價格格式化
-            String formattedPrice = formatCoursePrice(course.getPrice());
-            course.setFormattedPrice(formattedPrice);
-        }
-
-        model.addAttribute("courses", courses);
+        model.addAttribute("courses", formattedCourses);
         model.addAttribute("categories", categories);
         return "admin/managementCourses"; // 返回 Thymeleaf 模板
     }
 
+
+    // 刪除課程 (RESTFul API)
     @DeleteMapping("/courses/{courseId}")
     public ResponseEntity<?> deleteCourseById(@PathVariable Integer courseId){
         courseService.deleteCourseById(courseId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    // 新增課程
     @PostMapping("/creatCourse")
     public String createCourse(@RequestParam("courseName") String courseName,
                                @RequestParam("categoryId") Integer categoryId,
@@ -96,7 +93,6 @@ public class CourseController {
 
         return "redirect:/admin/managementCourses"; // 如果文件为空，直接重定向，不创建课程
     }
-
     // 下載到本地端 C槽的 uploadImages 資料夾
     private String uploadFile(MultipartFile file) {
         if (!file.isEmpty()) {
