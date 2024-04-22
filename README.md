@@ -26,19 +26,6 @@ SpringBoot -> Controller，Dao，Service 三層式架構
 
 資料庫交互 : NamedParameterJdbcTemplate , JPA  
 
-伺服器佈署 ( 使用 AWS EC2 ) -> 前台第三方登入在 EC2 無法使用 ( 授權問題 ) 
-請使用網站註冊登入 
-
-前台首頁 
-http://13.208.186.216:8080/enjoyLearning 
-
- 
-後台首頁 
-http://13.208.186.216:8080/admin/login 
-
-帳號 : 555@gmail.com  
-密碼 : 111 
-
 
 所有功能流程
 ====================================================
