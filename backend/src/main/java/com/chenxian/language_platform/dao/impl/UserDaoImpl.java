@@ -329,6 +329,98 @@ public class UserDaoImpl implements UserDao {
         }
     }
 
+    /**
+     * ECPay 付款流程第一步：建立 PENDING 訂單（只建 order + order_item，不建 user_course，不標記購物車）
+     */
+    @Transactional
+    @Override
+    public Order createPendingOrderFromCart(Integer userId, Integer cartId, Integer discount) {
+        List<CartItem> cartItems = findCartItemsById(cartId);
+        if (cartItems.isEmpty()) return null;
+
+        List<CartItem> validCartItems = cartItems.stream()
+                .filter(item -> {
+                    Course course = courseService.getCourseByCourseId(item.getCourseId());
+                    return course != null && !course.getIsDeleted();
+                })
+                .toList();
+
+        if (validCartItems.isEmpty()) return null;
+
+        // 建立訂單（payment_status = 'PENDING'）
+        int totalAmount = 0;
+        for (CartItem item : validCartItems) {
+            totalAmount += courseDao.getCourseById(item.getCourseId()).getPrice();
+        }
+        String sql = "INSERT INTO `order` (user_id, total_amount, discount, payment_status) " +
+                "VALUES (:userId, :totalAmount, :discount, 'PENDING')";
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("totalAmount", totalAmount);
+        map.put("discount", discount);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource(map), keyHolder);
+        Integer orderId = keyHolder.getKey().intValue();
+
+        // 建立訂單明細
+        createOrderItems(userId, orderId, validCartItems);
+
+        Order order = new Order();
+        order.setOrderId(orderId);
+        order.setUserId(userId);
+        order.setTotalAmount(totalAmount);
+        order.setDiscount(discount);
+        order.setPaymentStatus("PENDING");
+        return order;
+    }
+
+    /**
+     * ECPay 付款確認後第二步：建立 user_course + 標記購物車已結帳
+     */
+    @Transactional
+    @Override
+    public void confirmOrderPayment(Integer orderId, Integer cartId) {
+        // 從 order_item 查出所有課程
+        String itemSql = "SELECT course_id FROM order_item WHERE order_id = :orderId";
+        Map<String, Object> itemMap = new HashMap<>();
+        itemMap.put("orderId", orderId);
+        List<Integer> courseIds = namedParameterJdbcTemplate.query(itemSql, itemMap,
+                (rs, rowNum) -> rs.getInt("course_id"));
+
+        // 取得 userId
+        String orderSql = "SELECT user_id FROM `order` WHERE order_id = :orderId";
+        Integer userId = namedParameterJdbcTemplate.queryForObject(orderSql, itemMap, Integer.class);
+
+        // 建立 user_course（跳過已存在的）
+        for (Integer courseId : courseIds) {
+            String checkSql = "SELECT COUNT(*) FROM user_course WHERE user_id = :userId AND course_id = :courseId";
+            Map<String, Object> checkMap = new HashMap<>();
+            checkMap.put("userId", userId);
+            checkMap.put("courseId", courseId);
+            int count = namedParameterJdbcTemplate.queryForObject(checkSql, checkMap, Integer.class);
+            if (count == 0) {
+                String insertSql = "INSERT INTO user_course (user_id, course_id) VALUES (:userId, :courseId)";
+                namedParameterJdbcTemplate.update(insertSql, checkMap);
+            }
+        }
+
+        // 標記購物車已結帳
+        String cartSql = "UPDATE cart SET isCheckout = true WHERE cart_id = :cartId";
+        Map<String, Object> cartMap = new HashMap<>();
+        cartMap.put("cartId", cartId);
+        namedParameterJdbcTemplate.update(cartSql, cartMap);
+    }
+
+    @Override
+    public boolean hasPurchasedCourse(Integer userId, Integer courseId) {
+        String sql = "SELECT COUNT(*) FROM user_course WHERE user_id = :userId AND course_id = :courseId";
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("courseId", courseId);
+        int count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
+        return count > 0;
+    }
+
     // 購物車新增
     @Override
     public void addCart(Cart cart) {

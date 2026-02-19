@@ -173,6 +173,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Order createPendingOrderFromCart(Integer userId, Integer cartId, Integer discount) {
+        return userDao.createPendingOrderFromCart(userId, cartId, discount);
+    }
+
+    @Override
+    public void confirmOrderPayment(Integer orderId, Integer cartId) {
+        userDao.confirmOrderPayment(orderId, cartId);
+    }
+
+    @Override
+    public boolean hasPurchasedCourse(Integer userId, Integer courseId) {
+        return userDao.hasPurchasedCourse(userId, courseId);
+    }
+
+    @Override
     public String generateResetToken(String email) {
         // 從數據庫查找用戶
         User user = userRepository.findByEmail(email);

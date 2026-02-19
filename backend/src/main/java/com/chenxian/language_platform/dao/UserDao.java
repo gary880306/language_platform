@@ -31,6 +31,16 @@ public interface UserDao {
     void addCart(Cart cart);
 
     void addCartItem(CartItem cartItem);
+
+    // ECPay 付款流程：建立 PENDING 訂單（不建立 user_course，不標記購物車已結帳）
+    Order createPendingOrderFromCart(Integer userId, Integer cartId, Integer discount);
+
+    // ECPay 付款確認後：建立 user_course + 標記購物車已結帳
+    void confirmOrderPayment(Integer orderId, Integer cartId);
+
+    // 查詢用戶是否已購買某課程
+    boolean hasPurchasedCourse(Integer userId, Integer courseId);
+
     void addUserCoupon(Integer userId, Integer couponId);
     void updateUserCoupon(Integer userId, Integer couponId);
     List<UserCoupon> findUserCouponsByUserId(Integer userId);

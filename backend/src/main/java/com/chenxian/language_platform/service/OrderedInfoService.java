@@ -2,6 +2,7 @@ package com.chenxian.language_platform.service;
 
 import com.chenxian.language_platform.model.Order;
 import com.chenxian.language_platform.model.OrderItem;
+import com.chenxian.language_platform.model.PaymentTransaction;
 
 import java.util.List;
 
@@ -9,6 +10,12 @@ public interface OrderedInfoService {
     List<Order> findAllOrder();
     List<OrderItem> findOrderItemByOrderId(Integer orderId);
     List<Order> getOrdersByUserId(Integer userId);
+    List<Order> findOrdersByUserId(Integer userId);
     void saveOrder(Order order);
     Order findOrderById(Integer orderId);
+    // 付款相關
+    void updatePaymentStatus(Integer orderId, String paymentStatus);
+    void savePaymentTransaction(PaymentTransaction transaction);
+    PaymentTransaction findTransactionByMerchantTradeNo(String merchantTradeNo);
+    void updatePaymentTransaction(PaymentTransaction transaction);
 }

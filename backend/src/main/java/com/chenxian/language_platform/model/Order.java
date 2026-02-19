@@ -17,4 +17,5 @@ public class Order {
     private String userName;
     private String formattedTotalAmount;
     private List<OrderItem> orderItems;
+    private String paymentStatus; // PENDING, PAID, FAILED
 }

@@ -36,6 +36,10 @@ public interface UserService {
     List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId);
     Integer getCurrentCouponIdByUserId(Integer userId);
     void cancelCoupon(Integer userId);
+    // ECPay 付款流程
+    Order createPendingOrderFromCart(Integer userId, Integer cartId, Integer discount);
+    void confirmOrderPayment(Integer orderId, Integer cartId);
+    boolean hasPurchasedCourse(Integer userId, Integer courseId);
     String generateResetToken(String email);
     boolean resetPasswordWithToken(String token,String newPassword) throws Exception;
     boolean checkTokenValidity(String token);

@@ -31,7 +31,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/images",
             "/chatroom-websocket",
             "/secure/oidc/callback/google",
-            "/login/github"
+            "/login/github",
+            "/payment/return"   // ECPay 伺服器端付款回調（不帶 JWT）
     };
 
     @Override

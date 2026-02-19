@@ -3,14 +3,18 @@ package com.chenxian.language_platform.dao.impl;
 import com.chenxian.language_platform.dao.OrderedInfoDao;
 import com.chenxian.language_platform.model.Order;
 import com.chenxian.language_platform.model.OrderItem;
+import com.chenxian.language_platform.model.PaymentTransaction;
 import com.chenxian.language_platform.rowmapper.OrderIncludeUserRowMapper;
 import com.chenxian.language_platform.rowmapper.OrderItemIncludeUserRowMapper;
 import com.chenxian.language_platform.rowmapper.OrderItemRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
@@ -110,5 +114,75 @@ public class OrderedInfoDaoImpl implements OrderedInfoDao {
                 map,
                 new BeanPropertyRowMapper<>(OrderItem.class)
         );
+    }
+
+    @Override
+    public List<Order> findOrdersByUserId(Integer userId) {
+        return getOrdersByUserId(userId);
+    }
+
+    @Override
+    public void updatePaymentStatus(Integer orderId, String paymentStatus) {
+        String sql = "UPDATE `order` SET payment_status = :paymentStatus WHERE order_id = :orderId";
+        Map<String, Object> map = new HashMap<>();
+        map.put("orderId", orderId);
+        map.put("paymentStatus", paymentStatus);
+        namedParameterJdbcTemplate.update(sql, map);
+    }
+
+    @Override
+    public void savePaymentTransaction(PaymentTransaction transaction) {
+        String sql = "INSERT INTO payment_transaction (order_id, cart_id, merchant_trade_no) " +
+                "VALUES (:orderId, :cartId, :merchantTradeNo)";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("orderId", transaction.getOrderId())
+                .addValue("cartId", transaction.getCartId())
+                .addValue("merchantTradeNo", transaction.getMerchantTradeNo());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(sql, params, keyHolder);
+        if (keyHolder.getKey() != null) {
+            transaction.setId(keyHolder.getKey().intValue());
+        }
+    }
+
+    @Override
+    public PaymentTransaction findTransactionByMerchantTradeNo(String merchantTradeNo) {
+        String sql = "SELECT id, order_id, cart_id, merchant_trade_no, trade_no, payment_date, rtn_code, rtn_msg, created_at " +
+                "FROM payment_transaction WHERE merchant_trade_no = :merchantTradeNo";
+        Map<String, Object> map = new HashMap<>();
+        map.put("merchantTradeNo", merchantTradeNo);
+        try {
+            return namedParameterJdbcTemplate.queryForObject(sql, map, (rs, rowNum) -> {
+                PaymentTransaction t = new PaymentTransaction();
+                t.setId(rs.getInt("id"));
+                t.setOrderId(rs.getInt("order_id"));
+                t.setCartId(rs.getInt("cart_id"));
+                t.setMerchantTradeNo(rs.getString("merchant_trade_no"));
+                t.setTradeNo(rs.getString("trade_no"));
+                t.setPaymentDate(rs.getString("payment_date"));
+                Object rtnCode = rs.getObject("rtn_code");
+                t.setRtnCode(rtnCode != null ? ((Number) rtnCode).intValue() : null);
+                t.setRtnMsg(rs.getString("rtn_msg"));
+                t.setCreatedAt(rs.getTimestamp("created_at"));
+                return t;
+            });
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void updatePaymentTransaction(PaymentTransaction transaction) {
+        String sql = "UPDATE payment_transaction " +
+                "SET trade_no = :tradeNo, payment_date = :paymentDate, " +
+                "rtn_code = :rtnCode, rtn_msg = :rtnMsg " +
+                "WHERE merchant_trade_no = :merchantTradeNo";
+        Map<String, Object> map = new HashMap<>();
+        map.put("tradeNo", transaction.getTradeNo());
+        map.put("paymentDate", transaction.getPaymentDate());
+        map.put("rtnCode", transaction.getRtnCode());
+        map.put("rtnMsg", transaction.getRtnMsg());
+        map.put("merchantTradeNo", transaction.getMerchantTradeNo());
+        namedParameterJdbcTemplate.update(sql, map);
     }
 }
