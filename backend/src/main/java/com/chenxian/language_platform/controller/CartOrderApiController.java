@@ -2,13 +2,10 @@ package com.chenxian.language_platform.controller;
 
 import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.model.*;
-import com.chenxian.language_platform.service.CourseService;
-import com.chenxian.language_platform.service.FrontendService;
+import com.chenxian.language_platform.service.CartService;
 import com.chenxian.language_platform.service.OrderedInfoService;
-import com.chenxian.language_platform.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,20 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 購物車與訂單 REST API
+ * 購物車與訂單 REST API (SRP: 只處理購物車和訂單相關請求)
+ * (DIP: 依賴 CartService 介面，而非具體實作)
  */
 @RestController
 @RequestMapping("/api")
 public class CartOrderApiController {
 
     @Autowired
-    private FrontendService frontendService;
-
-    @Autowired
-    private CourseService courseService;
-
-    @Autowired
-    private UserService userService;
+    private CartService cartService;
 
     @Autowired
     private OrderedInfoService orderedInfoService;
@@ -40,10 +32,10 @@ public class CartOrderApiController {
     @GetMapping("/cart")
     public ResponseEntity<?> getCart(HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
-        Cart cart = frontendService.getCartByUserId(userId);
+        Cart cart = cartService.getCartByUserId(userId);
         if (cart == null) return ResponseEntity.ok(Map.of("items", List.of(), "total", 0));
 
-        List<CartItem> items = frontendService.getCartItemsByCartId(cart.getCartId());
+        List<CartItem> items = cartService.getCartItemsByCartId(cart.getCartId());
         int total = items.stream()
                 .mapToInt(item -> item.getCourse() != null ? item.getCourse().getPrice() : 0)
                 .sum();
@@ -59,12 +51,11 @@ public class CartOrderApiController {
 
         if (courseId == null) return ResponseEntity.badRequest().body(Map.of("message", "課程ID不可為空"));
 
-        // 檢查是否已購買
-        if (frontendService.hasPurchasedCourse(userId, courseId)) {
+        if (cartService.hasPurchasedCourse(userId, courseId)) {
             return ResponseEntity.badRequest().body(Map.of("message", "您已購買此課程"));
         }
 
-        frontendService.addToCart(userId, courseId);
+        cartService.addToCart(userId, courseId);
         return ResponseEntity.ok(Map.of("message", "加入購物車成功"));
     }
 
@@ -73,18 +64,18 @@ public class CartOrderApiController {
     public ResponseEntity<?> removeFromCart(@PathVariable Integer courseId,
                                              HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
-        frontendService.removeFromCart(userId, courseId);
+        cartService.removeFromCart(userId, courseId);
         return ResponseEntity.noContent().build();
     }
 
-    /** 套用優惠券 */
+    /** 套用優惠券（驗證並回傳優惠資訊） */
     @PostMapping("/cart/coupon")
     public ResponseEntity<?> applyCoupon(@RequestBody Map<String, String> body,
                                           HttpServletRequest request) {
         Integer userId = (Integer) request.getAttribute("userId");
         String couponCode = body.get("couponCode");
 
-        Coupon coupon = frontendService.validateCoupon(userId, couponCode);
+        Coupon coupon = cartService.validateCoupon(userId, couponCode);
         if (coupon == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "優惠券無效或已使用"));
         }
@@ -104,7 +95,7 @@ public class CartOrderApiController {
         Integer couponId = body.get("couponId") != null
                 ? ((Number) body.get("couponId")).intValue() : null;
 
-        CheckoutResponse result = frontendService.checkout(userId, couponId);
+        CheckoutResponse result = cartService.checkout(userId, couponId);
         if (result == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "結帳失敗，購物車可能為空"));
         }
@@ -125,7 +116,6 @@ public class CartOrderApiController {
     @GetMapping("/user/orders/{orderId}")
     public ResponseEntity<?> getOrderDetail(@PathVariable Integer orderId,
                                              HttpServletRequest request) {
-        Integer userId = (Integer) request.getAttribute("userId");
         Order order = orderedInfoService.findOrderById(orderId);
         if (order == null) return ResponseEntity.notFound().build();
 

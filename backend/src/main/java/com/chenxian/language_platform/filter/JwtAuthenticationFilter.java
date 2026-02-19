@@ -7,32 +7,33 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
+/**
+ * JWT 認證過濾器 (OCP: 公開路徑透過 application.properties 設定，新增路徑無需修改程式碼)
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
 
-    // 公開路徑（不需要 JWT）
-    private static final String[] PUBLIC_PATHS = {
-            "/api/auth/login",
-            "/api/auth/register",
-            "/api/auth/forgot-password",
-            "/api/auth/reset-password",
-            "/api/auth/captcha",
-            "/api/auth/google",
-            "/api/auth/github",
-            "/api/courses",
-            "/api/images",
-            "/chatroom-websocket",
-            "/secure/oidc/callback/google",
-            "/login/github"
-    };
+    /**
+     * 公開路徑從設定檔讀取 (OCP: 對擴展開放、對修改關閉)
+     * 新增公開路徑只需在 application.properties 的 jwt.public-paths 增加即可
+     */
+    @Value("${jwt.public-paths:/api/auth/login,/api/auth/register,/api/courses,/chatroom-websocket}")
+    private String publicPathsConfig;
+
+    private List<String> getPublicPaths() {
+        return Arrays.asList(publicPathsConfig.split(","));
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -41,8 +42,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // 放行公開路徑
-        for (String publicPath : PUBLIC_PATHS) {
-            if (path.startsWith(publicPath)) {
+        for (String publicPath : getPublicPaths()) {
+            if (path.startsWith(publicPath.trim())) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -70,7 +71,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 將用戶資訊放入請求屬性供 Controller 使用
         Claims claims = jwtUtil.parseToken(token);
         request.setAttribute("userId", Integer.parseInt(claims.getSubject()));
         request.setAttribute("email", claims.get("email", String.class));

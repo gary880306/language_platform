@@ -4,10 +4,11 @@ import com.chenxian.language_platform.dto.EmailForm;
 import com.chenxian.language_platform.dto.UserLoginRequest;
 import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.User;
+import com.chenxian.language_platform.service.AuthService;
+import com.chenxian.language_platform.service.EncryptionService;
 import com.chenxian.language_platform.service.UserService;
 import com.chenxian.language_platform.util.EmailService;
 import com.chenxian.language_platform.util.JwtUtil;
-import com.chenxian.language_platform.util.MyEncryptionComponent;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -31,18 +32,21 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
- * 認證 API 控制器
- * 處理登入、註冊、密碼重設、驗證碼
+ * 認證 API 控制器 (SRP: 只處理認證相關請求)
+ * (DIP: 依賴 AuthService 和 EncryptionService 介面，而非具體實作)
  */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
+    private AuthService authService;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
-    private MyEncryptionComponent myEncryptionComponent;
+    private EncryptionService encryptionService;
 
     @Autowired
     private EmailService emailService;
@@ -93,14 +97,13 @@ public class AuthController {
             return ResponseEntity.badRequest().body(errors);
         }
 
-        // 驗證碼檢查（可選，前端可傳可不傳）
         if (code != null && !code.equals(session.getAttribute("code") + "")) {
             session.invalidate();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "驗證碼錯誤"));
         }
 
-        User user = userService.getUserByEmail(req.getEmail());
+        User user = authService.getUserByEmail(req.getEmail());
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "無此用戶"));
         }
@@ -108,7 +111,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "該帳號已被停權"));
         }
 
-        String encrypted = myEncryptionComponent.encrypt(req.getPassword());
+        String encrypted = encryptionService.encrypt(req.getPassword());
         if (!user.getPassword().equals(encrypted)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "帳號或密碼錯誤"));
         }
@@ -129,12 +132,12 @@ public class AuthController {
         String email = body.get("email");
         String password = body.get("password");
 
-        User user = userService.getUserByEmail(email);
+        User user = authService.getUserByEmail(email);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "無此使用者"));
         }
 
-        String encrypted = myEncryptionComponent.encrypt(password);
+        String encrypted = encryptionService.encrypt(password);
         if (!user.getPassword().equals(encrypted)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "帳號密碼錯誤"));
         }
@@ -153,7 +156,7 @@ public class AuthController {
         ));
     }
 
-    /** 用戶登出（前端清除 Token 即可，後端回傳確認） */
+    /** 用戶登出 */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok(Map.of("message", "已登出"));
@@ -177,13 +180,13 @@ public class AuthController {
             if (!errors.isEmpty()) return ResponseEntity.badRequest().body(errors);
         }
 
-        if (userService.getUserByEmail(req.getEmail()) != null) {
+        if (authService.getUserByEmail(req.getEmail()) != null) {
             return ResponseEntity.badRequest().body(Map.of("email", "Email已被註冊"));
         }
 
-        req.setPassword(myEncryptionComponent.encrypt(req.getPassword()));
+        req.setPassword(encryptionService.encrypt(req.getPassword()));
         req.setAuthType("local");
-        userService.register(req);
+        authService.register(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "註冊成功"));
     }
 
@@ -194,12 +197,11 @@ public class AuthController {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Email 格式錯誤"));
         }
-        User user = userService.getUserByEmail(emailForm.getEmail());
+        User user = authService.getUserByEmail(emailForm.getEmail());
         if (user == null) {
             return ResponseEntity.badRequest().body(Map.of("message", "無此用戶"));
         }
-        String token = userService.generateResetToken(emailForm.getEmail());
-        // 重設連結指向 Vue 前端頁面
+        String token = authService.generateResetToken(emailForm.getEmail());
         String resetUrl = "http://localhost:5173/reset-password?token=" + token;
         emailService.sendResetPasswordLink(emailForm.getEmail(), resetUrl);
         return ResponseEntity.ok(Map.of("message", "重設密碼信已發送"));
@@ -218,10 +220,10 @@ public class AuthController {
         if (!newPassword.equals(confirm)) {
             return ResponseEntity.badRequest().body(Map.of("message", "密碼不一致"));
         }
-        if (!userService.checkTokenValidity(token)) {
+        if (!authService.checkTokenValidity(token)) {
             return ResponseEntity.badRequest().body(Map.of("message", "Token 無效或已過期"));
         }
-        boolean ok = userService.resetPasswordWithToken(token, newPassword);
+        boolean ok = authService.resetPasswordWithToken(token, newPassword);
         if (ok) return ResponseEntity.ok(Map.of("message", "密碼重設成功"));
         return ResponseEntity.internalServerError().body(Map.of("message", "密碼重設失敗"));
     }
@@ -235,7 +237,7 @@ public class AuthController {
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "未登入"));
         }
-        User user = userService.getUserByEmail(email);
+        User user = authService.getUserByEmail(email);
         return ResponseEntity.ok(Map.of(
                 "userId", userId,
                 "email", email,

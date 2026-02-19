@@ -8,7 +8,6 @@ import com.chenxian.language_platform.dto.UserRegisterRequest;
 import com.chenxian.language_platform.model.*;
 import com.chenxian.language_platform.rowmapper.*;
 import com.chenxian.language_platform.service.CourseService;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,14 +15,16 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
+/**
+ * 用戶資料存取實作 (DIP: 使用 @Repository 語意標記)
+ */
+@Repository
 public class UserDaoImpl implements UserDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -35,15 +36,11 @@ public class UserDaoImpl implements UserDao {
     private CourseService courseService;
 
     @Override
-    public List<User> findALlUsers() {
+    public List<User> findAllUsers() {
         String sql = "SELECT user_id,email,password,user_name,birth,phone_number,address,created_date,last_modified_date,levelId,is_active,authType,authId FROM user";
         Map<String,Object> map = new HashMap<>();
         List<User> users = namedParameterJdbcTemplate.query(sql,map,new UserInfoRowMapper());
-        if(!users.isEmpty()){
-
-            return users;
-        }
-        return null;
+        return users.isEmpty() ? null : users;
     }
 
     @Override

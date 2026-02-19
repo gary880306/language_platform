@@ -1,42 +1,35 @@
 package com.chenxian.language_platform.service.impl;
 
-import com.chenxian.language_platform.customize.CheckoutResponse;
 import com.chenxian.language_platform.dao.UserDao;
-import com.chenxian.language_platform.dto.UserRegisterRequest;
-import com.chenxian.language_platform.model.*;
+import com.chenxian.language_platform.model.User;
 import com.chenxian.language_platform.repository.UserRepository;
 import com.chenxian.language_platform.service.UserService;
-import com.chenxian.language_platform.util.MyEncryptionComponent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.UUID;
 
-@Component
+/**
+ * 用戶個人資料服務實作 (SRP: 只處理用戶個人資料管理)
+ * (DIP: 依賴 UserDao 介面，而非具體實作)
+ */
+@Service
 public class UserServiceImpl implements UserService {
+
     @Autowired
     private UserDao userDao;
+
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private MyEncryptionComponent myEncryptionComponent;
 
     @Override
-    public List<User> findALlUsers() {
-        return userDao.findALlUsers();
+    public List<User> findAllUsers() {
+        return userDao.findAllUsers();
     }
 
     @Override
     public List<User> findAllNonAdminUsers() {
         return userDao.findAllNonAdminUsers();
-    }
-
-    @Override
-    public Integer register(UserRegisterRequest userRegisterRequest) {
-        return userDao.createUser(userRegisterRequest);
     }
 
     @Override
@@ -50,201 +43,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByEmail(String email) {
-        return userDao.getUserByEmail(email);
+    public User updateUser(User user) {
+        User existing = userRepository.findById(user.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found: " + user.getUserId()));
+        existing.setUserName(user.getUserName());
+        existing.setEmail(user.getEmail());
+        existing.setPhoneNumber(user.getPhoneNumber());
+        existing.setAddress(user.getAddress());
+        existing.setBirth(user.getBirth());
+        return userRepository.save(existing);
     }
 
     @Override
-    public void updateUserInfo(User user) {
-        userDao.updateUserInfo(user);
-    }
-
-    @Override
-    public boolean isCourseInUserCart(Integer userId, Integer courseId) {
-        return userDao.isCourseInUserCart(userId,courseId);
-    }
-
-    @Override
-    public Cart findNoneCheckoutCartByUserId(Integer userId) {
-        return userDao.findNoneCheckoutCartByUserId(userId);
-    }
-
-    @Override
-    public CartItem findCartItemById(Integer itemId) {
-        return userDao.findCartItemById(itemId);
-    }
-
-    @Override
-    public List<CartItem> findCartItemsById(Integer cartId) {
-        return userDao.findCartItemsById(cartId);
-    }
-
-    @Override
-    public Boolean removeCartItemById(Integer itemId) {
-        return userDao.removeCartItemById(itemId);
-    }
-
-    @Override
-    public Cart findCartById(Integer cartId) {
-        return userDao.findCartById(cartId);
-    }
-
-    @Override
-    public CheckoutResponse checkoutCartByUserId(Integer userId, Integer cartId, Integer discount) {
-        return userDao.checkoutCartByUserId(userId,cartId,discount);
-    }
-
-    @Override
-    public Order createOrder(Integer userId, List<CartItem> cartItems, Integer discount) {
-        return userDao.createOrder(userId,cartItems,discount);
-    }
-
-    @Override
-    public void createOrderItems(Integer userId,Integer orderId, List<CartItem> cartItems) {
-        userDao.createOrderItems(userId,orderId,cartItems);
-    }
-
-    @Override
-    public void addCart(Cart cart) {
-        userDao.addCart(cart);
-    }
-
-    @Override
-    public void addCartItem(CartItem cartItem) {
-        userDao.addCartItem(cartItem);
-    }
-
-    @Override
-    public boolean updateUserActiveStatus(Integer userId, boolean isActive) {
+    public boolean updateUserStatus(Integer userId, boolean isActive) {
         User user = userDao.getUserIncludeActiveById(userId);
+        if (user == null) return false;
         user.setActive(isActive);
         userDao.updateUserInfo(user);
-        return false;
+        return true;
     }
-
-    @Override
-    public void addUserCoupon(Integer userId, Integer couponId) {
-        userDao.addUserCoupon(userId,couponId);
-    }
-
-    @Override
-    public void updateUserCoupon(Integer userId, Integer couponId) {
-        userDao.updateUserCoupon(userId,couponId);
-    }
-
-    @Override
-    public List<UserCoupon> findUserCouponsByUserId(Integer userId) {
-        return userDao.findUserCouponsByUserId(userId);
-    }
-
-    @Override
-    public void decrementCouponQuantity(Integer couponId) {
-        userDao.decrementCouponQuantity(couponId);
-    }
-
-    @Override
-    public Integer getCartCourseCount(Integer userId) {
-        return userDao.getCartCourseCount(userId);
-    }
-
-    @Override
-    public void updateCartCoupon(Integer couponId, Integer cartId) {
-        userDao.updateCartCoupon(couponId,cartId);
-    }
-
-    @Override
-    public void markCouponAsUsed(Integer userId, Integer couponId) {
-        userDao.markCouponAsUsed(userId,couponId);
-    }
-
-    @Override
-    public List<UserCoupon> findUnusedUserCouponsByUserId(Integer userId) {
-        return userDao.findUnusedUserCouponsByUserId(userId);
-    }
-
-    @Override
-    public Integer getCurrentCouponIdByUserId(Integer userId) {
-        return userDao.getCurrentCouponIdByUserId(userId);
-    }
-
-    @Override
-    public void cancelCoupon(Integer userId) {
-        userDao.cancelCoupon(userId);
-    }
-
-    @Override
-    public String generateResetToken(String email) {
-        // 從數據庫查找用戶
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            // 處理用戶不存在的情況
-            return null;
-        }
-
-        // 生成唯一令牌
-        String token = UUID.randomUUID().toString();
-        user.setResetToken(token);
-        user.setTokenCreationTime(Instant.now());
-
-        // 更新用戶信息以保存令牌
-        userRepository.save(user);
-
-        return token;
-    }
-
-    @Override
-    public boolean resetPasswordWithToken(String token,String newPassword) throws Exception {
-        // 檢查該用戶令牌是否存在於數據庫中
-        User user =  userRepository.findByResetToken(token);
-        boolean isTokenValid = checkTokenValidity(token);
-        if (isTokenValid) {
-            // 将新密码加密
-            String encodedNewPassword = myEncryptionComponent.encrypt(newPassword);
-
-            // 更新用户的密码
-            user.setPassword(encodedNewPassword);
-            user.setResetToken(null); // 清除令牌
-            user.setTokenCreationTime(null); // 清除令牌創建時間
-            userRepository.save(user); // 更新用戶資訊
-
-            return true; // 密碼重製成功
-        }
-
-        return false; // 令牌無效或用戶不存在
-    }
-
-    @Override
-    public boolean checkTokenValidity(String token) {
-        User user =  userRepository.findByResetToken(token);
-        // 获取当前时间
-        Instant currentTime = Instant.now();
-
-        // 获取令牌的创建时间（假设令牌创建时间存储在token对象中）
-        Instant tokenCreationTime = user.getTokenCreationTime();
-
-        // 计算令牌的有效期为30秒
-        Instant tokenExpirationTime = tokenCreationTime.plus(60, ChronoUnit.SECONDS);
-
-        // 检查当前时间是否在有效期内
-        boolean isValid = currentTime.isBefore(tokenExpirationTime);
-
-        return isValid;
-    }
-
-    @Override
-    public User updateUser(User user) {
-        // 假設 userId 是唯一且存在的。您需要根據實際情況進行適當的錯誤處理。
-        User existingUser = userRepository.findById(user.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
-        // 更新現有用戶的資訊。這裡您可能需要添加更多的檢查和邏輯，以確保數據的一致性和安全性。
-        existingUser.setUserName(user.getUserName());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setPhoneNumber(user.getPhoneNumber());
-        existingUser.setAddress(user.getAddress());
-        existingUser.setBirth(user.getBirth());
-        // 繼續更新其他需要的字段...
-
-        return userRepository.save(existingUser);
-    }
-
-
 }

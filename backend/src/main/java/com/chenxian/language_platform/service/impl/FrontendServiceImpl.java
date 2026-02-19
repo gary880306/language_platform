@@ -5,12 +5,15 @@ import com.chenxian.language_platform.dto.CourseQueryParams;
 import com.chenxian.language_platform.model.Course;
 import com.chenxian.language_platform.service.FrontendService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
-@Component
+/**
+ * 前端課程瀏覽服務實作 (SRP: 只負責課程搜尋與分頁)
+ */
+@Service
 public class FrontendServiceImpl implements FrontendService {
     @Autowired
     private FrontendDao frontendDao;

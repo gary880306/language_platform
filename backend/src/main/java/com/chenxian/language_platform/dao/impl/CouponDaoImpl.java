@@ -8,14 +8,17 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@Component
+/**
+ * 優惠券資料存取層實作 (DIP: 使用 @Repository 語意標記)
+ */
+@Repository
 public class CouponDaoImpl implements CouponDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -222,6 +225,15 @@ public class CouponDaoImpl implements CouponDao {
 
         int count = namedParameterJdbcTemplate.queryForObject(sql, map, Integer.class);
         return count > 0;
+    }
+
+    @Override
+    public Coupon findCouponByCode(String code) {
+        String sql = "SELECT coupon_id, code, description, discount_type, discount_value, start_date, end_date, is_active, quantity, is_deleted FROM coupon WHERE code = :code AND is_deleted = false";
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", code);
+        List<Coupon> coupons = namedParameterJdbcTemplate.query(sql, map, new CouponRowMapper());
+        return coupons.isEmpty() ? null : coupons.get(0);
     }
 
 }

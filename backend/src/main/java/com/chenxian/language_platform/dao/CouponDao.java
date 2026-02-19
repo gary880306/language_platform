@@ -28,4 +28,7 @@ public interface CouponDao {
     void assignCouponsToUsers(List<Integer> userIds, List<Integer> couponIds);
     boolean isCodeExists(String code);
 
+    /** 依優惠券代碼查詢優惠券 */
+    Coupon findCouponByCode(String code);
+
 }

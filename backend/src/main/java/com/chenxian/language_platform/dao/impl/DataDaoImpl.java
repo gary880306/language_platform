@@ -5,13 +5,13 @@ import com.chenxian.language_platform.model.CategoryData;
 import com.chenxian.language_platform.rowmapper.CategoryRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Repository
 public class DataDaoImpl implements DataDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;

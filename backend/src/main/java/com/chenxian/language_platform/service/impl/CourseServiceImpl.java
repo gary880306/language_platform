@@ -8,7 +8,7 @@ import com.chenxian.language_platform.model.Course;
 import com.chenxian.language_platform.model.UserCourse;
 import com.chenxian.language_platform.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-@Component
+/**
+ * 課程服務實作 (SRP: 只處理課程業務邏輯)
+ */
+@Service
 public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseDao courseDao;

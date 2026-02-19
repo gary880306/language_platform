@@ -8,13 +8,16 @@ import com.chenxian.language_platform.rowmapper.CourseRowMapperIncludeUserCount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+/**
+ * 前端課程瀏覽資料存取實作 (DIP: 使用 @Repository 語意標記)
+ */
+@Repository
 public class FrontendDaoImpl implements FrontendDao {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;

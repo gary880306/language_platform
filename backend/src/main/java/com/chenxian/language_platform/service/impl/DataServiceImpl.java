@@ -4,11 +4,11 @@ import com.chenxian.language_platform.dao.DataDao;
 import com.chenxian.language_platform.model.CategoryData;
 import com.chenxian.language_platform.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class DataServiceImpl implements DataService {
     @Autowired
     DataDao dataDao;

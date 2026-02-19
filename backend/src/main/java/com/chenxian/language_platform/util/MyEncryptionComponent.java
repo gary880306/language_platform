@@ -1,5 +1,6 @@
 package com.chenxian.language_platform.util;
 
+import com.chenxian.language_platform.service.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -7,8 +8,11 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import java.util.Base64;
 
+/**
+ * AES 加密服務實作 (DIP: 實作 EncryptionService 介面)
+ */
 @Component
-public class MyEncryptionComponent {
+public class MyEncryptionComponent implements EncryptionService {
 
     private final SecretKey secretKey;
 
@@ -33,19 +37,5 @@ public class MyEncryptionComponent {
         byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
         return new String(decryptedBytes);
     }
-
-    // 简单的测试方法，加密和解密一个字符串并打印结果
-    public void testEncryptionDecryption() throws Exception {
-        String originalMessage = "Hello, World!";
-        System.out.println("Original Message: " + originalMessage);
-
-        String encryptedMessage = encrypt(originalMessage);
-        System.out.println("Encrypted Message: " + encryptedMessage);
-
-        String decryptedMessage = decrypt(encryptedMessage);
-        System.out.println("Decrypted Message: " + decryptedMessage);
-    }
-
-
 
 }

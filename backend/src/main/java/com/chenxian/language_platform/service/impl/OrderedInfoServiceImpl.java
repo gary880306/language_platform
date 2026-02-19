@@ -5,11 +5,11 @@ import com.chenxian.language_platform.model.Order;
 import com.chenxian.language_platform.model.OrderItem;
 import com.chenxian.language_platform.service.OrderedInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class OrderedInfoServiceImpl implements OrderedInfoService {
     @Autowired
     private OrderedInfoDao orderedInfoDao;
