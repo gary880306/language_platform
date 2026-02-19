@@ -277,3 +277,42 @@ SpringBoot -> Controller，Dao，Service 三層式架構
 -> 課程語言排行 ( 使用3D圓餅圖，依照當前用戶所購買的課程種類數量顯示 ) 
 
 -> 課程銷售現況 ( 使用柱狀圖 ，依照課程被購買的數量顯示 ) 
+
+---
+
+## 前後端分離架構說明
+
+本專案已重構為前後端分離架構：
+
+### 目錄結構
+```
+language_platform/
+├── backend/          # Spring Boot REST API (Java 17)
+│   ├── pom.xml       # 移除 Thymeleaf，改為 JAR 打包，新增 JWT
+│   └── src/
+│       ├── config/   # CorsConfig, FilterConfig, WebSocketConfig
+│       ├── filter/   # JwtAuthenticationFilter
+│       ├── controller/ # 全部改為 @RestController
+│       └── util/     # JwtUtil
+└── frontend/         # Vue 3 SPA (Vite)
+    ├── package.json
+    └── src/
+        ├── api/      # Axios API 層
+        ├── router/   # Vue Router
+        ├── stores/   # Pinia (auth, cart)
+        ├── layouts/  # MainLayout, AdminLayout
+        ├── views/    # 所有頁面
+        └── components/ # NavBar, CourseCard, AppFooter
+```
+
+### 啟動
+```bash
+# 後端
+cd backend && mvn spring-boot:run  # http://localhost:8080
+
+# 前端
+cd frontend && npm install && npm run dev  # http://localhost:5173
+```
+
+### API 認證
+JWT Token 認證，登入後放入 `Authorization: Bearer <token>` Header。
